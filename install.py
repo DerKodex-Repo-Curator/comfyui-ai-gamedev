@@ -184,6 +184,27 @@ class ComfyUIGameDevInstaller:
         
         success = True
         
+        # Ensure RealESRGAN model exists
+        ckpt_dir = hy3dpaint_dir / "ckpt"
+        ckpt_dir.mkdir(exist_ok=True)
+        realesrgan_path = ckpt_dir / "RealESRGAN_x4plus.pth"
+        
+        if not realesrgan_path.exists():
+            print("📥 Downloading RealESRGAN upscaler model...")
+            try:
+                import urllib.request
+                url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth"
+                urllib.request.urlretrieve(url, str(realesrgan_path))
+                print("✅ RealESRGAN model downloaded")
+            except Exception as e:
+                print(f"❌ Failed to download RealESRGAN model: {e}")
+                print("   Please manually download from:")
+                print(f"   {url}")
+                print(f"   And save to: {realesrgan_path}")
+                success = False
+        else:
+            print("✅ RealESRGAN model found")
+        
         # Build custom rasterizer
         rasterizer_dir = hy3dpaint_dir / "custom_rasterizer"
         if rasterizer_dir.exists():

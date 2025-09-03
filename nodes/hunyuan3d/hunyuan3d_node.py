@@ -35,21 +35,18 @@ except ImportError:
 
 class Hunyuan3D21Node:
     """
-    ComfyUI node for Hunyuan3D 2.1 image-to-3D generation with texture painting
+    ComfyUI node for Hunyuan3D 2.1 3D shape generation (Stage 1)
     
-    All-in-one solution with built-in:
+    Features:
     - Automatic background removal (no RemBG node needed)
-    - Real-ESRGAN texture upscaling (no upscale node needed)  
     - Single and multi-view support (1-10 images)
-    - Smart output generation based on connections
+    - Generates untextured 3D mesh
     
     Outputs:
-    - mesh: Textured GLB mesh for direct use in Preview3D/SaveGLB (MESH)
-    - mesh_filepath: Path to textured GLB file (STRING)
-    - untextured_filepath: Path to untextured OBJ file (STRING)
+    - mesh: Untextured mesh for texture painting (MESH)
+    - mesh_filepath: Path to OBJ file (STRING)
     
-    IMPORTANT: Texture painting with Blender is ONLY performed if the mesh
-    output is connected to save ~11GB VRAM and processing time.
+    For textured models, connect to Hunyuan3D Paint Texture node
     """
     
     @classmethod
@@ -72,23 +69,18 @@ class Hunyuan3D21Node:
                 }),
             },
             "optional": {
-                "texture_resolution": (["512", "1024", "2048"], {"default": "1024"}),
                 "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647}),
-                "conda_path": ("STRING", {"default": "conda", "multiline": False}),
-                "blender_path": ("STRING", {"default": "blender", "multiline": False}),
             }
         }
     
     RETURN_TYPES = (
-        "MESH",          # Textured mesh for direct use
-        "STRING",        # Path to textured GLB file
-        "STRING",        # Path to untextured OBJ file
+        "MESH",          # Untextured mesh
+        "STRING",        # Path to OBJ file
     )
     
     RETURN_NAMES = (
         "mesh",
-        "mesh_filepath",
-        "untextured_filepath",
+        "obj_filepath",
     )
     
     FUNCTION = "generate_3d"
@@ -130,27 +122,21 @@ class Hunyuan3D21Node:
         resolution: str,
         guidance_scale: float,
         steps: int,
-        texture_resolution: str = "1024",
         seed: int = -1,
-        conda_path: str = "conda",
-        blender_path: str = "blender",
         **kwargs
-    ) -> Tuple[Any, ...]:
+    ) -> Tuple[Any, str]:
         """
-        Generate 3D model from input images with texture painting
+        Generate 3D shape from input images
         
         Args:
             images: Input image(s) tensor [B, H, W, C]
             resolution: Model generation resolution
             guidance_scale: Diffusion guidance scale
             steps: Number of diffusion steps
-            texture_resolution: Texture map resolution
             seed: Random seed (-1 for random)
-            conda_path: Path to conda executable
-            blender_path: Path to blender executable
             
         Returns:
-            Tuple of (mesh, mesh_filepath, untextured_filepath)
+            Tuple of (mesh, obj_filepath)
         """
         
         # Multi-view is automatic based on image count (1-10 images)
@@ -170,64 +156,26 @@ class Hunyuan3D21Node:
             seed=seed
         )
         
-        # Always apply texture using Blender
-        textured_glb = None
-        
-        print("🎨 Applying texture with Blender...")
-        if not base_mesh or not base_mesh.get("path"):
-            print("❌ Cannot apply texture: No base mesh available")
-        else:
-            print(f"  Base mesh: {base_mesh['path']}")
-            # Pass conda and blender paths to texture painting
-            self.conda_runner.conda_path = conda_path
-            self.conda_runner.blender_path = blender_path
-            
-            result = self._apply_texture(
-                mesh=base_mesh,
-                images=images,
-                resolution=int(texture_resolution),
-                blender_path=blender_path
-            )
-            if result and result.get("has_texture"):
-                textured_glb = result
-                print(f"✅ Texture applied successfully: {textured_glb['path']}")
-            else:
-                print("⚠️ Texture generation failed, using untextured mesh")
-                if result:
-                    print(f"  Result: {result}")
-        
         # Prepare outputs
-        untextured_path = base_mesh.get("path", "") if base_mesh else ""
+        obj_path = base_mesh.get("path", "") if base_mesh else ""
         
-        # Create mesh output (actual mesh object for Preview3D/SaveGLB)
-        # ComfyUI expects a specific format with vertices and faces as torch tensors
-        if textured_glb and textured_glb.get("path"):
-            # Load the GLB file and convert to ComfyUI mesh format
-            import trimesh
-            tm_mesh = trimesh.load(textured_glb["path"])
-            # Return the full path for Preview3D
-            mesh_filepath = textured_glb["path"]
-        elif base_mesh and base_mesh.get("path"):
-            # If no texture, load untextured OBJ
+        # Load the OBJ file and convert to ComfyUI mesh format
+        if base_mesh and base_mesh.get("path"):
             import trimesh
             tm_mesh = trimesh.load(base_mesh["path"])
-            # Return the full path for Preview3D
-            mesh_filepath = base_mesh["path"]
-        else:
-            tm_mesh = None
-            mesh_filepath = ""
-        
-        if tm_mesh:
+            
             # Convert trimesh to ComfyUI mesh format
             vertices = torch.from_numpy(tm_mesh.vertices).float().unsqueeze(0)  # Add batch dimension
             faces = torch.from_numpy(tm_mesh.faces).long().unsqueeze(0)  # Add batch dimension
             
             # Create a mesh object that ComfyUI expects
             mesh = MESH(vertices, faces)
+            print(f"✅ Mesh generated: {obj_path}")
         else:
             mesh = None
+            print("❌ No mesh generated")
             
-        return (mesh, mesh_filepath, untextured_path)
+        return (mesh, obj_path)
     
     
     def _get_connected_outputs(self) -> dict:
