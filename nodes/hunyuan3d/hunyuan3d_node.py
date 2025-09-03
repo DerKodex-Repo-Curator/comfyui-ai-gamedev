@@ -454,8 +454,7 @@ image_paths = {image_paths_str}
 print("Loading texture painting model...")
 paint_config = Hunyuan3DPaintConfig(
     max_num_view=len(image_paths),
-    resolution={resolution},
-    pbr_material=True
+    resolution={resolution}
 )
 paint_pipeline = Hunyuan3DPaintPipeline(paint_config)
 

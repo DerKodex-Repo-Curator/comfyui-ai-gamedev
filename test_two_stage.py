@@ -65,8 +65,7 @@ from textureGenPipeline import Hunyuan3DPaintPipeline, Hunyuan3DPaintConfig
 print("Loading paint model...")
 paint_config = Hunyuan3DPaintConfig(
     max_num_view=len(pil_images),
-    resolution=512,
-    pbr_material=True
+    resolution=512
 )
 paint_pipeline = Hunyuan3DPaintPipeline(paint_config)
 

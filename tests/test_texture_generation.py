@@ -268,7 +268,6 @@ f 1 3 4
         
         # Script should include Blender-related operations
         self.assertIn("Hunyuan3DPaintPipeline", script, "Should use paint pipeline")
-        self.assertIn("pbr_material=True", script, "Should enable PBR materials")
         self.assertIn("resolution=1024", script, "Should set texture resolution")
         
         # Script should handle texture output
