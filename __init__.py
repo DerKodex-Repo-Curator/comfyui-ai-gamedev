@@ -30,6 +30,14 @@ except ImportError as e:
     HUNYUAN_MAPPINGS = {}
     HUNYUAN_DISPLAY = {}
 
+try:
+    from .nodes.frame_extractor import NODE_CLASS_MAPPINGS as FRAME_MAPPINGS
+    from .nodes.frame_extractor import NODE_DISPLAY_NAME_MAPPINGS as FRAME_DISPLAY
+except ImportError as e:
+    print(f"Warning: Could not import Frame Extractor nodes: {e}")
+    FRAME_MAPPINGS = {}
+    FRAME_DISPLAY = {}
+
 # Combine all node mappings
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
@@ -37,6 +45,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {}
 # Add all node mappings
 NODE_CLASS_MAPPINGS.update(HUNYUAN_MAPPINGS)
 NODE_DISPLAY_NAME_MAPPINGS.update(HUNYUAN_DISPLAY)
+NODE_CLASS_MAPPINGS.update(FRAME_MAPPINGS)
+NODE_DISPLAY_NAME_MAPPINGS.update(FRAME_DISPLAY)
 
 # Check for first run
 config_file = root_dir / "config.json"
@@ -55,4 +65,7 @@ if not config_file.exists():
     print("  • Set up conda environment (optional)")
     print("=" * 60)
 
-__all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
+# Add web directory for UI components and workflows
+WEB_DIRECTORY = "./web"
+
+__all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS', 'WEB_DIRECTORY']

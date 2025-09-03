@@ -1,0 +1,227 @@
+{
+  "last_node_id": 9,
+  "last_link_id": 9,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [50, 200],
+      "size": [315, 314],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [1],
+          "shape": 3
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": ["example.png", "image"]
+    },
+    {
+      "id": 2,
+      "type": "Hunyuan3D21Node",
+      "pos": [420, 200],
+      "size": [350, 250],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mesh",
+          "type": "STRING",
+          "links": [2],
+          "shape": 3
+        },
+        {
+          "name": "textured_glb",
+          "type": "STRING",
+          "links": [3],
+          "shape": 3
+        },
+        {
+          "name": "preview",
+          "type": "IMAGE",
+          "links": [4],
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Hunyuan3D21Node"
+      },
+      "widgets_values": [
+        "512",      
+        7.5,        
+        50,         
+        true,       
+        "1024",     
+        "auto",     
+        -1,         
+        "blender"   
+      ]
+    },
+    {
+      "id": 7,
+      "type": "Load3D",
+      "pos": [800, 100],
+      "size": [200, 60],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "file_path",
+          "type": "STRING",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MESH",
+          "type": "MESH",
+          "links": [5],
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Load3D"
+      }
+    },
+    {
+      "id": 8,
+      "type": "Load3D",
+      "pos": [800, 250],
+      "size": [200, 60],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "file_path",
+          "type": "STRING",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MESH",
+          "type": "MESH",
+          "links": [6, 7],
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Load3D"
+      }
+    },
+    {
+      "id": 3,
+      "type": "SaveGLB",
+      "pos": [1050, 100],
+      "size": [315, 58],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mesh",
+          "type": "MESH",
+          "link": 5
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveGLB"
+      },
+      "widgets_values": ["untextured_mesh"]
+    },
+    {
+      "id": 4,
+      "type": "SaveGLB",
+      "pos": [1050, 250],
+      "size": [315, 58],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mesh",
+          "type": "MESH",
+          "link": 6
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveGLB"
+      },
+      "widgets_values": ["textured_model"]
+    },
+    {
+      "id": 5,
+      "type": "PreviewImage",
+      "pos": [800, 400],
+      "size": [315, 246],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 4
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 6,
+      "type": "Preview3D",
+      "pos": [1400, 250],
+      "size": [400, 400],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mesh",
+          "type": "MESH",
+          "link": 7
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Preview3D"
+      }
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "IMAGE"],
+    [2, 2, 0, 7, 0, "STRING"],
+    [3, 2, 1, 8, 0, "STRING"],
+    [4, 2, 2, 5, 0, "IMAGE"],
+    [5, 7, 0, 3, 0, "MESH"],
+    [6, 8, 0, 4, 0, "MESH"],
+    [7, 8, 0, 6, 0, "MESH"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

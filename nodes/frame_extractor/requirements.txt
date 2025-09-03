@@ -1,0 +1,4 @@
+# Frame Extractor Node Requirements
+opencv-python>=4.8.0
+numpy  # Usually already installed with ComfyUI
+torch  # Usually already installed with ComfyUI

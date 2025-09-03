@@ -25,11 +25,10 @@ class Hunyuan3D21Node:
     - Smart output generation based on connections
     
     Outputs:
-    - mesh: Untextured OBJ file for further processing
-    - textured_glb: GLB with embedded PBR textures (only generated if connected)
-    - preview: Rendered preview of the model
+    - untextured: Path to untextured OBJ file (STRING)
+    - mesh: Textured GLB mesh for direct use in Preview3D/SaveGLB (MESH)
     
-    IMPORTANT: Texture painting with Blender is ONLY performed if the textured_glb
+    IMPORTANT: Texture painting with Blender is ONLY performed if the mesh
     output is connected to save ~11GB VRAM and processing time.
     """
     
@@ -62,15 +61,13 @@ class Hunyuan3D21Node:
         }
     
     RETURN_TYPES = (
-        "MESH",          # Untextured OBJ mesh file
-        "MESH",          # Textured GLB with embedded textures
-        "IMAGE",         # Preview render
+        "STRING",        # Path to untextured OBJ mesh file
+        "MESH",          # Textured mesh for direct use
     )
     
     RETURN_NAMES = (
+        "untextured",
         "mesh",
-        "textured_glb",
-        "preview",
     )
     
     FUNCTION = "generate_3d"
@@ -135,12 +132,13 @@ class Hunyuan3D21Node:
             seed=seed
         )
         
-        # Apply texture ONLY if textured_glb output is connected
+        # Apply texture ONLY if mesh output is connected
         textured_glb = None
         
-        # Check if textured_glb output is connected (ComfyUI will set this)
-        # For now, we check enable_texture flag
-        if enable_texture and outputs_needed.get("textured_glb", False):
+        # Check if mesh output is connected (ComfyUI will set this)
+        # ComfyUI passes this info through kwargs
+        outputs_needed = kwargs.get("outputs_needed", {})
+        if enable_texture and outputs_needed.get("mesh", False):
             result = self._apply_texture(
                 mesh=base_mesh,
                 images=images,
@@ -150,14 +148,19 @@ class Hunyuan3D21Node:
             if result and result.get("has_texture"):
                 textured_glb = result
         
-        # Generate preview render
-        preview = self._generate_preview(
-            mesh=textured_glb if textured_glb else base_mesh,
-            textured=textured_glb is not None
-        )
+        # Return untextured path and textured mesh
+        obj_path = base_mesh.get("path", "") if base_mesh else ""
         
-        # Return outputs: mesh (OBJ), textured_glb (GLB with textures), preview
-        return (base_mesh, textured_glb, preview)
+        # For textured output, return as MESH type for direct use
+        if textured_glb and textured_glb.get("path"):
+            mesh_output = {"path": textured_glb["path"], "type": "glb"}
+        elif base_mesh and base_mesh.get("path"):
+            # If no texture, use untextured mesh
+            mesh_output = {"path": base_mesh["path"], "type": "obj"}
+        else:
+            mesh_output = None
+            
+        return (obj_path, mesh_output)
     
     def _determine_multi_view(self, batch_size: int, mode: str) -> bool:
         """Determine if input should be treated as multi-view"""
@@ -166,7 +169,7 @@ class Hunyuan3D21Node:
         elif mode == "multi":
             return batch_size > 1
         else:  # auto
-            return batch_size > 1 and batch_size <= 6
+            return batch_size > 1 and batch_size <= 10
     
     def _get_connected_outputs(self) -> dict:
         """
@@ -291,15 +294,6 @@ class Hunyuan3D21Node:
     def IS_CHANGED(cls, **kwargs):
         """Force re-execution when inputs change"""
         return float("nan")
-    
-    def _generate_preview(self, mesh: Any, textured: bool = False) -> torch.Tensor:
-        """Generate preview render of the mesh"""
-        # TODO: Implement preview generation
-        # from .utils.render import render_preview
-        
-        # Placeholder: return a blank image
-        preview = torch.zeros((1, 512, 512, 3))
-        return preview
     
     def _create_shape_script(self, image_paths, output_mesh, resolution, 
                            guidance_scale, steps, is_multi_view, seed):

@@ -86,16 +86,29 @@ sudo snap install blender --classic
 
 ---
 
-### 🎯 Frame Selector Node
+### 🎯 Frame Extractor Node
 
 **Requirements**: 
-- OpenCV
-- FFmpeg (optional, for video formats)
+- OpenCV (cv2)
+- NumPy (usually included with ComfyUI)
+- PyTorch (usually included with ComfyUI)
 
 **Install**:
 ```bash
-pip install opencv-python
-# Optional: sudo apt install ffmpeg
+pip install opencv-python>=4.8.0
+# Optional: For additional codec support
+pip install opencv-contrib-python
+```
+
+**Features**:
+- Extract evenly-spaced frames from videos
+- Skip unwanted start/end frames
+- Preserve full motion range
+- Memory-efficient sequential processing
+
+**Verify Installation**:
+```bash
+python -c "import cv2; print(f'OpenCV {cv2.__version__} installed')"
 ```
 
 ---
@@ -154,9 +167,9 @@ python -c "import numpy, PIL, cv2; print('Base deps OK')"
 - Look for nodes under "gamedev" category
 
 3. **Node-Specific Tests**:
-- Hunyuan3D: Check for "Hunyuan3D 2.1" node
-- Frame Selector: Check for "Frame Selector" node
-- Prompt Optimizer: Check for "Prompt Optimizer" node
+- Hunyuan3D: Check for "Hunyuan3D 2.1 Shape" and "Hunyuan3D 2.1 Paint" nodes
+- Frame Extractor: Check for "Frame Extractor" node under "gamedev/video" category
+- Prompt Optimizer: Check for "Prompt Optimizer" node (planned)
 
 ## Troubleshooting
 

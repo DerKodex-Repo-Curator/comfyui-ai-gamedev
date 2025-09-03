@@ -1,8 +1,14 @@
 # ComfyUI AI GameDev Dependencies
+
+# Core dependencies (usually already in ComfyUI)
 torch>=2.0.0
 torchvision
 numpy
 Pillow
+
+# 3D processing (Hunyuan3D)
 trimesh
 scipy
-opencv-python
+
+# Video processing (Frame Extractor)
+opencv-python>=4.8.0

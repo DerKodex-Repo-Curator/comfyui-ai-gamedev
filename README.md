@@ -1,23 +1,32 @@
 # ComfyUI AI GameDev Nodes
 
-Custom ComfyUI nodes for AI-powered game asset generation, providing a comprehensive toolkit for game developers to create 3D models, animations, and audio assets using state-of-the-art AI models.
+Custom ComfyUI nodes for AI-powered game asset generation, focusing on 3D model creation from images and videos.
 
 ## Features
 
-### 🎨 Hunyuan3D 2.1 Image-to-3D (All-in-One)
+### 🎮 Implemented Nodes
+
+#### 1. **Hunyuan3D 2.1** - Image to 3D Generation
 - Generate high-quality textured 3D models from single or multiple images
 - **Built-in background removal** - works with any input image
 - **Built-in Real-ESRGAN upscaling** - automatic texture enhancement
-- Built-in texture painting - no untextured gray models!
-- Uses Blender for advanced texture mapping
-- **Smart outputs**: 
-  - Always outputs untextured OBJ mesh
-  - Only generates textured GLB if that output is connected (saves 11GB VRAM)
-  - Textures are embedded in GLB file (no separate files needed)
-- No need for separate preprocessing nodes!
+- Built-in texture painting with Blender integration
+- **Smart memory management**: 
+  - Shape only: 10GB VRAM (untextured OBJ)
+  - With texture: 21GB VRAM (only when textured_glb output is connected)
+  - Automatic detection prevents wasted resources
+- Support for 1-10 input images for multi-view reconstruction
+- Outputs STRING paths compatible with Load3D nodes
 
-### 🎬 Video Generation
-- **Text-to-Video**: Generate game animations from text descriptions
+#### 2. **Frame Extractor** - Smart Video Frame Extraction  
+- Extract evenly-distributed frames from videos
+- Skip intro/outro frames automatically
+- Perfect for turntable videos → 3D reconstruction
+- Memory-efficient batch processing
+
+### 🚀 Planned Nodes
+- **Prompt Optimizer** - Model-specific prompt enhancement
+- **Text-to-Video** - Game animation generation
 - **Image-to-Video**: Animate static game assets
 
 ### 🎯 Frame Selector

@@ -16,8 +16,14 @@ Repository URL: https://github.com/mattwilliamson/comfyui-ai-gamedev
    - See: `docs/nodes/hunyuan3d.md` for implementation details
    - Key: Wraps `external/Hunyuan3D-2.1/` submodule (DO NOT MODIFY)
 
+2. **Frame Extractor** (`nodes/frame_extractor/`) - Smart video frame extraction
+   - Extract evenly-distributed frames from videos
+   - Skip start/end frames (intros, credits, etc.)
+   - Preserves full motion range while reducing frame count
+   - See: `docs/nodes/frame_extractor.md` for implementation details
+   - Requires: OpenCV (`pip install opencv-python`)
+
 ### Planned Nodes
-2. **Frame Selector** (`nodes/frame_selector/`) - Video frame extraction for multi-view
 3. **Prompt Optimizer** (`nodes/prompt_optimizer/`) - Model-specific prompt enhancement
 4. **Text-to-Video** - Game animation generation
 5. **Text-to-Speech** - Character voice generation
@@ -132,6 +138,7 @@ def _get_connected_outputs() -> dict:
 ### Example Images
 - Single view: `examples/input_images/single_view/railgun/frame_001_4x.png`
 - Multi-view: `examples/input_images/multi_view/frame_*_4x.png` (10 frames)
+- Sample video: `examples/ship.mp4` - Test video for frame extraction
 
 ### Development Mode
 - No `requirements.txt` currently exists - create when adding dependencies
@@ -147,8 +154,8 @@ See `docs/installation.md` for complete instructions.
 1. **Base install** - Required for all nodes (basic Python deps)
 2. **Node-specific** - Only install what you need:
    - Hunyuan3D: Needs Blender, CUDA 12.4, 21GB VRAM, submodule
-   - Frame Selector: Just OpenCV + optional FFmpeg
-   - Prompt Optimizer: Just transformers library
+   - Frame Extractor: Just OpenCV (`pip install opencv-python`)
+   - Prompt Optimizer: Just transformers library (planned)
    - Others: TBD as implemented
 
 ### Key Point:
@@ -169,7 +176,7 @@ When working on specific nodes:
 
 Current docs:
 - **Hunyuan3D**: `docs/nodes/hunyuan3d.md` - Full implementation details
-- **Frame Selector**: `docs/nodes/frame_selector.md` (TODO)
+- **Frame Extractor**: `docs/nodes/frame_extractor.md` - Full implementation details
 - **Prompt Optimizer**: `docs/nodes/prompt_optimizer.md` (TODO)
 
 ## Important Caveats
@@ -192,3 +199,35 @@ python install.py
 # Test in ComfyUI
 python ~/path/to/ComfyUI/main.py
 ```
+
+## ComfyUI Template Workflows
+
+**Example workflows are shown in ComfyUI's Browse Templates section**
+
+### Making Workflows Appear in Templates Browser
+Custom node workflows appear in ComfyUI's template browser when placed in:
+- `workflow_examples/` directory in the custom node folder (standard naming)
+- Each workflow `.json` file should include `id` and `revision` fields at the top level:
+
+```json
+{
+  "id": "unique-workflow-id",
+  "revision": 0,
+  "last_node_id": 10,
+  "last_link_id": 15,
+  "nodes": [...],
+  "links": [...],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}
+```
+
+### Current Example Workflows
+Located in `/workflow_examples/`:
+1. **hunyuan3d_single_view_textured.json** - Single image to textured 3D
+2. **hunyuan3d_multi_view.json** - Multi-view 3D reconstruction (up to 10 images)
+3. **hunyuan3d_video_to_3d.json** - Video to 3D using frame extraction
+
+These appear automatically in ComfyUI's template browser when the node is installed.
