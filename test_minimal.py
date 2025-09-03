@@ -43,7 +43,7 @@ shape_pipeline = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained(
 print("Generating 3D shape...")
 mesh = shape_pipeline(
     image=pil_images,
-    num_inference_steps=50,
+    num_inference_steps=30,
     multi_view=True
 )[0]
 
@@ -54,7 +54,7 @@ print("Saved: test_out/mesh.obj")
 print("Loading paint model...")
 paint_config = Hunyuan3DPaintConfig(
     max_num_view=len(pil_images),
-    resolution=512
+    resolution=256
 )
 paint_pipeline = Hunyuan3DPaintPipeline(paint_config)
 
@@ -70,7 +70,7 @@ textured = paint_pipeline(
     mesh_path="test_out/mesh.obj",
     image_path=refs,
     output_dir="test_out",
-    num_inference_steps=50,
+    num_inference_steps=30,
     multi_view=True
 )
 

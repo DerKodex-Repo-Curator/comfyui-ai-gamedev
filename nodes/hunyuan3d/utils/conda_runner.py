@@ -16,6 +16,7 @@ class CondaRunner:
     def __init__(self, env_name: str = "hunyuan3d"):
         self.env_name = env_name
         self.conda_path = self._find_conda()
+        self.blender_path = "blender"  # Can be overridden
         
     def _find_conda(self) -> Optional[str]:
         """Find conda executable"""
@@ -105,8 +106,8 @@ class CondaRunner:
             # This provides access to the 'bpy' module needed for mesh operations
             result = subprocess.run(
                 [
-                    "conda", "run", "-n", self.env_name,
-                    "blender", "--background", "--python", str(script_path)
+                    self.conda_path, "run", "-n", self.env_name,
+                    self.blender_path, "--background", "--python", str(script_path)
                 ],
                 capture_output=True,
                 text=True,

@@ -72,9 +72,10 @@ class Hunyuan3D21Node:
                 }),
             },
             "optional": {
-                "enable_texture": ("BOOLEAN", {"default": True}),
                 "texture_resolution": (["512", "1024", "2048"], {"default": "1024"}),
                 "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647}),
+                "conda_path": ("STRING", {"default": "conda", "multiline": False}),
+                "blender_path": ("STRING", {"default": "blender", "multiline": False}),
             }
         }
     
@@ -129,22 +130,24 @@ class Hunyuan3D21Node:
         resolution: str,
         guidance_scale: float,
         steps: int,
-        enable_texture: bool = True,
         texture_resolution: str = "1024",
         seed: int = -1,
+        conda_path: str = "conda",
+        blender_path: str = "blender",
         **kwargs
     ) -> Tuple[Any, ...]:
         """
-        Generate 3D model from input images
+        Generate 3D model from input images with texture painting
         
         Args:
             images: Input image(s) tensor [B, H, W, C]
             resolution: Model generation resolution
             guidance_scale: Diffusion guidance scale
             steps: Number of diffusion steps
-            enable_texture: Whether to generate textures
             texture_resolution: Texture map resolution
             seed: Random seed (-1 for random)
+            conda_path: Path to conda executable
+            blender_path: Path to blender executable
             
         Returns:
             Tuple of (mesh, mesh_filepath, untextured_filepath)
@@ -167,29 +170,31 @@ class Hunyuan3D21Node:
             seed=seed
         )
         
-        # Apply texture if enabled
+        # Always apply texture using Blender
         textured_glb = None
         
-        if enable_texture:
-            print("🎨 Texture generation enabled, applying texture...")
-            if not base_mesh or not base_mesh.get("path"):
-                print("❌ Cannot apply texture: No base mesh available")
+        print("🎨 Applying texture with Blender...")
+        if not base_mesh or not base_mesh.get("path"):
+            print("❌ Cannot apply texture: No base mesh available")
+        else:
+            print(f"  Base mesh: {base_mesh['path']}")
+            # Pass conda and blender paths to texture painting
+            self.conda_runner.conda_path = conda_path
+            self.conda_runner.blender_path = blender_path
+            
+            result = self._apply_texture(
+                mesh=base_mesh,
+                images=images,
+                resolution=int(texture_resolution),
+                blender_path=blender_path
+            )
+            if result and result.get("has_texture"):
+                textured_glb = result
+                print(f"✅ Texture applied successfully: {textured_glb['path']}")
             else:
-                print(f"  Base mesh: {base_mesh['path']}")
-                # Use hardcoded blender path since it's removed from params
-                result = self._apply_texture(
-                    mesh=base_mesh,
-                    images=images,
-                    resolution=int(texture_resolution),
-                    blender_path="blender"
-                )
-                if result and result.get("has_texture"):
-                    textured_glb = result
-                    print(f"✅ Texture applied successfully: {textured_glb['path']}")
-                else:
-                    print("⚠️ Texture generation failed, using untextured mesh")
-                    if result:
-                        print(f"  Result: {result}")
+                print("⚠️ Texture generation failed, using untextured mesh")
+                if result:
+                    print(f"  Result: {result}")
         
         # Prepare outputs
         untextured_path = base_mesh.get("path", "") if base_mesh else ""
@@ -335,7 +340,8 @@ class Hunyuan3D21Node:
         print(f"  Script: {script_path}")
         print(f"  Output: {output_glb}")
         
-        success = self.conda_runner.execute_script(script_path, timeout=300)
+        # Run texture painting inside Blender's Python environment
+        success = self.conda_runner.execute_in_blender(script_path, timeout=300)
         
         # Clean up temp files
         script_path.unlink(missing_ok=True)
