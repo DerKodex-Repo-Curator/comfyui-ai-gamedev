@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv
+.env
+
+# Model files (too large for git)
+*.pth
+*.safetensors
+*.ckpt
+*.bin
+*.pt
+*.pkl
+*.h5
+*.onnx
+
+# Test outputs
+test_outputs/
+test_out/
+*.obj
+*.glb
+*.stl
+*.mtl
+*.png.tmp
+temp_ref_*.png
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Config (may contain paths)
+config.json
+
+# Build artifacts
+build/
+dist/
+*.egg-info/

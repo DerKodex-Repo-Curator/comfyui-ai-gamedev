@@ -1,0 +1,8 @@
+# ComfyUI AI GameDev Dependencies
+torch>=2.0.0
+torchvision
+numpy
+Pillow
+trimesh
+scipy
+opencv-python
