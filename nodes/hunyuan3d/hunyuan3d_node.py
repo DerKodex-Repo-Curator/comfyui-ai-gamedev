@@ -99,6 +99,14 @@ class Hunyuan3D21Node:
             print("⚠️  Warning: Hunyuan3D conda environment not properly configured")
             print("   Please run: python install.py")
         
+        # Setup model paths
+        from .utils.model_paths import setup_model_env, get_model_paths
+        paths = setup_model_env()
+        if paths.get("shape_model"):
+            print(f"✅ Using shape model from ComfyUI: {paths['shape_model']}")
+        else:
+            print("📌 Using shape model from HuggingFace cache")
+        
         # Check if Blender is installed
         import subprocess
         try:

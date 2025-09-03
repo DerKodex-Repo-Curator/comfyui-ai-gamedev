@@ -340,48 +340,121 @@ opencv-python
                 except Exception as e:
                     print(f"⚠️  Could not create symlink: {e}")
         
-        # 2. Download Hunyuan3D models from HuggingFace
-        print("\n📥 Downloading Hunyuan3D models from HuggingFace...")
+        # 2. Download Hunyuan3D models to ComfyUI directory
+        print("\n📥 Downloading Hunyuan3D models...")
         print("   This requires ~13GB of disk space")
         
-        try:
-            # Check if huggingface_hub is installed
-            import huggingface_hub
+        if comfyui_dir and comfyui_dir.exists():
+            # Create Hunyuan3D model directories in ComfyUI
+            hunyuan_models_dir = comfyui_dir / "models" / "diffusion_models" / "Hunyuan3D-2.1"
+            hunyuan_models_dir.mkdir(parents=True, exist_ok=True)
             
-            # Download shape generation model
-            print("\n1️⃣  Downloading shape generation model (7GB)...")
             try:
-                model_path = huggingface_hub.snapshot_download(
-                    repo_id="tencent/Hunyuan3D-2.1",
-                    subfolder="hunyuan3d-dit-v2-1",
-                    local_dir_use_symlinks=False,
-                    resume_download=True
-                )
-                print(f"   ✅ Shape model cached at: {model_path}")
-            except Exception as e:
-                print(f"   ⚠️  Failed to download shape model: {e}")
-                print("   The model will be downloaded on first use")
-            
-            # Download texture painting model
-            print("\n2️⃣  Downloading texture painting model (6GB)...")
-            try:
-                model_path = huggingface_hub.snapshot_download(
-                    repo_id="tencent/Hunyuan3D-2.1",
-                    subfolder="hunyuan3d-paintpbr-v2-1",
-                    local_dir_use_symlinks=False,
-                    resume_download=True
-                )
-                print(f"   ✅ Paint model cached at: {model_path}")
-            except Exception as e:
-                print(f"   ⚠️  Failed to download paint model: {e}")
-                print("   The model will be downloaded on first use")
+                # Check if huggingface_hub is installed
+                import huggingface_hub
+                from huggingface_hub import hf_hub_download
                 
-        except ImportError:
-            print("⚠️  huggingface_hub not installed - models will download on first use")
-            print("   Install with: pip install huggingface_hub")
-        except Exception as e:
-            print(f"⚠️  Could not download models: {e}")
-            print("   Models will be downloaded automatically on first use")
+                # Download shape generation model
+                print("\n1️⃣  Downloading shape generation model (7GB)...")
+                shape_model_dir = hunyuan_models_dir / "hunyuan3d-dit-v2-1"
+                shape_model_dir.mkdir(parents=True, exist_ok=True)
+                
+                try:
+                    # Download the model files to ComfyUI directory
+                    print("   Downloading to ComfyUI models directory...")
+                    shape_files = [
+                        "config.json",
+                        "model_index.json",
+                        "scheduler/scheduler_config.json",
+                        "text_encoder/config.json",
+                        "text_encoder/model.safetensors",
+                        "text_encoder_2/config.json",
+                        "text_encoder_2/model.safetensors",
+                        "tokenizer/merges.txt",
+                        "tokenizer/special_tokens_map.json",
+                        "tokenizer/tokenizer_config.json",
+                        "tokenizer/vocab.json",
+                        "tokenizer_2/merges.txt",
+                        "tokenizer_2/special_tokens_map.json",
+                        "tokenizer_2/tokenizer_config.json",
+                        "tokenizer_2/vocab.json",
+                        "transformer/config.json",
+                        "transformer/diffusion_pytorch_model.safetensors",
+                        "vae/config.json",
+                        "vae/diffusion_pytorch_model.safetensors",
+                    ]
+                    
+                    for file_path in shape_files:
+                        local_file = shape_model_dir / file_path
+                        if not local_file.exists():
+                            local_file.parent.mkdir(parents=True, exist_ok=True)
+                            print(f"   Downloading {file_path}...")
+                            hf_hub_download(
+                                repo_id="tencent/Hunyuan3D-2.1",
+                                subfolder=f"hunyuan3d-dit-v2-1/{file_path}",
+                                filename=Path(file_path).name,
+                                local_dir=str(local_file.parent),
+                                local_dir_use_symlinks=False,
+                                resume_download=True
+                            )
+                    
+                    print(f"   ✅ Shape model installed to: {shape_model_dir}")
+                    
+                    # Also ensure it's cached for HuggingFace
+                    huggingface_hub.snapshot_download(
+                        repo_id="tencent/Hunyuan3D-2.1",
+                        subfolder="hunyuan3d-dit-v2-1",
+                        local_dir_use_symlinks=False,
+                        resume_download=True
+                    )
+                    
+                except Exception as e:
+                    print(f"   ⚠️  Failed to download shape model: {e}")
+                
+                # Download texture painting model
+                print("\n2️⃣  Downloading texture painting model (6GB)...")
+                paint_model_dir = hunyuan_models_dir / "hunyuan3d-paintpbr-v2-1"
+                paint_model_dir.mkdir(parents=True, exist_ok=True)
+                
+                try:
+                    # For paint model, we'll keep it in HF cache as it's loaded differently
+                    model_path = huggingface_hub.snapshot_download(
+                        repo_id="tencent/Hunyuan3D-2.1",
+                        subfolder="hunyuan3d-paintpbr-v2-1",
+                        local_dir_use_symlinks=False,
+                        resume_download=True
+                    )
+                    print(f"   ✅ Paint model cached at: {model_path}")
+                    
+                    # Create a symlink in ComfyUI for consistency
+                    if not (paint_model_dir / "model.safetensors").exists():
+                        try:
+                            # Find the model file in HF cache
+                            hf_cache_dir = Path.home() / ".cache" / "huggingface" / "hub"
+                            paint_cache = hf_cache_dir / "models--tencent--Hunyuan3D-2.1"
+                            if paint_cache.exists():
+                                # Create info file pointing to cache
+                                info_file = paint_model_dir / "model_location.txt"
+                                info_file.write_text(f"Model cached at: {model_path}\n")
+                                print(f"   ✅ Paint model location saved")
+                        except Exception:
+                            pass
+                            
+                except Exception as e:
+                    print(f"   ⚠️  Failed to download paint model: {e}")
+                
+                print(f"\n✅ Hunyuan3D models directory: {hunyuan_models_dir}")
+                    
+            except ImportError:
+                print("⚠️  huggingface_hub not installed")
+                print("   Install with: pip install huggingface_hub")
+                print("   Models will be downloaded on first use")
+            except Exception as e:
+                print(f"⚠️  Could not download models: {e}")
+                print("   Models will be downloaded automatically on first use")
+        else:
+            print("⚠️  ComfyUI directory not found - models will use default cache")
+            print("   Models will be stored in: ~/.cache/huggingface/hub/")
         
         # 3. Test the setup
         print("\n🧪 Testing model setup...")
@@ -409,9 +482,13 @@ opencv-python
                 print(f"   ⚠️  Could not run test: {e}")
         
         print("\n📝 Model locations:")
-        print(f"   • RealESRGAN: {comfyui_upscale_dir}/RealESRGAN_x4plus.pth" if comfyui_upscale_dir else "   • RealESRGAN: Not installed")
-        print("   • Hunyuan3D models: ~/.cache/huggingface/hub/models--tencent--Hunyuan3D-2.1/")
-        print("\n💡 Models are shared between ComfyUI and command-line usage")
+        if comfyui_dir and comfyui_dir.exists():
+            print(f"   • RealESRGAN: {comfyui_dir}/models/upscale_models/RealESRGAN_x4plus.pth")
+            print(f"   • Hunyuan3D Shape: {comfyui_dir}/models/diffusion_models/Hunyuan3D-2.1/hunyuan3d-dit-v2-1/")
+            print(f"   • Hunyuan3D Paint: ~/.cache/huggingface/hub/models--tencent--Hunyuan3D-2.1/")
+        else:
+            print("   • Models stored in default HuggingFace cache: ~/.cache/huggingface/hub/")
+        print("\n💡 Models are shared between ComfyUI nodes and command-line scripts")
         
         return True
     
