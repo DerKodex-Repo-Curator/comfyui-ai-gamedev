@@ -223,10 +223,18 @@ class Hunyuan3DPaintNode:
         
         image_paths_str = json.dumps(image_paths)
         
+        # RealESRGAN should be in ComfyUI models directory
+        # The install script creates a symlink from Hunyuan3D to ComfyUI's model
+        
         return f"""
 import sys
+import os
 from pathlib import Path
 from PIL import Image
+
+# Use offline mode for HuggingFace to avoid SSL issues
+os.environ['HF_HUB_OFFLINE'] = '1'
+os.environ['TRANSFORMERS_OFFLINE'] = '1'
 
 # Setup paths
 sys.path.insert(0, 'external/Hunyuan3D-2.1')
@@ -258,6 +266,12 @@ paint_config = Hunyuan3DPaintConfig(
     max_num_view=len(image_paths),
     resolution={resolution}
 )
+
+# Set config paths explicitly
+paint_config.multiview_cfg_path = "external/Hunyuan3D-2.1/hy3dpaint/cfgs/hunyuan-paint-pbr.yaml"
+paint_config.custom_pipeline = "external/Hunyuan3D-2.1/hy3dpaint/hunyuanpaintpbr"
+paint_config.realesrgan_ckpt_path = "external/Hunyuan3D-2.1/hy3dpaint/ckpt/RealESRGAN_x4plus.pth"
+
 paint_pipeline = Hunyuan3DPaintPipeline(paint_config)
 
 print("Painting textures with Blender...")

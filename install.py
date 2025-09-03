@@ -184,26 +184,8 @@ class ComfyUIGameDevInstaller:
         
         success = True
         
-        # Ensure RealESRGAN model exists
-        ckpt_dir = hy3dpaint_dir / "ckpt"
-        ckpt_dir.mkdir(exist_ok=True)
-        realesrgan_path = ckpt_dir / "RealESRGAN_x4plus.pth"
-        
-        if not realesrgan_path.exists():
-            print("📥 Downloading RealESRGAN upscaler model...")
-            try:
-                import urllib.request
-                url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth"
-                urllib.request.urlretrieve(url, str(realesrgan_path))
-                print("✅ RealESRGAN model downloaded")
-            except Exception as e:
-                print(f"❌ Failed to download RealESRGAN model: {e}")
-                print("   Please manually download from:")
-                print(f"   {url}")
-                print(f"   And save to: {realesrgan_path}")
-                success = False
-        else:
-            print("✅ RealESRGAN model found")
+        # RealESRGAN will be handled in download_model_weights()
+        # It will be downloaded to ComfyUI models directory and symlinked
         
         # Build custom rasterizer
         rasterizer_dir = hy3dpaint_dir / "custom_rasterizer"
@@ -315,36 +297,121 @@ opencv-python
             return False
     
     def download_model_weights(self):
-        """Download model weights (optional)"""
+        """Download and setup model weights"""
         print("\n🎯 Model Weights Setup...")
         
-        models_dir = self.root_dir / "resources" / "models"
-        models_dir.mkdir(parents=True, exist_ok=True)
+        # Determine ComfyUI models directory
+        comfyui_dir = Path.home() / "src" / "ComfyUI"
+        if not comfyui_dir.exists():
+            comfyui_dir = Path.home() / "ComfyUI"
         
-        # Download Real-ESRGAN for texture enhancement
-        esrgan_path = self.hunyuan_dir / "hy3dpaint" / "ckpt" / "RealESRGAN_x4plus.pth"
-        if not esrgan_path.exists():
-            print("📥 Downloading Real-ESRGAN model for texture enhancement...")
-            esrgan_path.parent.mkdir(parents=True, exist_ok=True)
-            
-            try:
-                import urllib.request
-                url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth"
-                urllib.request.urlretrieve(url, esrgan_path)
-                print("✅ Real-ESRGAN model downloaded")
-            except Exception as e:
-                print(f"⚠️  Failed to download Real-ESRGAN: {e}")
-                print("   You can manually download from:")
-                print("   https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth")
-                print(f"   Place it in: {esrgan_path}")
+        if not comfyui_dir.exists():
+            print("⚠️  ComfyUI directory not found")
+            print("   Expected at: ~/src/ComfyUI or ~/ComfyUI")
+            comfyui_upscale_dir = None
         else:
-            print("✅ Real-ESRGAN model already present")
+            comfyui_upscale_dir = comfyui_dir / "models" / "upscale_models"
+            comfyui_upscale_dir.mkdir(parents=True, exist_ok=True)
+            print(f"✅ ComfyUI models directory: {comfyui_dir}")
         
-        print("\n📝 Additional model weights needed:")
-        print("   1. Hunyuan3D-Paint-v2-1 (2B model)")
-        print("      Download from Hugging Face: Tencent-Hunyuan/Hunyuan3D-Paint-v2-1")
-        print("   2. Place in: resources/models/ or ComfyUI/models/checkpoints/")
-        print("\n⚠️  Note: Texture generation requires ~21GB VRAM")
+        # 1. Download Real-ESRGAN to ComfyUI models directory
+        if comfyui_upscale_dir:
+            esrgan_path = comfyui_upscale_dir / "RealESRGAN_x4plus.pth"
+            if not esrgan_path.exists():
+                print("📥 Downloading Real-ESRGAN model for texture upscaling...")
+                try:
+                    import urllib.request
+                    url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth"
+                    urllib.request.urlretrieve(url, esrgan_path)
+                    print(f"✅ Real-ESRGAN model downloaded to: {esrgan_path}")
+                except Exception as e:
+                    print(f"⚠️  Failed to download Real-ESRGAN: {e}")
+                    print("   Manual download: https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth")
+            else:
+                print(f"✅ Real-ESRGAN model already present: {esrgan_path}")
+            
+            # Create symlink in Hunyuan3D directory
+            hunyuan_esrgan_path = self.hunyuan_dir / "hy3dpaint" / "ckpt" / "RealESRGAN_x4plus.pth"
+            if not hunyuan_esrgan_path.exists():
+                hunyuan_esrgan_path.parent.mkdir(parents=True, exist_ok=True)
+                try:
+                    hunyuan_esrgan_path.symlink_to(esrgan_path)
+                    print(f"✅ Created symlink for Hunyuan3D")
+                except Exception as e:
+                    print(f"⚠️  Could not create symlink: {e}")
+        
+        # 2. Download Hunyuan3D models from HuggingFace
+        print("\n📥 Downloading Hunyuan3D models from HuggingFace...")
+        print("   This requires ~13GB of disk space")
+        
+        try:
+            # Check if huggingface_hub is installed
+            import huggingface_hub
+            
+            # Download shape generation model
+            print("\n1️⃣  Downloading shape generation model (7GB)...")
+            try:
+                model_path = huggingface_hub.snapshot_download(
+                    repo_id="tencent/Hunyuan3D-2.1",
+                    subfolder="hunyuan3d-dit-v2-1",
+                    local_dir_use_symlinks=False,
+                    resume_download=True
+                )
+                print(f"   ✅ Shape model cached at: {model_path}")
+            except Exception as e:
+                print(f"   ⚠️  Failed to download shape model: {e}")
+                print("   The model will be downloaded on first use")
+            
+            # Download texture painting model
+            print("\n2️⃣  Downloading texture painting model (6GB)...")
+            try:
+                model_path = huggingface_hub.snapshot_download(
+                    repo_id="tencent/Hunyuan3D-2.1",
+                    subfolder="hunyuan3d-paintpbr-v2-1",
+                    local_dir_use_symlinks=False,
+                    resume_download=True
+                )
+                print(f"   ✅ Paint model cached at: {model_path}")
+            except Exception as e:
+                print(f"   ⚠️  Failed to download paint model: {e}")
+                print("   The model will be downloaded on first use")
+                
+        except ImportError:
+            print("⚠️  huggingface_hub not installed - models will download on first use")
+            print("   Install with: pip install huggingface_hub")
+        except Exception as e:
+            print(f"⚠️  Could not download models: {e}")
+            print("   Models will be downloaded automatically on first use")
+        
+        # 3. Test the setup
+        print("\n🧪 Testing model setup...")
+        print("   Running shape generation test...")
+        
+        test_script = self.root_dir / "test_shape.py"
+        if test_script.exists():
+            try:
+                result = subprocess.run(
+                    [sys.executable, str(test_script)],
+                    capture_output=True,
+                    text=True,
+                    timeout=120,
+                    cwd=self.root_dir
+                )
+                if "Shape generation complete" in result.stdout:
+                    print("   ✅ Shape generation test successful!")
+                else:
+                    print("   ⚠️  Shape generation test failed")
+                    if result.stderr:
+                        print(f"   Error: {result.stderr[:200]}")
+            except subprocess.TimeoutExpired:
+                print("   ⚠️  Test timed out (this is normal for first run)")
+            except Exception as e:
+                print(f"   ⚠️  Could not run test: {e}")
+        
+        print("\n📝 Model locations:")
+        print(f"   • RealESRGAN: {comfyui_upscale_dir}/RealESRGAN_x4plus.pth" if comfyui_upscale_dir else "   • RealESRGAN: Not installed")
+        print("   • Hunyuan3D models: ~/.cache/huggingface/hub/models--tencent--Hunyuan3D-2.1/")
+        print("\n💡 Models are shared between ComfyUI and command-line usage")
         
         return True
     

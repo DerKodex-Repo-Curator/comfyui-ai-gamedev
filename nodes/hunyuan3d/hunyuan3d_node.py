@@ -321,9 +321,14 @@ class Hunyuan3D21Node:
         
         return f"""
 import sys
+import os
 import torch
 from pathlib import Path
 from PIL import Image
+
+# Use offline mode for HuggingFace to avoid SSL issues
+os.environ['HF_HUB_OFFLINE'] = '1'
+os.environ['TRANSFORMERS_OFFLINE'] = '1'
 
 # Setup paths
 sys.path.insert(0, 'external/Hunyuan3D-2.1')
