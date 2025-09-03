@@ -1,9 +1,9 @@
-from .frame_extractor_node import FrameExtractorNode
+from .frame_extractor_node import VideoFrameExtractorNode
 
 NODE_CLASS_MAPPINGS = {
-    "FrameExtractor": FrameExtractorNode
+    "VideoFrameExtractor": VideoFrameExtractorNode
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "FrameExtractor": "Frame Extractor"
+    "VideoFrameExtractor": "🎮 Video Frame Extractor"
 }

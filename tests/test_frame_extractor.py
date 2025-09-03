@@ -48,9 +48,9 @@ class TestFrameExtractorNode(unittest.TestCase):
         self.assertEqual(video_config[1]["default"], "")
         
         frame_count_config = input_types["required"]["frame_count"]
-        self.assertEqual(frame_count_config[1]["default"], 10)
-        self.assertEqual(frame_count_config[1]["min"], 1)
-        self.assertEqual(frame_count_config[1]["max"], 100)
+        self.assertEqual(frame_count_config[1]["default"], 0)
+        self.assertEqual(frame_count_config[1]["min"], 0)
+        self.assertEqual(frame_count_config[1]["max"], 1000)
         
     @patch('os.path.exists')
     @patch('cv2.VideoCapture')
@@ -179,6 +179,34 @@ class TestFrameExtractorNode(unittest.TestCase):
         # Check value range [0, 1]
         self.assertTrue(torch.all(frames_tensor >= 0))
         self.assertTrue(torch.all(frames_tensor <= 1))
+    
+    @patch('os.path.exists')
+    @patch('cv2.VideoCapture')
+    def test_extract_all_frames_with_zero(self, mock_video_capture, mock_exists):
+        """Test that frame_count=0 extracts all available frames"""
+        mock_exists.return_value = True
+        mock_cap = Mock()
+        mock_video_capture.return_value = mock_cap
+        mock_cap.isOpened.return_value = True
+        mock_cap.get.side_effect = lambda prop: {
+            cv2.CAP_PROP_FRAME_COUNT: 30,
+            cv2.CAP_PROP_FPS: 30
+        }.get(prop, 0)
+        
+        test_frame = np.ones((480, 640, 3), dtype=np.uint8) * 127
+        mock_cap.read.return_value = (True, test_frame)
+        
+        # Test with frame_count=0 (should extract all 20 frames after skipping)
+        result = self.node.extract_frames(
+            video="test.mp4",
+            frame_count=0,
+            skip_start_frames=5,
+            skip_end_frames=5
+        )
+        
+        # Should extract frames 5-24 (20 frames total)
+        frames_tensor = result[0]
+        self.assertEqual(frames_tensor.shape[0], 20)
 
 
 class TestFrameExtractorIntegration(unittest.TestCase):

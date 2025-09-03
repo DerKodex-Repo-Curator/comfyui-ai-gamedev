@@ -14,6 +14,25 @@ import json
 
 from .utils.conda_runner import CondaRunner
 
+# Import ComfyUI modules
+try:
+    from comfy_extras.nodes_hunyuan3d import MESH
+except ImportError:
+    # Fallback if not available
+    class MESH:
+        def __init__(self, vertices, faces):
+            self.vertices = vertices
+            self.faces = faces
+
+try:
+    import folder_paths
+except ImportError:
+    # Fallback for testing outside ComfyUI
+    class folder_paths:
+        @staticmethod
+        def get_output_directory():
+            return Path.home() / "ComfyUI" / "output"
+
 class Hunyuan3D21Node:
     """
     ComfyUI node for Hunyuan3D 2.1 image-to-3D generation with texture painting
@@ -25,8 +44,9 @@ class Hunyuan3D21Node:
     - Smart output generation based on connections
     
     Outputs:
-    - untextured: Path to untextured OBJ file (STRING)
     - mesh: Textured GLB mesh for direct use in Preview3D/SaveGLB (MESH)
+    - mesh_filepath: Path to textured GLB file (STRING)
+    - untextured_filepath: Path to untextured OBJ file (STRING)
     
     IMPORTANT: Texture painting with Blender is ONLY performed if the mesh
     output is connected to save ~11GB VRAM and processing time.
@@ -54,35 +74,54 @@ class Hunyuan3D21Node:
             "optional": {
                 "enable_texture": ("BOOLEAN", {"default": True}),
                 "texture_resolution": (["512", "1024", "2048"], {"default": "1024"}),
-                "multi_view_mode": (["auto", "single", "multi"], {"default": "auto"}),
                 "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647}),
-                "blender_path": ("STRING", {"default": "blender"}),
             }
         }
     
     RETURN_TYPES = (
-        "STRING",        # Path to untextured OBJ mesh file
         "MESH",          # Textured mesh for direct use
+        "STRING",        # Path to textured GLB file
+        "STRING",        # Path to untextured OBJ file
     )
     
     RETURN_NAMES = (
-        "untextured",
         "mesh",
+        "mesh_filepath",
+        "untextured_filepath",
     )
     
     FUNCTION = "generate_3d"
-    CATEGORY = "gamedev/3d"
+    CATEGORY = "🎮 AI GameDev/3D"
     OUTPUT_NODE = True
     
     def __init__(self):
-        self.output_dir = Path(tempfile.gettempdir()) / "hunyuan3d_output"
-        self.output_dir.mkdir(exist_ok=True)
+        # Save to ComfyUI output/mesh directory to match SaveGLB node
+        output_dir = Path(folder_paths.get_output_directory())
+        self.output_dir = output_dir / "mesh"
+        self.output_dir.mkdir(parents=True, exist_ok=True)
         self.conda_runner = CondaRunner(env_name="hunyuan3d")
         
         # Check environment on init
         if not self.conda_runner.check_environment():
             print("⚠️  Warning: Hunyuan3D conda environment not properly configured")
             print("   Please run: python install.py")
+        
+        # Check if Blender is installed
+        import subprocess
+        try:
+            result = subprocess.run(['blender', '--version'], capture_output=True, text=True, timeout=5)
+            if result.returncode == 0:
+                print(f"✅ Blender found: {result.stdout.split()[1] if result.stdout else 'version unknown'}")
+            else:
+                print("⚠️  Warning: Blender not found or not working properly")
+                print("   Texture generation requires Blender. Install with:")
+                print("   sudo apt install blender  # or")
+                print("   sudo snap install blender --classic")
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            print("❌ Blender not found! Texture generation will fail.")
+            print("   Install Blender with:")
+            print("   sudo apt install blender  # or")
+            print("   sudo snap install blender --classic")
         
     def generate_3d(
         self,
@@ -92,9 +131,7 @@ class Hunyuan3D21Node:
         steps: int,
         enable_texture: bool = True,
         texture_resolution: str = "1024",
-        multi_view_mode: str = "auto",
         seed: int = -1,
-        blender_path: str = "blender",
         **kwargs
     ) -> Tuple[Any, ...]:
         """
@@ -107,17 +144,15 @@ class Hunyuan3D21Node:
             steps: Number of diffusion steps
             enable_texture: Whether to generate textures
             texture_resolution: Texture map resolution
-            multi_view_mode: How to handle multiple images
             seed: Random seed (-1 for random)
-            blender_path: Path to Blender executable
             
         Returns:
-            Tuple of generated meshes and metadata
+            Tuple of (mesh, mesh_filepath, untextured_filepath)
         """
         
-        # Determine if we have multi-view input
+        # Multi-view is automatic based on image count (1-10 images)
         batch_size = images.shape[0] if len(images.shape) == 4 else 1
-        is_multi_view = self._determine_multi_view(batch_size, multi_view_mode)
+        is_multi_view = batch_size > 1 and batch_size <= 10
         
         # Check which outputs are connected (placeholder - ComfyUI provides this)
         outputs_needed = self._get_connected_outputs()
@@ -132,44 +167,63 @@ class Hunyuan3D21Node:
             seed=seed
         )
         
-        # Apply texture ONLY if mesh output is connected
+        # Apply texture if enabled
         textured_glb = None
         
-        # Check if mesh output is connected (ComfyUI will set this)
-        # ComfyUI passes this info through kwargs
-        outputs_needed = kwargs.get("outputs_needed", {})
-        if enable_texture and outputs_needed.get("mesh", False):
-            result = self._apply_texture(
-                mesh=base_mesh,
-                images=images,
-                resolution=int(texture_resolution),
-                blender_path=blender_path
-            )
-            if result and result.get("has_texture"):
-                textured_glb = result
+        if enable_texture:
+            print("🎨 Texture generation enabled, applying texture...")
+            if not base_mesh or not base_mesh.get("path"):
+                print("❌ Cannot apply texture: No base mesh available")
+            else:
+                print(f"  Base mesh: {base_mesh['path']}")
+                # Use hardcoded blender path since it's removed from params
+                result = self._apply_texture(
+                    mesh=base_mesh,
+                    images=images,
+                    resolution=int(texture_resolution),
+                    blender_path="blender"
+                )
+                if result and result.get("has_texture"):
+                    textured_glb = result
+                    print(f"✅ Texture applied successfully: {textured_glb['path']}")
+                else:
+                    print("⚠️ Texture generation failed, using untextured mesh")
+                    if result:
+                        print(f"  Result: {result}")
         
-        # Return untextured path and textured mesh
-        obj_path = base_mesh.get("path", "") if base_mesh else ""
+        # Prepare outputs
+        untextured_path = base_mesh.get("path", "") if base_mesh else ""
         
-        # For textured output, return as MESH type for direct use
+        # Create mesh output (actual mesh object for Preview3D/SaveGLB)
+        # ComfyUI expects a specific format with vertices and faces as torch tensors
         if textured_glb and textured_glb.get("path"):
-            mesh_output = {"path": textured_glb["path"], "type": "glb"}
+            # Load the GLB file and convert to ComfyUI mesh format
+            import trimesh
+            tm_mesh = trimesh.load(textured_glb["path"])
+            # Return the full path for Preview3D
+            mesh_filepath = textured_glb["path"]
         elif base_mesh and base_mesh.get("path"):
-            # If no texture, use untextured mesh
-            mesh_output = {"path": base_mesh["path"], "type": "obj"}
+            # If no texture, load untextured OBJ
+            import trimesh
+            tm_mesh = trimesh.load(base_mesh["path"])
+            # Return the full path for Preview3D
+            mesh_filepath = base_mesh["path"]
         else:
-            mesh_output = None
+            tm_mesh = None
+            mesh_filepath = ""
+        
+        if tm_mesh:
+            # Convert trimesh to ComfyUI mesh format
+            vertices = torch.from_numpy(tm_mesh.vertices).float().unsqueeze(0)  # Add batch dimension
+            faces = torch.from_numpy(tm_mesh.faces).long().unsqueeze(0)  # Add batch dimension
             
-        return (obj_path, mesh_output)
+            # Create a mesh object that ComfyUI expects
+            mesh = MESH(vertices, faces)
+        else:
+            mesh = None
+            
+        return (mesh, mesh_filepath, untextured_path)
     
-    def _determine_multi_view(self, batch_size: int, mode: str) -> bool:
-        """Determine if input should be treated as multi-view"""
-        if mode == "single":
-            return False
-        elif mode == "multi":
-            return batch_size > 1
-        else:  # auto
-            return batch_size > 1 and batch_size <= 10
     
     def _get_connected_outputs(self) -> dict:
         """
@@ -208,8 +262,10 @@ class Hunyuan3D21Node:
             img.save(img_path)
             image_paths.append(str(img_path))
         
-        # Output path
-        output_mesh = self.output_dir / f"mesh_{run_id}.obj"
+        # Output path with descriptive name
+        import datetime
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_mesh = self.output_dir / f"hunyuan3d_{timestamp}_{run_id[:8]}.obj"
         
         # Create execution script
         script = self._create_shape_script(
@@ -259,8 +315,10 @@ class Hunyuan3D21Node:
             img.save(img_path)
             image_paths.append(str(img_path))
         
-        # Output path
-        output_glb = self.output_dir / f"textured_{run_id}.glb"
+        # Output path with descriptive name
+        import datetime
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") 
+        output_glb = self.output_dir / f"hunyuan3d_textured_{timestamp}_{run_id[:8]}.glb"
         
         # Create texture painting script
         script = self._create_texture_script(
@@ -274,20 +332,26 @@ class Hunyuan3D21Node:
         script_path.write_text(script)
         
         print(f"🎨 Painting textures (res={resolution})...")
+        print(f"  Script: {script_path}")
+        print(f"  Output: {output_glb}")
+        
         success = self.conda_runner.execute_script(script_path, timeout=300)
         
-        # Clean up
+        # Clean up temp files
         script_path.unlink(missing_ok=True)
         for path in image_paths:
             Path(path).unlink(missing_ok=True)
         
         if not success:
-            print("⚠️  Texture painting failed, returning untextured mesh")
+            print("❌ Texture painting script failed")
             return mesh
         
         if output_glb.exists():
+            file_size = output_glb.stat().st_size
+            print(f"✅ GLB file created: {output_glb} ({file_size:,} bytes)")
             return {"path": str(output_glb), "type": "glb", "has_texture": True}
         else:
+            print(f"❌ GLB file not found at: {output_glb}")
             return mesh
     
     @classmethod

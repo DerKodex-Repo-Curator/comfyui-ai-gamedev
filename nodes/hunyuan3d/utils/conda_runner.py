@@ -88,6 +88,75 @@ class CondaRunner:
             print(f"Error executing script: {e}")
             return False
     
+    def execute_in_blender(self, script_path: Path, timeout: int = 300) -> bool:
+        """
+        Execute a Python script inside Blender's Python environment
+        Required for texture painting which needs the 'bpy' module
+        
+        Args:
+            script_path: Path to Python script to execute in Blender
+            timeout: Maximum execution time in seconds
+            
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            # Run the script inside Blender's Python environment
+            # This provides access to the 'bpy' module needed for mesh operations
+            result = subprocess.run(
+                [
+                    "conda", "run", "-n", self.env_name,
+                    "blender", "--background", "--python", str(script_path)
+                ],
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                cwd=os.path.expanduser("~/src/comfyui-ai-gamedev")  # Run from project root
+            )
+            
+            # Print output for debugging
+            if result.stdout:
+                print(result.stdout)
+            if result.stderr:
+                # Filter out common Blender warnings
+                stderr_lines = result.stderr.split('\n')
+                important_errors = []
+                for line in stderr_lines:
+                    if line and not any(ignore in line for ignore in [
+                        "Blender quit",
+                        "Saved:",
+                        "Warning:",
+                        "Info:",
+                        "found bundled python"
+                    ]):
+                        important_errors.append(line)
+                if important_errors:
+                    print(f"Stderr: {chr(10).join(important_errors)}", file=sys.stderr)
+            
+            # Check for success
+            if result.returncode != 0:
+                # Check if texture was saved despite non-zero exit
+                if "Saved textured GLB" in result.stdout or "Saved:" in result.stdout:
+                    print("✅ Texture painting completed (Blender exit code ignored)")
+                    return True
+                else:
+                    print(f"❌ Blender script failed with return code {result.returncode}")
+                    return False
+            
+            return True
+            
+        except subprocess.TimeoutExpired:
+            print(f"❌ Blender script timed out after {timeout} seconds")
+            return False
+        except FileNotFoundError:
+            print("❌ Blender not found! Please install Blender:")
+            print("   sudo apt install blender  # or")
+            print("   sudo snap install blender --classic")
+            return False
+        except Exception as e:
+            print(f"❌ Error executing Blender script: {e}")
+            return False
+    
     def execute_command(self, command: str, timeout: int = 60) -> Tuple[bool, str, str]:
         """
         Execute a single command in the conda environment

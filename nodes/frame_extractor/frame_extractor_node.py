@@ -1,84 +1,95 @@
-import cv2
 import numpy as np
 import torch
 from typing import Tuple
-import os
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class FrameExtractorNode:
+class VideoFrameExtractorNode:
+    """
+    Extract frames from video at specified intervals
+    Takes VIDEO output from LoadVideo node
+    """
+    
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "video": ("STRING", {"default": "", "multiline": False}),
-                "frame_count": ("INT", {"default": 10, "min": 1, "max": 100, "step": 1}),
+                "video": ("VIDEO",),  # Takes VIDEO output from LoadVideo
+                "frame_count": ("INT", {"default": 0, "min": 0, "max": 1000, "step": 1}),
                 "skip_start_frames": ("INT", {"default": 0, "min": 0, "max": 1000, "step": 1}),
                 "skip_end_frames": ("INT", {"default": 0, "min": 0, "max": 1000, "step": 1}),
             }
         }
     
-    RETURN_TYPES = ("IMAGE",)
-    RETURN_NAMES = ("frames",)
+    RETURN_TYPES = ("IMAGE", "INT", "INT")
+    RETURN_NAMES = ("frames", "total_frames", "extracted_count")
     FUNCTION = "extract_frames"
-    CATEGORY = "gamedev/video"
+    CATEGORY = "🎮 AI GameDev/Video"
     OUTPUT_NODE = False
 
-    def extract_frames(self, video: str, frame_count: int, skip_start_frames: int, skip_end_frames: int) -> Tuple[torch.Tensor]:
-        if not video or not os.path.exists(video):
-            raise ValueError(f"Video file not found: {video}")
+    def extract_frames(self, video, frame_count: int, skip_start_frames: int, skip_end_frames: int) -> Tuple[torch.Tensor]:
+        """
+        Extract frames from video at specified intervals
         
-        cap = cv2.VideoCapture(video)
-        if not cap.isOpened():
-            raise ValueError(f"Could not open video file: {video}")
+        Args:
+            video: Video object from LoadVideo containing frames, audio, and metadata
+            frame_count: Number of frames to extract (0 = all frames)
+            skip_start_frames: Number of frames to skip at the start
+            skip_end_frames: Number of frames to skip at the end
         
-        try:
-            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-            fps = cap.get(cv2.CAP_PROP_FPS)
-            
-            if total_frames <= 0:
-                raise ValueError("Could not determine video frame count")
-            
-            usable_start = skip_start_frames
-            usable_end = total_frames - skip_end_frames
-            usable_frame_count = usable_end - usable_start
-            
-            if usable_frame_count <= 0:
-                raise ValueError(f"No frames remaining after skipping {skip_start_frames} start and {skip_end_frames} end frames from {total_frames} total")
-            
-            if frame_count > usable_frame_count:
-                logger.warning(f"Requested {frame_count} frames but only {usable_frame_count} available. Using all available frames.")
-                frame_count = usable_frame_count
-            
-            if frame_count == usable_frame_count:
-                frame_indices = list(range(usable_start, usable_end))
-            else:
-                step = (usable_frame_count - 1) / (frame_count - 1) if frame_count > 1 else 0
-                frame_indices = [int(usable_start + i * step) for i in range(frame_count)]
-            
-            frames = []
-            for idx in frame_indices:
-                cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
-                ret, frame = cap.read()
-                if not ret:
-                    logger.warning(f"Could not read frame {idx}")
-                    continue
-                
-                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame_normalized = frame_rgb.astype(np.float32) / 255.0
-                frames.append(frame_normalized)
-            
-            if not frames:
-                raise ValueError("No frames could be extracted from the video")
-            
-            frames_tensor = torch.from_numpy(np.stack(frames, axis=0))
-            
-            logger.info(f"Extracted {len(frames)} frames from video (skipped {skip_start_frames} start, {skip_end_frames} end)")
-            logger.info(f"Frame indices used: {frame_indices[:5]}{'...' if len(frame_indices) > 5 else ''}")
-            
-            return (frames_tensor,)
-            
-        finally:
-            cap.release()
+        Returns:
+            Tuple containing batch of frames as tensor
+        """
+        # Extract components from VideoInput object
+        components = video.get_components()
+        images = components.images
+        
+        # Get dimensions from frames tensor
+        if len(images.shape) == 4:
+            total_frames, height, width, channels = images.shape
+        elif len(images.shape) == 3:
+            # Single frame
+            total_frames = 1
+            height, width, channels = images.shape
+            images = images.unsqueeze(0)
+        else:
+            raise ValueError(f"Expected 3D or 4D tensor, got shape {images.shape}")
+        
+        logger.info(f"Processing video frames tensor: {total_frames} frames, {height}x{width}")
+        
+        usable_start = skip_start_frames
+        usable_end = total_frames - skip_end_frames
+        usable_frame_count = usable_end - usable_start
+        
+        if usable_frame_count <= 0:
+            raise ValueError(f"No frames remaining after skipping {skip_start_frames} start and {skip_end_frames} end frames from {total_frames} total")
+        
+        # If frame_count is 0, extract all available frames
+        if frame_count == 0:
+            frame_count = usable_frame_count
+            logger.info(f"frame_count=0, extracting all {frame_count} available frames")
+        
+        if frame_count > usable_frame_count:
+            logger.warning(f"Requested {frame_count} frames but only {usable_frame_count} available. Using all available frames.")
+            frame_count = usable_frame_count
+        
+        # Calculate which frames to extract
+        if frame_count == usable_frame_count:
+            frame_indices = list(range(usable_start, usable_end))
+        else:
+            step = (usable_frame_count - 1) / (frame_count - 1) if frame_count > 1 else 0
+            frame_indices = [int(usable_start + i * step) for i in range(frame_count)]
+        
+        logger.info(f"Extracting {len(frame_indices)} frames from tensor")
+        
+        # Extract the selected frames from the tensor
+        selected_frames = images[frame_indices]
+        
+        return (selected_frames, total_frames, len(frame_indices))
+    
+    @classmethod
+    def IS_CHANGED(cls, **kwargs):
+        # This could be optimized to detect when frame selection actually changes
+        return float("nan")

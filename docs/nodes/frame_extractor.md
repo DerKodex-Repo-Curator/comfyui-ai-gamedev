@@ -29,7 +29,7 @@ pip install opencv-python
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | `video` | STRING | "" | - | Path to video file (absolute or relative) |
-| `frame_count` | INT | 10 | 1-100 | Number of frames to extract |
+| `frame_count` | INT | 0 | 0-1000 | Number of frames to extract (0 = all frames) |
 | `skip_start_frames` | INT | 0 | 0-1000 | Frames to skip at video start |
 | `skip_end_frames` | INT | 0 | 0-1000 | Frames to skip at video end |
 
@@ -39,6 +39,15 @@ pip install opencv-python
 | `frames` | IMAGE | Batch tensor of extracted frames (B, H, W, C) |
 
 ## Usage Examples
+
+### Extract All Frames
+Extract every frame from the video:
+```
+video: "path/to/video.mp4"
+frame_count: 0
+skip_start_frames: 0
+skip_end_frames: 0
+```
 
 ### Basic Frame Extraction
 Extract 10 evenly-spaced frames from entire video:

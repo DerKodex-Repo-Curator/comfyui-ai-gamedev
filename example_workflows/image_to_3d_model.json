@@ -1,12 +1,12 @@
 {
-  "last_node_id": 5,
-  "last_link_id": 4,
+  "last_node_id": 4,
+  "last_link_id": 3,
   "nodes": [
     {
       "id": 1,
-      "type": "LoadVideo",
+      "type": "LoadImage",
       "pos": [50, 200],
-      "size": [315, 200],
+      "size": [315, 314],
       "flags": {},
       "order": 0,
       "mode": 0,
@@ -15,34 +15,28 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [1],
-          "shape": 3,
-          "slot_index": 0
+          "shape": 3
         },
         {
-          "name": "AUDIO",
-          "type": "AUDIO",
+          "name": "MASK",
+          "type": "MASK",
           "links": null,
           "shape": 3
         }
       ],
       "properties": {
-        "Node name for S&R": "LoadVideo"
+        "Node name for S&R": "LoadImage"
       },
       "widgets_values": [
-        "examples/ship.mp4",
-        0,
-        "auto",
-        0,
-        1.0,
-        "disabled",
-        "video"
+        "examples/input_images/single_view/railgun/frame_001_4x.png",
+        "image"
       ]
     },
     {
       "id": 2,
-      "type": "SelectEveryNthFrame",
+      "type": "Hunyuan3D21Node",
       "pos": [400, 200],
-      "size": [315, 100],
+      "size": [350, 220],
       "flags": {},
       "order": 1,
       "mode": 0,
@@ -55,48 +49,25 @@
       ],
       "outputs": [
         {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [2],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "SelectEveryNthFrame"
-      },
-      "widgets_values": [
-        5,
-        10
-      ]
-    },
-    {
-      "id": 3,
-      "type": "Hunyuan3D21Node",
-      "pos": [750, 200],
-      "size": [350, 250],
-      "flags": {},
-      "order": 2,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 2
-        }
-      ],
-      "outputs": [
-        {
-          "name": "untextured",
-          "type": "STRING",
-          "links": null,
-          "shape": 3
-        },
-        {
           "name": "mesh",
           "type": "MESH",
-          "links": [3, 4],
-          "shape": 3
+          "links": [3],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "mesh_filepath",
+          "type": "STRING",
+          "links": [2],
+          "shape": 3,
+          "slot_index": 1
+        },
+        {
+          "name": "untextured_filepath",
+          "type": "STRING",
+          "links": null,
+          "shape": 3,
+          "slot_index": 2
         }
       ],
       "properties": {
@@ -105,19 +76,36 @@
       "widgets_values": [
         "512",
         7.5,
-        75,
+        50,
         true,
         "1024",
-        "multi",
-        42,
-        "blender"
+        -1
       ]
     },
     {
-      "id": 4,
+      "id": 3,
       "type": "Preview3D",
-      "pos": [1150, 200],
+      "pos": [800, 200],
       "size": [400, 400],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model_file",
+          "type": "STRING",
+          "link": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Preview3D"
+      }
+    },
+    {
+      "id": 4,
+      "type": "SaveGLB",
+      "pos": [800, 650],
+      "size": [315, 58],
       "flags": {},
       "order": 3,
       "mode": 0,
@@ -129,35 +117,15 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "Preview3D"
-      }
-    },
-    {
-      "id": 5,
-      "type": "SaveGLB",
-      "pos": [1150, 650],
-      "size": [315, 58],
-      "flags": {},
-      "order": 4,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "mesh",
-          "type": "MESH",
-          "link": 4
-        }
-      ],
-      "properties": {
         "Node name for S&R": "SaveGLB"
       },
-      "widgets_values": ["video_3d_model"]
+      "widgets_values": ["meshes/generated_3d_model"]
     }
   ],
   "links": [
     [1, 1, 0, 2, 0, "IMAGE"],
-    [2, 2, 0, 3, 0, "IMAGE"],
-    [3, 3, 1, 4, 0, "MESH"],
-    [4, 3, 1, 5, 0, "MESH"]
+    [2, 2, 1, 3, 0, "STRING"],
+    [3, 2, 0, 4, 0, "MESH"]
   ],
   "groups": [],
   "config": {},

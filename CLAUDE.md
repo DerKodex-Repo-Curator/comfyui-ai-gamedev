@@ -16,12 +16,14 @@ Repository URL: https://github.com/mattwilliamson/comfyui-ai-gamedev
    - See: `docs/nodes/hunyuan3d.md` for implementation details
    - Key: Wraps `external/Hunyuan3D-2.1/` submodule (DO NOT MODIFY)
 
-2. **Frame Extractor** (`nodes/frame_extractor/`) - Smart video frame extraction
+2. **Video Frame Extractor** (`nodes/frame_extractor/`) - Smart video frame extraction
    - Extract evenly-distributed frames from videos
    - Skip start/end frames (intros, credits, etc.)
    - Preserves full motion range while reducing frame count
+   - **Takes VIDEO input from LoadVideo node** (not IMAGE)
+   - Uses ComfyUI's native `VideoInput.get_components()` API
    - See: `docs/nodes/frame_extractor.md` for implementation details
-   - Requires: OpenCV (`pip install opencv-python`)
+   - No additional requirements (uses ComfyUI's video system)
 
 ### Planned Nodes
 3. **Prompt Optimizer** (`nodes/prompt_optimizer/`) - Model-specific prompt enhancement
@@ -56,12 +58,20 @@ comfyui-ai-gamedev/
 ### Hunyuan3D 2.1 REQUIRES Blender
 **BLENDER IS MANDATORY FOR HUNYUAN3D 2.1 - NO EXCEPTIONS**
 - Texture painting REQUIRES Blender (`blender --background --python`)
-- Without Blender, you only get untextured gray models
+- Without Blender, you only get untextured gray models (OBJ files)
 - Install: `sudo snap install blender --classic` or `sudo apt install blender`
 - Verify: `blender --version`
 - Blender 3.0.1+ required for texture painting pipeline
 - **For debugging**: Run Python scripts in Blender's environment with `blender --background --python script.py`
 - **Known issue**: Blender may segfault on exit after texture painting - this is normal if output files were created successfully
+
+#### Texture Troubleshooting
+If textures are not appearing:
+1. **Check Blender is installed**: Node prints status on initialization
+2. **Check console output**: Look for "🎨 Texture generation enabled" messages
+3. **Verify output**: Textured models are GLB files, untextured are OBJ files
+4. **File location**: Check `ComfyUI/output/mesh/` for `hunyuan3d_textured_*.glb` files
+5. **Enable texture**: Ensure "enable_texture" is True in the node parameters
 
 ### Never Modify External Submodules
 **NEVER modify code in `external/` directories**
@@ -115,6 +125,12 @@ NODE_DISPLAY_NAME_MAPPINGS = {"NodeName": "Display Name"}
 - `RETURN_TYPES`: Output types tuple
 - `FUNCTION`: Main processing method name
 - `CATEGORY`: Menu location (e.g., "gamedev/3d")
+
+### ComfyUI Type System
+- **MESH**: Object with `.vertices` and `.faces` tensors (from `comfy_extras.nodes_hunyuan3d`)
+- **VIDEO**: VideoInput object with `.get_components()` method
+- **IMAGE**: Tensor batch of images
+- **STRING**: File paths for Preview3D node
 
 ### Multi-View Detection Pattern
 ```python
@@ -225,9 +241,28 @@ Custom node workflows appear in ComfyUI's template browser when placed in:
 ```
 
 ### Current Example Workflows
-Located in `/workflow_examples/`:
-1. **hunyuan3d_single_view_textured.json** - Single image to textured 3D
-2. **hunyuan3d_multi_view.json** - Multi-view 3D reconstruction (up to 10 images)
-3. **hunyuan3d_video_to_3d.json** - Video to 3D using frame extraction
+Located in `/example_workflows/`:
+1. **image_to_3d_model.json** - Single image to textured 3D using Hunyuan3D
+2. **video_frame_preview.json** - Extract and preview all frames from video
+3. **video_to_3d_model.json** - Extract 8 frames from video for 3D reconstruction
 
-These appear automatically in ComfyUI's template browser when the node is installed.
+### Important Integration Notes
+
+#### Preview3D Node Requirements
+- **Preview3D expects STRING input** (file path), not MESH objects
+- Connect Hunyuan3D's `mesh_filepath` output (slot 1) to Preview3D's `model_file` input
+- Do NOT connect the MESH output directly to Preview3D
+
+#### File Storage Locations
+- **Hunyuan3D outputs**: Saved to `ComfyUI/output/mesh/` (same as SaveGLB node)
+- **Load3D looks in**: `ComfyUI/input/3d/` (recursively)
+- **SaveGLB default**: `ComfyUI/output/mesh/` (with "mesh/" prefix)
+- Files are named with timestamp: `hunyuan3d_textured_YYYYMMDD_HHMMSS_[uuid].glb`
+- **To use with Load3D**: Copy files from `output/mesh/` to `input/3d/`
+
+#### VideoFrameExtractor Updates
+- **Takes VIDEO input from LoadVideo node** (not IMAGE)
+- Uses ComfyUI's native `VideoInput.get_components()` API
+- Node class renamed from `FrameExtractor` to `VideoFrameExtractor`
+- Removed fps output (not needed)
+- Returns: frames (IMAGE), total_frames (INT), extracted_count (INT)
