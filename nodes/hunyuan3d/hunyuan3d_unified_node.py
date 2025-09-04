@@ -164,55 +164,39 @@ class Hunyuan3D21UnifiedNode:
         print(f"  👀 Multi-view: {is_multi_view}")
         print(f"{'='*60}\n")
         
-        # Generate base shape
-        print("🔨 Phase 1: Shape Generation")
+        # Generate 3D model with unified pipeline
+        print("🔨 Generating 3D Model")
         print("-" * 40)
-        base_mesh = self._generate_shape(
+        
+        output_glb = self._generate_3d_unified(
             images=images,
+            enable_texture=enable_texture,
             resolution=int(resolution),
+            texture_resolution=int(texture_resolution),
             guidance_scale=guidance_scale,
-            steps=shape_steps,
+            shape_steps=shape_steps,
+            texture_steps=texture_steps,
             is_multi_view=is_multi_view,
             seed=seed
         )
         
-        if not base_mesh or not base_mesh.get("path"):
-            print("❌ Shape generation failed")
+        if not output_glb:
+            print("❌ 3D generation failed")
             return (None, "", "", "")
         
-        # Load the OBJ file
-        obj_path = base_mesh["path"]
-        tm_mesh = trimesh.load(obj_path)
+        # Load the generated mesh
+        tm_mesh = trimesh.load(output_glb)
         
-        # Generate initial formats from original mesh
-        glb_path = self._export_format(tm_mesh, obj_path, "glb")
-        stl_path = self._export_format(tm_mesh, obj_path, "stl")
+        # Export to other formats
+        output_obj = str(Path(output_glb).with_suffix(".obj"))
+        output_stl = str(Path(output_glb).with_suffix(".stl"))
         
-        # Apply texture if enabled and Blender is available
-        final_glb = glb_path
-        final_obj = obj_path
-        final_stl = stl_path
+        tm_mesh.export(output_obj)
+        tm_mesh.export(output_stl)
         
-        if enable_texture and self.blender_available:
-            print("\n🎨 Phase 2: Texture Painting")
-            print("-" * 40)
-            
-            textured = self._apply_texture(
-                mesh_path=obj_path,
-                images=images,
-                resolution=int(texture_resolution),
-                steps=texture_steps
-            )
-            
-            if textured and textured.get("glb_path"):
-                # Use textured versions for all outputs
-                final_glb = textured["glb_path"]
-                final_obj = textured["obj_path"]
-                final_stl = textured["stl_path"]
-                # Reload the textured mesh
-                tm_mesh = trimesh.load(final_glb)
-        elif enable_texture and not self.blender_available:
-            print("\n⚠️  Texture painting skipped - Blender not available")
+        final_glb = output_glb
+        final_obj = output_obj
+        final_stl = output_stl
         
         # Convert to MESH object
         vertices = torch.from_numpy(tm_mesh.vertices).float().unsqueeze(0)
@@ -230,8 +214,9 @@ class Hunyuan3D21UnifiedNode:
         
         return (mesh, final_glb, final_obj, final_stl)
     
-    def _generate_shape(self, images, resolution, guidance_scale, steps, is_multi_view, seed):
-        """Generate 3D shape using Hunyuan3D model"""
+    def _generate_3d_unified(self, images, enable_texture, resolution, texture_resolution,
+                            guidance_scale, shape_steps, texture_steps, is_multi_view, seed):
+        """Generate 3D shape and texture in one unified process like demo.py"""
         # Save images to temp files
         run_id = uuid.uuid4().hex[:8]
         image_paths = []
@@ -243,97 +228,167 @@ class Hunyuan3D21UnifiedNode:
             img.save(img_path)
             image_paths.append(str(img_path))
         
-        # Output path
+        # Output paths
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_mesh = self.output_dir / f"hunyuan3d_{timestamp}_{run_id}.obj"
+        if enable_texture and self.blender_available:
+            output_glb = self.output_dir / f"hunyuan3d_textured_{timestamp}_{run_id}.glb"
+        else:
+            output_glb = self.output_dir / f"hunyuan3d_{timestamp}_{run_id}.glb"
         
-        # Create execution script
-        script = self._create_shape_script(
+        # Create unified script like demo.py
+        script = self._create_unified_script(
             image_paths=image_paths,
-            output_mesh=str(output_mesh),
+            output_glb=str(output_glb),
             resolution=resolution,
+            texture_resolution=texture_resolution,
             guidance_scale=guidance_scale,
-            steps=steps,
+            shape_steps=shape_steps,
+            texture_steps=texture_steps,
             is_multi_view=is_multi_view,
+            enable_texture=enable_texture and self.blender_available,
             seed=seed if seed != -1 else None
         )
         
-        script_path = self.output_dir / f"generate_shape_{run_id}.py"
+        script_path = self.output_dir / f"generate_unified_{run_id}.py"
         script_path.write_text(script)
         
-        print(f"  ⏳ Generating shape (this may take 2-5 minutes)...")
-        success = self.conda_runner.execute_script(script_path, timeout=300)
+        print(f"  ⏳ Generating 3D model (this may take 5-10 minutes)...")
+        
+        # Run in Blender if texture is enabled, otherwise regular Python
+        if enable_texture and self.blender_available:
+            success = self.conda_runner.execute_in_blender(
+                script_path, 
+                timeout=600,
+                output_file=output_glb
+            )
+        else:
+            success = self.conda_runner.execute_script(script_path, timeout=600)
         
         # Clean up
         script_path.unlink(missing_ok=True)
         for path in image_paths:
             Path(path).unlink(missing_ok=True)
         
-        if success and output_mesh.exists():
-            size_mb = output_mesh.stat().st_size / (1024 * 1024)
-            print(f"  ✅ Shape generated: {output_mesh.name} ({size_mb:.2f} MB)")
-            return {"path": str(output_mesh), "type": "obj"}
+        if success and output_glb.exists():
+            size_mb = output_glb.stat().st_size / (1024 * 1024)
+            print(f"  ✅ Model generated: {output_glb.name} ({size_mb:.2f} MB)")
+            return str(output_glb)
         else:
-            print(f"  ❌ Shape generation failed - mesh file not created")
+            print(f"  ❌ Generation failed - output file not created")
             return None
     
-    def _apply_texture(self, mesh_path, images, resolution, steps):
-        """Apply texture using Blender and Hunyuan3D painting"""
-        # Save reference images
-        run_id = uuid.uuid4().hex[:8]
-        image_paths = []
+    def _create_unified_script(self, image_paths, output_glb, resolution, texture_resolution,
+                              guidance_scale, shape_steps, texture_steps, is_multi_view, 
+                              enable_texture, seed):
+        """Create unified script like demo.py - shape and texture in one go"""
+        image_paths_str = json.dumps(image_paths)
         
-        for i in range(images.shape[0]):
-            img_array = (images[i].cpu().numpy() * 255).astype(np.uint8)
-            img = Image.fromarray(img_array, mode='RGB')
-            img_path = self.output_dir / f"tex_ref_{run_id}_{i:03d}.png"
-            img.save(img_path)
-            image_paths.append(str(img_path))
+        # Base script that matches demo.py structure
+        script = f"""
+import sys
+import os
+
+# Use offline mode
+os.environ['HF_HUB_OFFLINE'] = '1'
+os.environ['TRANSFORMERS_OFFLINE'] = '1'
+
+# Setup paths
+sys.path.insert(0, 'external/Hunyuan3D-2.1')
+sys.path.insert(0, 'external/Hunyuan3D-2.1/hy3dshape')
+sys.path.insert(0, 'external/Hunyuan3D-2.1/hy3dpaint')
+
+from PIL import Image
+from hy3dshape.pipelines import Hunyuan3DDiTFlowMatchingPipeline
+{f"torch.manual_seed({seed})" if seed else ""}
+
+# Load images
+image_paths = {image_paths_str}
+pil_images = [Image.open(p).convert("RGB") for p in image_paths]
+
+print("Loading shape generation model...")
+shape_pipeline = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained(
+    'tencent/Hunyuan3D-2.1',
+    subfolder='hunyuan3d-dit-v2-1'
+)
+
+print(f"Generating 3D shape from {{len(pil_images)}} images...")
+try:
+    result = shape_pipeline(
+        image=pil_images if len(pil_images) > 1 else pil_images[0],
+        num_inference_steps={shape_steps},
+        guidance_scale={guidance_scale},
+        resolution={resolution},
+        {"multi_view=True" if is_multi_view else ""}
+    )
+    
+    if result and len(result) > 0:
+        mesh = result[0]
+        if mesh is not None:
+"""
         
-        # Output path
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_glb = self.output_dir / f"hunyuan3d_textured_{timestamp}_{run_id}.glb"
-        
-        # Use permanent paint script
-        script_path = Path(__file__).parent / "scripts" / "paint_texture.py"
-        
-        print(f"  ⏳ Painting texture (this may take 3-7 minutes)...")
-        
-        # Run painting with arguments
-        success = self.conda_runner.execute_in_blender_with_args(
-            script_path, 
-            args=[
-                "--mesh", mesh_path,
-                "--images", json.dumps(image_paths),
-                "--output", str(output_glb),
-                "--resolution", str(resolution),
-                "--steps", str(steps)
-            ],
-            timeout=600,
-            output_file=output_glb
-        )
-        
-        # Clean up temp files
-        for path in image_paths:
-            Path(path).unlink(missing_ok=True)
-        
-        if output_glb.exists():
-            # All formats should have been generated by paint_texture.py
-            output_obj = output_glb.with_suffix(".obj")
-            output_stl = output_glb.with_suffix(".stl")
+        if enable_texture:
+            # With texture - save intermediate GLB then texture it
+            script += f"""
+            # Save intermediate mesh
+            temp_mesh = "{output_glb.replace('_textured', '')}"
+            mesh.export(temp_mesh)
+            print(f"Saved intermediate mesh: {{temp_mesh}}")
             
-            glb_size = output_glb.stat().st_size / (1024 * 1024)
-            print(f"  ✅ Texture applied: {output_glb.name} ({glb_size:.2f} MB)")
+            # Apply texture painting
+            print("\nApplying texture...")
+            from textureGenPipeline import Hunyuan3DPaintPipeline, Hunyuan3DPaintConfig
             
-            return {
-                "glb_path": str(output_glb),
-                "obj_path": str(output_obj) if output_obj.exists() else None,
-                "stl_path": str(output_stl) if output_stl.exists() else None,
-                "has_texture": True
-            }
+            # Configure texture painting
+            paint_config = Hunyuan3DPaintConfig(
+                max_num_view=len(pil_images),
+                resolution={texture_resolution}
+            )
+            paint_config.realesrgan_ckpt_path = "external/Hunyuan3D-2.1/hy3dpaint/ckpt/RealESRGAN_x4plus.pth"
+            paint_config.multiview_cfg_path = "external/Hunyuan3D-2.1/hy3dpaint/cfgs/hunyuan-paint-pbr.yaml"
+            paint_config.custom_pipeline = "external/Hunyuan3D-2.1/hy3dpaint/hunyuanpaintpbr"
+            
+            paint_pipeline = Hunyuan3DPaintPipeline(paint_config)
+            
+            # Paint texture
+            output_path = paint_pipeline(
+                mesh_path=temp_mesh,
+                image_path=image_paths if len(image_paths) > 1 else image_paths[0],
+                output_mesh_path="{output_glb}"
+            )
+            
+            if output_path:
+                print(f"Saved textured mesh: {{output_path}}")
+            else:
+                print("ERROR: Texture painting failed")
+                import sys
+                sys.exit(1)
+"""
         else:
-            print(f"  ⚠️ Texture painting failed, using untextured mesh")
-            return None
+            # No texture - just save as GLB
+            script += f"""
+            # Save mesh
+            mesh.export("{output_glb}")
+            print(f"Saved mesh: {output_glb}")
+"""
+        
+        # Complete the script
+        script += """
+        else:
+            print("ERROR: Generated mesh is None")
+            import sys
+            sys.exit(1)
+    else:
+        print("ERROR: Pipeline returned empty result")
+        import sys
+        sys.exit(1)
+except Exception as e:
+    print(f"ERROR: Generation failed: {e}")
+    import traceback
+    traceback.print_exc()
+    import sys
+    sys.exit(1)
+"""
+        return script
     
     def _export_format(self, trimesh_obj, base_path, format):
         """Export mesh to different format"""
@@ -349,71 +404,6 @@ class Hunyuan3D21UnifiedNode:
         
         return ""
     
-    def _create_shape_script(self, image_paths, output_mesh, resolution, 
-                           guidance_scale, steps, is_multi_view, seed):
-        """Create script for shape generation"""
-        image_paths_str = json.dumps(image_paths)
-        
-        return f"""
-import sys
-import os
-import torch
-from pathlib import Path
-from PIL import Image
-
-# Use offline mode
-os.environ['HF_HUB_OFFLINE'] = '1'
-os.environ['TRANSFORMERS_OFFLINE'] = '1'
-
-# Setup paths
-sys.path.insert(0, 'external/Hunyuan3D-2.1')
-sys.path.insert(0, 'external/Hunyuan3D-2.1/hy3dshape')
-
-from hy3dshape.pipelines import Hunyuan3DDiTFlowMatchingPipeline
-
-# Load images
-image_paths = {image_paths_str}
-pil_images = [Image.open(p).convert("RGB") for p in image_paths]
-
-{f"torch.manual_seed({seed})" if seed else ""}
-
-print("Loading shape generation model...")
-shape_pipeline = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained(
-    'tencent/Hunyuan3D-2.1',
-    subfolder='hunyuan3d-dit-v2-1'
-)
-
-print(f"Generating 3D shape from {{len(pil_images)}} images...")
-try:
-    result = shape_pipeline(
-        image=pil_images if len(pil_images) > 1 else pil_images[0],
-        num_inference_steps={steps},
-        guidance_scale={guidance_scale},
-        resolution={resolution},
-        {"multi_view=True" if is_multi_view else ""}
-    )
-    
-    if result and len(result) > 0:
-        mesh = result[0]
-        if mesh is not None:
-            # Save mesh
-            mesh.export("{output_mesh}")
-            print(f"Saved mesh: {output_mesh}")
-        else:
-            print("ERROR: Generated mesh is None")
-            import sys
-            sys.exit(1)
-    else:
-        print("ERROR: Pipeline returned empty result")
-        import sys
-        sys.exit(1)
-except Exception as e:
-    print(f"ERROR: Shape generation failed: {{e}}")
-    import traceback
-    traceback.print_exc()
-    import sys
-    sys.exit(1)
-"""
     
     @classmethod
     def IS_CHANGED(cls, **kwargs):

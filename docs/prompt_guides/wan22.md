@@ -38,7 +38,7 @@ Adds rich detail about:
 
 Example:
 ```
-An astronaut floating inside a space station, zero-gravity movement, POV camera, ultra-realistic textures, cinematic lighting, dramatic shadows --no lens flare, --no text overlay
+An astronaut floating inside a space station, zero-gravity movement, POV camera, ultra-realistic textures, cinematic lighting, dramatic shadows -no lens flare, -no text overlay
 ```
 
 ## Core Components
@@ -120,41 +120,41 @@ Examples:
 
 ## Negative Prompts
 
-Use `--no` format to exclude unwanted elements:
-- `--no text overlay` - Prevents text in video
-- `--no distorted faces` - Ensures facial clarity
-- `--no lens flare` - Removes lens artifacts
-- `--no grainy textures` - Maintains clean quality
-- `--no shaky camera` - Ensures smooth movement
-- `--no watermark` - Prevents branding
-- `--no blur` - Maintains sharpness
-- `--no artifacts` - Reduces generation errors
+Use `-no` format to exclude unwanted elements:
+- `-no text overlay` - Prevents text in video
+- `-no distorted faces` - Ensures facial clarity
+- `-no lens flare` - Removes lens artifacts
+- `-no grainy textures` - Maintains clean quality
+- `-no shaky camera` - Ensures smooth movement
+- `-no watermark` - Prevents branding
+- `-no blur` - Maintains sharpness
+- `-no artifacts` - Reduces generation errors
 
 ## Complete Prompt Examples
 
 ### Cinematic Drama
 ```
-A young woman in a red dress, standing in the rain, holding a glowing umbrella, in a bustling neon-lit city street at night, slow motion tracking shot, camera pans from left to right, cinematic lighting, shallow depth of field, soft bokeh, moody atmosphere --no text overlay, --no distorted faces, --no grainy textures
+A young woman in a red dress, standing in the rain, holding a glowing umbrella, in a bustling neon-lit city street at night, slow motion tracking shot, camera pans from left to right, cinematic lighting, shallow depth of field, soft bokeh, moody atmosphere -no text overlay, -no distorted faces, -no grainy textures
 ```
 
 ### Action Sequence
 ```
-A samurai warrior in traditional armor, leaping through cherry blossoms, sword drawn mid-strike, in ancient Japanese temple courtyard, dynamic camera movement following the action, golden hour lighting, high-speed capture, epic cinematic style --no motion blur, --no shaky camera
+A samurai warrior in traditional armor, leaping through cherry blossoms, sword drawn mid-strike, in ancient Japanese temple courtyard, dynamic camera movement following the action, golden hour lighting, high-speed capture, epic cinematic style -no motion blur, -no shaky camera
 ```
 
 ### Sci-Fi Exploration
 ```
-In the depths of a dense tropical jungle, an explorer in futuristic gear kneels brushing dirt from ancient alien fragments. The camera pushes in for a close-up of his excited expression, bioluminescent plants glowing softly, mysterious atmosphere, volumetric fog --no lens artifacts
+In the depths of a dense tropical jungle, an explorer in futuristic gear kneels brushing dirt from ancient alien fragments. The camera pushes in for a close-up of his excited expression, bioluminescent plants glowing softly, mysterious atmosphere, volumetric fog -no lens artifacts
 ```
 
 ### Fantasy Magic
 ```
-A wizard casting a spell, magical energy swirling around hands, in a candlelit stone chamber, camera orbits slowly, particles floating in air, warm firelight with cool magical glow contrast, mystical atmosphere, fantasy film style --no modern elements
+A wizard casting a spell, magical energy swirling around hands, in a candlelit stone chamber, camera orbits slowly, particles floating in air, warm firelight with cool magical glow contrast, mystical atmosphere, fantasy film style -no modern elements
 ```
 
 ### Nature Documentary
 ```
-A snow leopard stalking through Himalayan peaks, cautious movements, tracking shot at eye level, pristine mountain landscape, early morning light, documentary style, ultra-realistic fur textures, natural color grading --no artificial effects
+A snow leopard stalking through Himalayan peaks, cautious movements, tracking shot at eye level, pristine mountain landscape, early morning light, documentary style, ultra-realistic fur textures, natural color grading -no artificial effects
 ```
 
 ## Best Practices
@@ -233,16 +233,16 @@ Abandoned classroom, dust particles in shaft of light, camera slowly pans across
 3. **Camera Purpose**: Every camera move should serve the narrative
 4. **Lighting Consistency**: Maintain coherent lighting throughout
 5. **Style Unity**: Keep visual style consistent across all elements
-6. **Negative Precision**: Target specific unwanted elements with --no flags
+6. **Negative Precision**: Target specific unwanted elements with -no flags
 
 ## Prompt Template
 
 ### Standard Template
 ```
-[Subject with attributes], [action/pose], in [scene description], [camera movement], [lighting setup], [visual style], [mood/atmosphere] --no [unwanted element 1], --no [unwanted element 2]
+[Subject with attributes], [action/pose], in [scene description], [camera movement], [lighting setup], [visual style], [mood/atmosphere] -no [unwanted element 1], -no [unwanted element 2]
 ```
 
 ### Example Using Template
 ```
-A robotic dancer with chrome limbs, performing fluid movements, in abandoned theater with red velvet seats, camera orbits dynamically, dramatic spotlight with dust particles, art deco style, nostalgic yet futuristic mood --no motion blur, --no lens distortion
+A robotic dancer with chrome limbs, performing fluid movements, in abandoned theater with red velvet seats, camera orbits dynamically, dramatic spotlight with dust particles, art deco style, nostalgic yet futuristic mood -no motion blur, -no lens distortion
 ```

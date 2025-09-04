@@ -118,7 +118,7 @@ class CondaRunner:
             print(f"Error executing script: {e}")
             return False
     
-    def execute_in_blender(self, script_path: Path, timeout: int = 300) -> bool:
+    def execute_in_blender(self, script_path: Path, timeout: int = 300, output_file: Path = None) -> bool:
         """
         Execute a Python script inside Blender's Python environment
         Required for texture painting which needs the 'bpy' module
@@ -126,6 +126,7 @@ class CondaRunner:
         Args:
             script_path: Path to Python script to execute in Blender
             timeout: Maximum execution time in seconds
+            output_file: Expected output file to check for success
             
         Returns:
             bool: True if successful, False otherwise
@@ -148,19 +149,25 @@ class CondaRunner:
             if result.stdout:
                 print(result.stdout)
             
-            # Check if texture painting completed successfully
+            # Check if output file was created (most reliable indicator)
+            if output_file and output_file.exists():
+                if result.returncode != 0:
+                    print("Note: Blender exited with error but output was generated successfully")
+                return True
+            
+            # Check if generation completed successfully
             # Ignore Blender crashes - they happen after the work is done
             success_indicators = [
+                "Saved textured mesh:",
+                "Saved mesh:",
                 "Saved textured GLB",
                 "✅ Saved textured GLB",
                 "Texture painting complete",
-                "✨ Texture painting workflow complete",
-                "Saved:",
-                "File size:"
+                "✨ Texture painting workflow complete"
             ]
             
             if any(indicator in result.stdout for indicator in success_indicators):
-                # Success - texture was created, ignore any crashes
+                # Success - model was created, ignore any crashes
                 # Don't report Blender segfault as an error
                 return True
             

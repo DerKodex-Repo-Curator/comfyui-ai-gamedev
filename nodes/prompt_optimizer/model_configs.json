@@ -138,7 +138,7 @@
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating negative prompts for WAN 2.2 video generation. Based on the optimized positive prompt, create a list of elements to exclude using '--no' format. Focus on preventing common video artifacts, unwanted elements, and quality issues that could interfere with the user's vision. Include: motion problems (blur, shake, distortion), quality issues (grain, artifacts, low resolution), unwanted overlays (text, watermarks), and style conflicts. DO NOT exclude anything the user specifically requested in their original prompt. Output ONLY the negative prompt flags."
+          "content": "You are generating negative prompts for WAN 2.2 video generation. Based on the optimized positive prompt, create a list of elements to exclude using '-no' format. Focus on preventing common video artifacts, unwanted elements, and quality issues that could interfere with the user's vision. Include: motion problems (blur, shake, distortion), quality issues (grain, artifacts, low resolution), unwanted overlays (text, watermarks), and style conflicts. DO NOT exclude anything the user specifically requested in their original prompt. Output ONLY the negative prompt flags."
         },
         {
           "role": "user",
@@ -146,7 +146,7 @@
         },
         {
           "role": "assistant",
-          "content": "--no motion blur --no shaky camera --no distorted proportions --no unnatural animal movement --no grainy texture --no compression artifacts --no text overlay --no watermark --no oversaturation --no lens distortion"
+          "content": "-no motion blur -no shaky camera -no distorted proportions -no unnatural animal movement -no grainy texture -no compression artifacts -no text overlay -no watermark -no oversaturation -no lens distortion"
         },
         {
           "role": "user",
@@ -154,7 +154,7 @@
         },
         {
           "role": "assistant",
-          "content": "--no camera shake --no exposure flickering --no motion artifacts --no pixelation --no banding in gradients --no text overlay --no watermark --no lens flare artifacts --no unnatural building geometry --no temporal inconsistency"
+          "content": "-no camera shake -no exposure flickering -no motion artifacts -no pixelation -no banding in gradients -no text overlay -no watermark -no lens flare artifacts -no unnatural building geometry -no temporal inconsistency"
         },
         {
           "role": "user",
@@ -162,7 +162,7 @@
         },
         {
           "role": "assistant",
-          "content": "--no motion blur --no focus hunting --no unnatural insect movement --no wing distortion --no color banding --no compression artifacts --no text overlay --no watermark --no depth of field artifacts --no macro lens aberration"
+          "content": "-no motion blur -no focus hunting -no unnatural insect movement -no wing distortion -no color banding -no compression artifacts -no text overlay -no watermark -no depth of field artifacts -no macro lens aberration"
         }
       ]
     },
@@ -202,7 +202,7 @@
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating negative prompts for WAN 2.1 video. Create exclusion flags based on the positive prompt to prevent artifacts and unwanted elements while being careful NOT to exclude anything the user specifically wants. Focus on motion quality, rendering issues, and style consistency problems that would detract from the user's vision. Output ONLY the negative prompt flags using '--no' format."
+          "content": "You are generating negative prompts for WAN 2.1 video. Create exclusion flags based on the positive prompt to prevent artifacts and unwanted elements while being careful NOT to exclude anything the user specifically wants. Focus on motion quality, rendering issues, and style consistency problems that would detract from the user's vision. Output ONLY the negative prompt flags using '-no' format."
         },
         {
           "role": "user",
@@ -210,7 +210,7 @@
         },
         {
           "role": "assistant",
-          "content": "--no unnatural fire movement --no color banding --no flickering artifacts --no motion blur --no overexposure --no compression noise --no text overlay --no watermark --no unrealistic physics --no temporal inconsistency"
+          "content": "-no unnatural fire movement -no color banding -no flickering artifacts -no motion blur -no overexposure -no compression noise -no text overlay -no watermark -no unrealistic physics -no temporal inconsistency"
         },
         {
           "role": "user",
@@ -218,7 +218,7 @@
         },
         {
           "role": "assistant",
-          "content": "--no water physics errors --no motion artifacts --no camera shake --no exposure issues --no rainbow aberrations --no pixelation in mist --no text overlay --no watermark --no unnatural flow patterns --no focus issues"
+          "content": "-no water physics errors -no motion artifacts -no camera shake -no exposure issues -no rainbow aberrations -no pixelation in mist -no text overlay -no watermark -no unnatural flow patterns -no focus issues"
         },
         {
           "role": "user",
@@ -226,7 +226,7 @@
         },
         {
           "role": "assistant",
-          "content": "--no mechanical jitter --no inconsistent timing --no motion blur --no focus hunting --no dust particle artifacts --no lighting flicker --no text overlay --no watermark --no perspective distortion --no temporal jumps"
+          "content": "-no mechanical jitter -no inconsistent timing -no motion blur -no focus hunting -no dust particle artifacts -no lighting flicker -no text overlay -no watermark -no perspective distortion -no temporal jumps"
         }
       ]
     },

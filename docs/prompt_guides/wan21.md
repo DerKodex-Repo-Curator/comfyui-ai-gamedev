@@ -93,7 +93,7 @@ Describe visual style and mood:
 ## Negative Prompts
 Use negative prompts to avoid unwanted artifacts:
 ```
---no blur, no text, no watermark, no distortion, no glitches, no artifacts
+-no blur, -no text, -no watermark, -no distortion, -no glitches, -no artifacts
 ```
 
 ## Example Prompts
