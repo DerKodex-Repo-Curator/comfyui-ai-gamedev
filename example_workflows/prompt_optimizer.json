@@ -60,14 +60,14 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "text",
+          "name": "source",
           "type": "STRING",
           "link": 1
         }
       ],
       "outputs": [
         {
-          "name": "text",
+          "name": "source",
           "type": "STRING",
           "links": null
         }
@@ -88,14 +88,14 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "text",
+          "name": "source",
           "type": "STRING",
           "link": 2
         }
       ],
       "outputs": [
         {
-          "name": "text",
+          "name": "source",
           "type": "STRING",
           "links": null
         }

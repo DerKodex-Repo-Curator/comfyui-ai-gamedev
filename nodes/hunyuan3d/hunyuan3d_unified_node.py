@@ -274,6 +274,7 @@ class Hunyuan3D21UnifiedNode:
             print(f"  ✅ Shape generated: {output_mesh.name} ({size_mb:.2f} MB)")
             return {"path": str(output_mesh), "type": "obj"}
         else:
+            print(f"  ❌ Shape generation failed - mesh file not created")
             return None
     
     def _apply_texture(self, mesh_path, images, resolution, steps):
@@ -385,17 +386,35 @@ shape_pipeline = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained(
 )
 
 print(f"Generating 3D shape from {{len(pil_images)}} images...")
-mesh = shape_pipeline(
-    image=pil_images if len(pil_images) > 1 else pil_images[0],
-    num_inference_steps={steps},
-    guidance_scale={guidance_scale},
-    resolution={resolution},
-    {"multi_view=True" if is_multi_view else ""}
-)[0]
-
-# Save mesh
-mesh.export("{output_mesh}")
-print(f"Saved mesh: {output_mesh}")
+try:
+    result = shape_pipeline(
+        image=pil_images if len(pil_images) > 1 else pil_images[0],
+        num_inference_steps={steps},
+        guidance_scale={guidance_scale},
+        resolution={resolution},
+        {"multi_view=True" if is_multi_view else ""}
+    )
+    
+    if result and len(result) > 0:
+        mesh = result[0]
+        if mesh is not None:
+            # Save mesh
+            mesh.export("{output_mesh}")
+            print(f"Saved mesh: {output_mesh}")
+        else:
+            print("ERROR: Generated mesh is None")
+            import sys
+            sys.exit(1)
+    else:
+        print("ERROR: Pipeline returned empty result")
+        import sys
+        sys.exit(1)
+except Exception as e:
+    print(f"ERROR: Shape generation failed: {{e}}")
+    import traceback
+    traceback.print_exc()
+    import sys
+    sys.exit(1)
 """
     
     @classmethod
