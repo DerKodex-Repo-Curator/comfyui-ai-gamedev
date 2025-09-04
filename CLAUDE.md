@@ -49,6 +49,25 @@ comfyui-ai-gamedev/
 
 ## 🚨 CRITICAL REQUIREMENTS - NEVER FORGET
 
+### Ollama Model Names
+**ALWAYS use `qwen2.5vl:7b` - NEVER use `qwen2.5-vision:7b`**
+- The correct model name is `qwen2.5vl:7b` (no hyphen before "vision", use "vl")
+- This applies to all Ollama commands and configurations
+- Example: `ollama pull qwen2.5vl:7b`
+
+## 🚨 CRITICAL REQUIREMENTS - NEVER FORGET
+
+### ALWAYS RUN HUNYUAN3D THROUGH BLENDER
+**NEVER run Hunyuan3D scripts directly with Python - ALWAYS use Blender**
+```bash
+# WRONG - THIS WILL FAIL:
+conda run -n hunyuan3d python script.py
+
+# CORRECT - ALWAYS DO THIS:
+conda run -n hunyuan3d blender --background --python script.py
+```
+**WHY**: Hunyuan3D texture painting requires the `bpy` module which is ONLY available inside Blender's Python environment. Even shape generation should run through Blender for consistency.
+
 ### Prove Problems Before Proposing Fixes
 **ALWAYS investigate and prove the root cause before suggesting solutions**
 - Don't guess about causes - investigate first

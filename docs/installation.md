@@ -116,12 +116,45 @@ python -c "import cv2; print(f'OpenCV {cv2.__version__} installed')"
 ### 💬 Prompt Optimizer Node
 
 **Requirements**:
-- Transformers library
-- ~2GB for language models
+- Ollama server running locally
+- Ollama Python client
+- Vision-capable model (recommended: qwen2.5vl:7b)
+- ~8GB RAM for model inference
 
-**Install**:
+**Install Ollama**:
 ```bash
-pip install transformers
+# Install Ollama (Linux/Mac)
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Install Ollama (Windows)
+# Download from https://ollama.com/download/windows
+
+# Start Ollama server
+ollama serve  # Usually starts automatically
+
+# Pull recommended model
+ollama pull qwen2.5vl:7b
+```
+
+**Install Python Dependencies**:
+```bash
+pip install ollama>=0.1.0
+pip install Pillow>=10.0.0  # For image handling
+```
+
+**Features**:
+- Optimizes prompts for 9+ different AI models
+- Supports image context integration
+- Generates both positive and negative prompts
+- Model-specific optimization strategies
+
+**Verify Installation**:
+```bash
+# Check Ollama is running
+curl http://localhost:11434
+
+# Check Python client
+python -c "import ollama; print('Ollama client installed')"
 ```
 
 ---

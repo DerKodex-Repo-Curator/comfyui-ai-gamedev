@@ -1,0 +1,189 @@
+{
+  "id": "prompt-optimizer-workflow",
+  "revision": 0,
+  "last_node_id": 8,
+  "last_link_id": 7,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "PromptOptimizer",
+      "pos": [400, 300],
+      "size": [400, 220],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive_prompt",
+          "type": "STRING",
+          "links": [1],
+          "slot_index": 0
+        },
+        {
+          "name": "negative_prompt",
+          "type": "STRING",
+          "links": [2],
+          "slot_index": 1
+        },
+        {
+          "name": "original_prompt",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PromptOptimizer"
+      },
+      "widgets_values": [
+        "flux_dev",
+        "a majestic dragon flying through clouds",
+        "localhost:11434",
+        "qwen2.5vl:7b"
+      ],
+      "title": "Prompt Optimizer"
+    },
+    {
+      "id": 2,
+      "type": "PromptDisplayLarge",
+      "pos": [900, 200],
+      "size": [450, 250],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PromptDisplayLarge"
+      },
+      "widgets_values": [""],
+      "title": "Optimized Positive Prompt"
+    },
+    {
+      "id": 3,
+      "type": "PromptDisplayLarge",
+      "pos": [900, 470],
+      "size": [450, 200],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PromptDisplayLarge"
+      },
+      "widgets_values": [""],
+      "title": "Optimized Negative Prompt"
+    },
+    {
+      "id": 6,
+      "type": "Note",
+      "pos": [50, 50],
+      "size": [300, 180],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "properties": {
+        "text": "Prompt Optimizer Workflow\n\n1. Enter your simple prompt\n2. Select target model (flux_dev, wan22, etc.)\n3. Optionally connect an image for context\n4. Configure Ollama settings\n5. Get optimized prompts for your model\n\nRequires:\n- Ollama running locally\n- qwen2.5vl:7b model installed"
+      },
+      "widgets_values": ["Prompt Optimizer Workflow\n\n1. Enter your simple prompt\n2. Select target model (flux_dev, wan22, etc.)\n3. Optionally connect an image for context\n4. Configure Ollama settings\n5. Get optimized prompts for your model\n\nRequires:\n- Ollama running locally\n- qwen2.5vl:7b model installed"],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 7,
+      "type": "LoadImage",
+      "pos": [50, 300],
+      "size": [300, 314],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [7],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": ["example.png", "image"],
+      "title": "Optional: Load Reference Image"
+    },
+    {
+      "id": 8,
+      "type": "Note",
+      "pos": [400, 50],
+      "size": [400, 100],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "properties": {
+        "text": "Supported Models:\n- flux_dev, flux_krea, flux_kontext (no negative)\n- wan21, wan22 (positive + negative)\n- mmaudio, ace_step, qwen_image_edit, indextts"
+      },
+      "widgets_values": ["Supported Models:\n- flux_dev, flux_krea, flux_kontext (no negative)\n- wan21, wan22 (positive + negative)\n- mmaudio, ace_step, qwen_image_edit, indextts"],
+      "color": "#223",
+      "bgcolor": "#335"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "STRING"],
+    [2, 1, 1, 3, 0, "STRING"],
+    [7, 7, 0, 1, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "title": "Input",
+      "bounding": [40, -10, 770, 650],
+      "color": "#3f789e",
+      "font_size": 24
+    },
+    {
+      "title": "Output",
+      "bounding": [880, 130, 900, 500],
+      "color": "#b58b2a",
+      "font_size": 24
+    }
+  ],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

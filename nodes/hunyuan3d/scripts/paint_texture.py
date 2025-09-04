@@ -84,23 +84,22 @@ def main():
     try:
         # Run texture painting
         print(f"  🖌️  Painting textures (this may take several minutes)...")
-        paint_pipeline(
+        temp_glb_path = os.path.join(temp_dir, "textured_mesh.glb")
+        
+        textured_mesh = paint_pipeline(
             mesh_path=args.mesh,
             image_path=image_paths if is_multi_view else image_paths[0],
-            output_dir=temp_dir,
-            num_inference_steps=args.steps,
-            multi_view=is_multi_view
+            output_mesh_path=temp_glb_path,
+            use_remesh=True,
+            save_glb=True
         )
-        print(f"  ✅ Texture painting completed")
+        print(f"  ✅ Done painting textures!")
+        print(f"  ✅ Texture painting completed successfully")
         
-        # Find the generated GLB file
-        print(f"  📦 Looking for generated GLB file...")
-        import glob
-        glb_files = glob.glob(os.path.join(temp_dir, "*.glb"))
-        if glb_files:
-            # Copy to final location
+        # Copy the generated GLB file to final location
+        if os.path.exists(temp_glb_path):
             print(f"  📁 Exporting GLB to output directory...")
-            shutil.copy(glb_files[0], args.output)
+            shutil.copy(temp_glb_path, args.output)
             print(f"  ✅ Saved textured GLB: {args.output}")
             # Get file size for verification
             size_mb = os.path.getsize(args.output) / (1024 * 1024)

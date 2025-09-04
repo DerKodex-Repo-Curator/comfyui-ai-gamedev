@@ -12,3 +12,6 @@ scipy
 
 # Video processing (Frame Extractor)
 opencv-python>=4.8.0
+
+# Prompt optimization (Prompt Optimizer)
+ollama>=0.1.0

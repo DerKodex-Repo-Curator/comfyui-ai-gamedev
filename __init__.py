@@ -38,6 +38,14 @@ except ImportError as e:
     FRAME_MAPPINGS = {}
     FRAME_DISPLAY = {}
 
+try:
+    from .nodes.prompt_optimizer import NODE_CLASS_MAPPINGS as PROMPT_MAPPINGS
+    from .nodes.prompt_optimizer import NODE_DISPLAY_NAME_MAPPINGS as PROMPT_DISPLAY
+except ImportError as e:
+    print(f"Warning: Could not import Prompt Optimizer nodes: {e}")
+    PROMPT_MAPPINGS = {}
+    PROMPT_DISPLAY = {}
+
 # Combine all node mappings
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
@@ -47,6 +55,8 @@ NODE_CLASS_MAPPINGS.update(HUNYUAN_MAPPINGS)
 NODE_DISPLAY_NAME_MAPPINGS.update(HUNYUAN_DISPLAY)
 NODE_CLASS_MAPPINGS.update(FRAME_MAPPINGS)
 NODE_DISPLAY_NAME_MAPPINGS.update(FRAME_DISPLAY)
+NODE_CLASS_MAPPINGS.update(PROMPT_MAPPINGS)
+NODE_DISPLAY_NAME_MAPPINGS.update(PROMPT_DISPLAY)
 
 # Check for first run
 config_file = root_dir / "config.json"
