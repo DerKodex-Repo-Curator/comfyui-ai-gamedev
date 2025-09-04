@@ -82,32 +82,25 @@ def main():
     
     print(f"  🖌️  Painting textures (this may take several minutes)...")
     
-    # Use simpler API with remeshing for better performance
-    textured_obj_path = paint_pipeline(
+    # Match demo.py approach - it directly outputs GLB if specified
+    output_mesh_path = paint_pipeline(
         mesh_path=args.mesh,
         image_path=image_paths if is_multi_view else image_paths[0],
-        use_remesh=True  # Always use remeshing for better game performance
+        output_mesh_path=args.output
     )
-    print(f"  ✅ Done painting textures!")
-    print(f"  ✅ Texture painting completed successfully")
     
-    # Convert to multiple formats using trimesh
-    if textured_obj_path:
-        print(f"  📦 Exporting to multiple formats...")
-        mesh_textured = trimesh.load(textured_obj_path)
+    if output_mesh_path and os.path.exists(output_mesh_path):
+        glb_size = os.path.getsize(output_mesh_path) / (1024 * 1024)
+        print(f"  ✅ Saved textured GLB: {output_mesh_path} ({glb_size:.2f} MB)")
         
-        # Export as GLB (primary format)
-        mesh_textured.export(args.output)
-        glb_size = os.path.getsize(args.output) / (1024 * 1024)
-        print(f"  ✅ Saved textured GLB: {args.output} ({glb_size:.2f} MB)")
+        # Also export as OBJ and STL using trimesh
+        mesh_textured = trimesh.load(output_mesh_path)
         
-        # Export as OBJ (with materials)
         obj_path = args.output.replace(".glb", ".obj")
         mesh_textured.export(obj_path)
         obj_size = os.path.getsize(obj_path) / (1024 * 1024)
         print(f"  ✅ Saved textured OBJ: {obj_path} ({obj_size:.2f} MB)")
         
-        # Export as STL (geometry only)
         stl_path = args.output.replace(".glb", ".stl")
         mesh_textured.export(stl_path)
         stl_size = os.path.getsize(stl_path) / (1024 * 1024)

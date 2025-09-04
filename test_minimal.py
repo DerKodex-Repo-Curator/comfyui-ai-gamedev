@@ -31,7 +31,7 @@ Path('test_out').mkdir(exist_ok=True)
 # Generate shape
 print("Generating shape...")
 shape_pipeline = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained('tencent/Hunyuan3D-2.1', subfolder='hunyuan3d-dit-v2-1')
-mesh = shape_pipeline(image='examples/input_images/single_view/railgun/frame_001_4x.png', num_inference_steps=10)[0]
+mesh = shape_pipeline(image='examples/input_images/single_view/railgun/frame_001_4x.png', num_inference_steps=30)[0]
 mesh.export('test_out/mesh.obj')
 print("✅ Shape saved: test_out/mesh.obj")
 

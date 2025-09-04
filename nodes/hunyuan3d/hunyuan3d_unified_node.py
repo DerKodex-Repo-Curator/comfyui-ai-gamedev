@@ -380,9 +380,7 @@ pil_images = [Image.open(p).convert("RGB") for p in image_paths]
 print("Loading shape generation model...")
 shape_pipeline = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained(
     'tencent/Hunyuan3D-2.1',
-    subfolder='hunyuan3d-dit-v2-1',
-    torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-    device_map='auto'
+    subfolder='hunyuan3d-dit-v2-1'
 )
 
 print(f"Generating 3D shape from {{len(pil_images)}} images...")
