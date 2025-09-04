@@ -10,9 +10,11 @@ Repository URL: https://github.com/mattwilliamson/comfyui-ai-gamedev
 
 ### Implemented Nodes
 1. **Hunyuan3D 2.1** (`nodes/hunyuan3d/`) - Image-to-3D generation
-   - **Shape Node**: Generate untextured 3D mesh (10GB VRAM)
-   - **Paint Node**: Add textures with Blender (11GB VRAM)  
-   - Split design for memory efficiency - can run separately
+   - **Unified Node**: Generates 3D mesh with optional texture painting
+   - Shape generation: 10GB VRAM required
+   - Texture painting: 11GB VRAM required (Blender required)
+   - Texture can be enabled/disabled in node settings
+   - Outputs: GLB, OBJ, and STL formats
    - See: `docs/nodes/hunyuan3d.md` for implementation details
    - Key: Wraps `external/Hunyuan3D-2.1/` submodule (DO NOT MODIFY)
 
@@ -63,7 +65,7 @@ comfyui-ai-gamedev/
 - Verify: `blender --version`
 - Blender 3.0.1+ required for texture painting pipeline
 - **For debugging**: Run Python scripts in Blender's environment with `blender --background --python script.py`
-- **Known issue**: Blender may segfault on exit after texture painting - this is normal if output files were created successfully
+- **Known issue**: Blender crashes/segfaults on exit after texture painting - this is a Blender bug and should be ignored. The texture painting completes successfully before the crash. Silence/suppress these errors.
 
 #### Texture Troubleshooting
 If textures are not appearing:
@@ -103,7 +105,34 @@ from textureGenPipeline import Hunyuan3DPaintPipeline, Hunyuan3DPaintConfig
 - **Python 3.10**
 - **Blender 3.0.1+** (REQUIRED)
 - **~50GB disk space** for models
-- **Use conda environment**: `conda run -n hunyuan3d python script.py`
+- **Conda environment**: Configurable (default: "hunyuan3d")
+
+### Configuration
+The Hunyuan3D nodes support flexible configuration:
+
+#### Using Configuration Script
+```bash
+# Show current configuration
+python configure_hunyuan3d.py --show
+
+# Set conda environment name
+python configure_hunyuan3d.py --conda-env my_custom_env
+
+# Set custom paths
+python configure_hunyuan3d.py --conda-path /path/to/conda --blender-path /usr/bin/blender
+```
+
+#### Using Environment Variables
+```bash
+export HUNYUAN3D_CONDA_ENV=my_env
+export HUNYUAN3D_CONDA_PATH=/path/to/conda
+export HUNYUAN3D_BLENDER_PATH=/usr/bin/blender
+```
+
+#### Configuration File
+Settings are saved to `hunyuan3d_config.json` in the project root.
+
+Priority order: Environment Variables > Config File > Defaults
 
 ### Model Storage
 Models are automatically downloaded to shared cache:

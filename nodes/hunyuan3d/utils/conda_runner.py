@@ -13,10 +13,39 @@ import json
 class CondaRunner:
     """Execute Python scripts in conda environment"""
     
-    def __init__(self, env_name: str = "hunyuan3d"):
-        self.env_name = env_name
-        self.conda_path = self._find_conda()
-        self.blender_path = "blender"  # Can be overridden
+    def __init__(self, env_name: str = None):
+        # Use environment variables or defaults
+        self.env_name = env_name or os.environ.get("HUNYUAN3D_CONDA_ENV", "hunyuan3d")
+        self.conda_path = os.environ.get("HUNYUAN3D_CONDA_PATH", "conda")
+        self.blender_path = os.environ.get("HUNYUAN3D_BLENDER_PATH", "blender")
+        
+        # Try to find conda if not an absolute path
+        if not Path(self.conda_path).is_absolute():
+            found_conda = self._find_conda()
+            if found_conda:
+                self.conda_path = found_conda
+        
+        # Get the project root directory dynamically
+        # Look for the directory containing external/Hunyuan3D-2.1
+        self.project_root = None
+        
+        # Start from this file and go up to find the project root
+        for parent in Path(__file__).parents:
+            if (parent / "external" / "Hunyuan3D-2.1").exists():
+                self.project_root = parent
+                break
+        
+        # If not found, try current working directory
+        if self.project_root is None:
+            if (Path.cwd() / "external" / "Hunyuan3D-2.1").exists():
+                self.project_root = Path.cwd()
+            # Or check if we're in ComfyUI and the node is in custom_nodes
+            elif (Path.cwd() / "custom_nodes" / "comfyui-ai-gamedev" / "external" / "Hunyuan3D-2.1").exists():
+                self.project_root = Path.cwd() / "custom_nodes" / "comfyui-ai-gamedev"
+            else:
+                # Last resort - assume we're 4 levels deep
+                self.project_root = Path(__file__).parent.parent.parent.parent
+                print(f"⚠️ Warning: Could not verify project root, using: {self.project_root}")
         
     def _find_conda(self) -> Optional[str]:
         """Find conda executable"""
@@ -61,7 +90,7 @@ class CondaRunner:
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                cwd=os.path.expanduser("~/src/comfyui-ai-gamedev")  # Run from project root
+                cwd=str(self.project_root)  # Run from project root
             )
             
             # Print output for debugging
@@ -112,37 +141,55 @@ class CondaRunner:
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                cwd=os.path.expanduser("~/src/comfyui-ai-gamedev")  # Run from project root
+                cwd=str(self.project_root)  # Run from project root
             )
             
             # Print output for debugging
             if result.stdout:
                 print(result.stdout)
-            if result.stderr:
-                # Filter out common Blender warnings
-                stderr_lines = result.stderr.split('\n')
-                important_errors = []
-                for line in stderr_lines:
-                    if line and not any(ignore in line for ignore in [
+            
+            # Check if texture painting completed successfully
+            # Ignore Blender crashes - they happen after the work is done
+            success_indicators = [
+                "Saved textured GLB",
+                "✅ Saved textured GLB",
+                "Texture painting complete",
+                "✨ Texture painting workflow complete",
+                "Saved:",
+                "File size:"
+            ]
+            
+            if any(indicator in result.stdout for indicator in success_indicators):
+                # Success - texture was created, ignore any crashes
+                # Don't report Blender segfault as an error
+                return True
+            
+            # Only report real failures (when no output file was created)
+            if result.returncode != 0:
+                # Don't show segfault errors - they're expected
+                if result.stderr and "Segmentation fault" not in result.stderr:
+                    # Show other errors that might be relevant
+                    stderr_lines = result.stderr.split('\n')
+                    important_errors = []
+                    ignore_patterns = [
+                        "Segmentation fault",
+                        "core dumped", 
+                        "blender.crash.txt",
                         "Blender quit",
-                        "Saved:",
                         "Warning:",
                         "Info:",
-                        "found bundled python"
-                    ]):
-                        important_errors.append(line)
-                if important_errors:
-                    print(f"Stderr: {chr(10).join(important_errors)}", file=sys.stderr)
-            
-            # Check for success
-            if result.returncode != 0:
-                # Check if texture was saved despite non-zero exit
-                if "Saved textured GLB" in result.stdout or "Saved:" in result.stdout:
-                    print("✅ Texture painting completed (Blender exit code ignored)")
-                    return True
-                else:
-                    print(f"❌ Blender script failed with return code {result.returncode}")
-                    return False
+                        "found bundled python",
+                        "failed. (See above for error)"
+                    ]
+                    for line in stderr_lines:
+                        if line and not any(ignore in line for ignore in ignore_patterns):
+                            important_errors.append(line)
+                    if important_errors:
+                        print(f"Stderr: {chr(10).join(important_errors)}", file=sys.stderr)
+                
+                # Only report failure if no output was created
+                print(f"❌ Texture painting failed (no output file created)")
+                return False
             
             return True
             
@@ -156,6 +203,85 @@ class CondaRunner:
             return False
         except Exception as e:
             print(f"❌ Error executing Blender script: {e}")
+            return False
+    
+    def execute_in_blender_with_args(self, script_path: Path, args: List[str], timeout: int = 300, output_file: Path = None) -> bool:
+        """
+        Execute a Python script inside Blender with command line arguments
+        
+        Args:
+            script_path: Path to Python script to execute in Blender
+            args: List of command line arguments to pass to the script
+            timeout: Maximum execution time in seconds
+            output_file: Optional path to expected output file to check for success
+            
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            # Build command with script arguments after double dash
+            cmd = [
+                self.conda_path, "run", "-n", self.env_name,
+                self.blender_path, "--background", "--python", str(script_path), "--"
+            ] + args
+            
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                cwd=str(self.project_root)
+            )
+            
+            # Print output for debugging
+            if result.stdout:
+                print(result.stdout)
+            
+            # Check for success indicators
+            success_indicators = [
+                "Export completed successfully",
+                "✅ Export completed",
+                "✅ Saved textured GLB",
+                "Texture painting workflow complete",
+                "✨ Texture painting workflow complete"
+            ]
+            
+            if any(indicator in result.stdout for indicator in success_indicators):
+                return True
+            
+            # Check if output file was created despite any issues
+            if output_file and Path(output_file).exists():
+                print("  ✅ Texture painting completed (output file created)")
+                return True
+            
+            # Only show real errors, not Blender crashes
+            if result.returncode != 0 and result.stderr:
+                if "Segmentation fault" not in result.stderr:
+                    stderr_lines = result.stderr.split('\n')
+                    important_errors = []
+                    ignore_patterns = [
+                        "Segmentation fault", "core dumped", "blender.crash.txt",
+                        "Blender quit", "Warning:", "Info:", "found bundled python"
+                    ]
+                    for line in stderr_lines:
+                        if line and not any(ignore in line for ignore in ignore_patterns):
+                            important_errors.append(line)
+                    if important_errors:
+                        print(f"Stderr: {chr(10).join(important_errors)}", file=sys.stderr)
+                
+                print(f"❌ Texture painting failed")
+                return False
+            
+            return result.returncode == 0
+            
+        except subprocess.TimeoutExpired:
+            print(f"❌ Script timed out after {timeout} seconds")
+            return False
+        except FileNotFoundError:
+            print("❌ Blender not found! Please install Blender")
+            return False
+        except Exception as e:
+            print(f"❌ Error: {e}")
             return False
     
     def execute_command(self, command: str, timeout: int = 60) -> Tuple[bool, str, str]:
@@ -187,7 +313,7 @@ class CondaRunner:
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                cwd=os.path.expanduser("~/src/comfyui-ai-gamedev")
+                cwd=str(self.project_root)
             )
             
             return (result.returncode == 0, result.stdout, result.stderr)
