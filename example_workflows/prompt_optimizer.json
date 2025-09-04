@@ -52,7 +52,7 @@
     },
     {
       "id": 2,
-      "type": "PromptDisplayLarge",
+      "type": "PromptPreview",
       "pos": [900, 200],
       "size": [450, 250],
       "flags": {},
@@ -73,14 +73,14 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "PromptDisplayLarge"
+        "Node name for S&R": "PromptPreview"
       },
-      "widgets_values": [""],
+      "widgets_values": [],
       "title": "Optimized Positive Prompt"
     },
     {
       "id": 3,
-      "type": "PromptDisplayLarge",
+      "type": "PromptPreview",
       "pos": [900, 470],
       "size": [450, 200],
       "flags": {},
@@ -101,9 +101,9 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "PromptDisplayLarge"
+        "Node name for S&R": "PromptPreview"
       },
-      "widgets_values": [""],
+      "widgets_values": [],
       "title": "Optimized Negative Prompt"
     },
     {

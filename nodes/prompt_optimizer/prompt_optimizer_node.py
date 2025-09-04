@@ -361,8 +361,18 @@ class PromptOptimizer:
             logger.info(f"   📝 Negative: {negative_prompt[:150]}..." if len(negative_prompt) > 150 else f"   📝 Negative: {negative_prompt}")
         logger.info(f"=" * 60)
         
+        # Log what we're returning
+        result = (positive_prompt, negative_prompt, prompt)
+        logger.info(f"🔄 Returning from PromptOptimizer:")
+        logger.info(f"   Return type: {type(result)}")
+        logger.info(f"   Return length: {len(result)} elements")
+        logger.info(f"   [0] positive_prompt: type={type(result[0])}, len={len(result[0])} chars")
+        logger.info(f"   [1] negative_prompt: type={type(result[1])}, len={len(result[1])} chars")
+        logger.info(f"   [2] original_prompt: type={type(result[2])}, len={len(result[2])} chars")
+        logger.debug(f"   Full return value: {result}")
+        
         # Return optimized prompts and original
-        return (positive_prompt, negative_prompt, prompt)
+        return result
     
     def __del__(self):
         """Cleanup on deletion"""

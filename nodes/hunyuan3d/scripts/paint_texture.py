@@ -51,6 +51,7 @@ def main():
     from textureGenPipeline import Hunyuan3DPaintPipeline, Hunyuan3DPaintConfig
     import tempfile
     import shutil
+    import trimesh
     
     # Parse image paths
     image_paths = json.loads(args.images)
@@ -79,38 +80,42 @@ def main():
     print(f"\n🎨 Starting texture painting with Blender...")
     print(f"  ⚙️  Running Blender in background mode...")
     
-    # Use a temp directory for intermediate files
-    temp_dir = tempfile.mkdtemp(prefix="hunyuan_paint_")
-    try:
-        # Run texture painting
-        print(f"  🖌️  Painting textures (this may take several minutes)...")
-        temp_glb_path = os.path.join(temp_dir, "textured_mesh.glb")
+    print(f"  🖌️  Painting textures (this may take several minutes)...")
+    
+    # Use simpler API with remeshing for better performance
+    textured_obj_path = paint_pipeline(
+        mesh_path=args.mesh,
+        image_path=image_paths if is_multi_view else image_paths[0],
+        use_remesh=True  # Always use remeshing for better game performance
+    )
+    print(f"  ✅ Done painting textures!")
+    print(f"  ✅ Texture painting completed successfully")
+    
+    # Convert to multiple formats using trimesh
+    if textured_obj_path:
+        print(f"  📦 Exporting to multiple formats...")
+        mesh_textured = trimesh.load(textured_obj_path)
         
-        textured_mesh = paint_pipeline(
-            mesh_path=args.mesh,
-            image_path=image_paths if is_multi_view else image_paths[0],
-            output_mesh_path=temp_glb_path,
-            use_remesh=True,
-            save_glb=True
-        )
-        print(f"  ✅ Done painting textures!")
-        print(f"  ✅ Texture painting completed successfully")
+        # Export as GLB (primary format)
+        mesh_textured.export(args.output)
+        glb_size = os.path.getsize(args.output) / (1024 * 1024)
+        print(f"  ✅ Saved textured GLB: {args.output} ({glb_size:.2f} MB)")
         
-        # Copy the generated GLB file to final location
-        if os.path.exists(temp_glb_path):
-            print(f"  📁 Exporting GLB to output directory...")
-            shutil.copy(temp_glb_path, args.output)
-            print(f"  ✅ Saved textured GLB: {args.output}")
-            # Get file size for verification
-            size_mb = os.path.getsize(args.output) / (1024 * 1024)
-            print(f"  📊 File size: {size_mb:.2f} MB")
-            print(f"  ✅ Export completed successfully!")
-        else:
-            print("  ❌ Warning: No GLB file generated")
-    finally:
-        # Clean up temp directory
-        print(f"  🧹 Cleaning up temporary files...")
-        shutil.rmtree(temp_dir, ignore_errors=True)
+        # Export as OBJ (with materials)
+        obj_path = args.output.replace(".glb", ".obj")
+        mesh_textured.export(obj_path)
+        obj_size = os.path.getsize(obj_path) / (1024 * 1024)
+        print(f"  ✅ Saved textured OBJ: {obj_path} ({obj_size:.2f} MB)")
+        
+        # Export as STL (geometry only)
+        stl_path = args.output.replace(".glb", ".stl")
+        mesh_textured.export(stl_path)
+        stl_size = os.path.getsize(stl_path) / (1024 * 1024)
+        print(f"  ✅ Saved textured STL: {stl_path} ({stl_size:.2f} MB)")
+        
+        print(f"  ✅ Export completed successfully!")
+    else:
+        print("  ❌ Warning: No textured mesh generated")
     
     print(f"\n✨ Texture painting workflow complete!")
     print("="*50)

@@ -4,18 +4,16 @@ Optimizes prompts for various AI models using Ollama
 """
 
 from .prompt_optimizer_node import PromptOptimizer
-from .prompt_display_node import PromptDisplay, PromptDisplayLarge
+from .prompt_preview_node import PromptPreview
 
 NODE_CLASS_MAPPINGS = {
     "PromptOptimizer": PromptOptimizer,
-    "PromptDisplay": PromptDisplay,
-    "PromptDisplayLarge": PromptDisplayLarge
+    "PromptPreview": PromptPreview,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "PromptOptimizer": "Prompt Optimizer (Ollama)",
-    "PromptDisplay": "Prompt Display",
-    "PromptDisplayLarge": "Prompt Display (Large)"
+    "PromptPreview": "Prompt Preview",
 }
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']

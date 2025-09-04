@@ -29,6 +29,10 @@ test_out/
 *.png.tmp
 temp_ref_*.png
 
+# Test files
+test_minimal_with_remesh.py
+test_node_paint.py
+
 # IDE
 .vscode/
 .idea/

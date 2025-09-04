@@ -8,15 +8,18 @@ Custom ComfyUI nodes for AI-powered game asset generation, focusing on 3D model 
 
 #### 1. **Hunyuan3D 2.1** - Image to 3D Generation
 - Generate high-quality textured 3D models from single or multiple images
-- **Built-in background removal** - works with any input image
-- **Built-in Real-ESRGAN upscaling** - automatic texture enhancement
-- Built-in texture painting with Blender integration
+- **Complete pipeline with intelligent processing**:
+  1. **Background Removal** - Automatic segmentation for clean inputs
+  2. **3D Shape Generation** - Neural FlowMatching diffusion (50-200 steps)
+  3. **Mesh Remeshing** - Optimized topology (77% size reduction)
+  4. **Real-ESRGAN Upscaling** - 4x texture enhancement
+  5. **PBR Texture Painting** - Multi-view consistent textures via Blender
+  6. **Multi-format Export** - GLB (with textures), OBJ, STL outputs
 - **Smart memory management**: 
   - Shape only: 10GB VRAM (untextured OBJ)
-  - With texture: 21GB VRAM (only when textured_glb output is connected)
-  - Automatic detection prevents wasted resources
+  - With texture: 21GB VRAM (full pipeline with Blender)
 - Support for 1-10 input images for multi-view reconstruction
-- Outputs STRING paths compatible with Load3D nodes
+- Outputs textured/remeshed versions for optimal game engine performance
 
 #### 2. **Frame Extractor** - Smart Video Frame Extraction  
 - Extract evenly-distributed frames from videos
@@ -113,27 +116,65 @@ comfyui-ai-gamedev/
 └── docs/                   # Documentation
 ```
 
+## Hunyuan3D 2.1 Workflow
+
+The Hunyuan3D 2.1 node performs an intelligent multi-stage pipeline:
+
+```mermaid
+graph TD
+    A[Input Images] --> B[Background Removal]
+    B --> C[Shape Generation<br/>50-200 steps]
+    C --> D[Mesh Export<br/>OBJ format]
+    D --> E{Texture<br/>Enabled?}
+    E -->|No| F[Untextured Output]
+    E -->|Yes| G[Blender Pipeline]
+    G --> H[Mesh Remeshing<br/>77% size reduction]
+    H --> I[Texture Painting<br/>Multi-view projection]
+    I --> J[Real-ESRGAN<br/>4x upscaling]
+    J --> K[PBR Material<br/>Generation]
+    K --> L[Export Formats<br/>GLB, OBJ, STL]
+    
+    style G fill:#f9f,stroke:#333,stroke-width:4px
+    style L fill:#9f9,stroke:#333,stroke-width:2px
+```
+
+### Key Processing Steps:
+
+1. **Background Removal**: Automatic segmentation removes backgrounds from input images
+2. **Shape Generation**: Neural diffusion model creates base 3D geometry (10GB VRAM)
+3. **Mesh Remeshing**: Optimizes topology for game engines (6.5MB → 1.5MB)
+4. **Texture Painting**: Projects multi-view textures onto UV-mapped mesh
+5. **Real-ESRGAN Upscaling**: Enhances texture resolution by 4x
+6. **PBR Materials**: Generates base color, metallic, and roughness maps
+7. **Multi-Format Export**: Outputs optimized GLB (with textures), OBJ, and STL
+
 ## Usage Examples
 
 ### Basic Image-to-3D
 1. Load an image using ComfyUI's Image Loader
 2. Connect to Hunyuan3D 2.1 node
-3. Configure resolution and quality settings
-4. Choose output format (textured GLB recommended for game engines)
-5. Run the workflow - get a fully textured 3D model!
+3. Configure:
+   - **Resolution**: 256/512/1024 (shape quality)
+   - **Texture Resolution**: 512/1024/2048 (texture detail)
+   - **Shape Steps**: 50-200 (generation quality)
+   - **Texture Steps**: 50-100 (painting iterations)
+4. Enable texture painting (requires Blender)
+5. Run workflow → Receive optimized 3D model with PBR textures!
 
 ### Multi-View 3D Reconstruction
-1. Load multiple views of your object (4-10 images work best)
-2. Connect to Hunyuan3D 2.1 node
-3. The node automatically detects multi-view input
-4. Get higher quality 3D models with better geometry
-5. Export as textured GLB for Unity, Unreal, or Godot
+1. Load 4-10 views of your object
+2. Connect batch to Hunyuan3D 2.1 node
+3. Node automatically detects multi-view mode
+4. Higher quality geometry from multiple references
+5. Consistent texturing across all views
+6. Export remeshed GLB for Unity, Unreal, or Godot
 
-### Frame Selection for 3D
-1. Load a video file
-2. Connect to Frame Selector node
-3. Set number of frames to extract (e.g., 5)
-4. Connect output to Hunyuan3D for multi-view reconstruction
+### Video to 3D Pipeline
+1. Load video with Frame Extractor
+2. Extract 5-10 evenly distributed frames
+3. Skip intro/outro frames automatically
+4. Pass frames to Hunyuan3D for reconstruction
+5. Get game-ready 3D asset from video turntable
 
 ## Example Input Images
 
@@ -171,13 +212,28 @@ These demonstrate the current Hunyuan3D 2.0 pipeline which our 2.1 nodes enhance
 - CUDA-capable GPU with 21GB+ VRAM for texture generation (or CPU mode)
 - SSL certificates (installed via conda)
 
-## Performance Tips
+## Performance & Optimization
 
-- The Hunyuan3D 2.1 node only generates outputs that are connected in your workflow
-- Use lower resolutions (512) for faster prototyping, higher (1024+) for production
-- Multi-view reconstruction provides significantly better quality
-- Single view: ~2-3 minutes | Multi-view: ~5-7 minutes (varies by GPU)
-- Texture generation adds ~1-2 minutes but eliminates manual texturing work
+### Processing Times (RTX 4090):
+- **Shape Generation**: 2-3 minutes (single view), 4-5 minutes (multi-view)
+- **Texture Painting**: 3-5 minutes (Blender pipeline)
+- **Total Pipeline**: 5-8 minutes for complete textured model
+
+### Optimization Tips:
+- **Resolution Settings**: 
+  - Prototyping: 256 shape, 512 texture
+  - Production: 512+ shape, 1024+ texture
+- **Memory Management**:
+  - Shape only: 10GB VRAM
+  - Full pipeline: 21GB VRAM
+- **File Size Reduction**:
+  - Original mesh: ~6.5MB
+  - After remeshing: ~1.5MB (77% reduction)
+  - Maintains visual quality with optimized topology
+- **Multi-View Benefits**:
+  - 4+ views: Significantly better geometry
+  - 6-10 views: Optimal quality/time balance
+  - Consistent texturing across all angles
 
 ## Contributing
 
