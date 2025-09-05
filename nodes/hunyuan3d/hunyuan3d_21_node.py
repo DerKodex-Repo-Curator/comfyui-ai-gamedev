@@ -58,7 +58,6 @@ class Hunyuan3D21Node:
                 }),
             },
             "optional": {
-                "seed": ("INT", {"default": -1, "min": -1, "max": 2147483647}),
                 "conda_env": ("STRING", {"default": default_conda_env, "multiline": False}),
                 "conda_path": ("STRING", {"default": default_conda_path, "multiline": False}),
             }
@@ -83,7 +82,7 @@ class Hunyuan3D21Node:
     
     def generate_3d(self, images, resolution, texture_resolution,
                    guidance_scale, shape_steps, texture_steps, 
-                   seed=-1, conda_env=None, conda_path=None, **kwargs):
+                   conda_env=None, conda_path=None, **kwargs):
         """Generate 3D model using single script execution through Blender"""
         
         # Use provided conda settings or defaults
@@ -118,7 +117,7 @@ class Hunyuan3D21Node:
             "guidance_scale": guidance_scale,
             "shape_steps": shape_steps,
             "texture_steps": texture_steps,
-            "seed": seed if seed != -1 else None
+            "seed": None  # No seed, let it be random
         }
         
         # Write config to temp file
