@@ -36,8 +36,8 @@ class Hunyuan3D21Node:
         return {
             "required": {
                 "images": ("IMAGE",),
-                "resolution": (["256", "512", "1024"], {"default": "512"}),
-                "texture_resolution": (["512", "1024", "2048"], {"default": "1024"}),
+                "resolution": (["256", "512", "768", "1024", "2048"], {"default": "512"}),  # Added 768 and 2048 options
+                "texture_resolution": (["512", "768", "1024", "2048"], {"default": "768"}),  # Default to 768 for better quality
                 "guidance_scale": ("FLOAT", {
                     "default": 7.5,
                     "min": 1.0,
@@ -45,15 +45,15 @@ class Hunyuan3D21Node:
                     "step": 0.5
                 }),
                 "shape_steps": ("INT", {
-                    "default": 50,
+                    "default": 30,  # Standard quality (3 min generation per testing guide)
                     "min": 10,  # Minimum 10 steps required for shape generation
-                    "max": 200,
+                    "max": 100,
                     "step": 1
                 }),
                 "texture_steps": ("INT", {
-                    "default": 50,
+                    "default": 30,  # Standard quality
                     "min": 10,  # Minimum 10 steps for texture
-                    "max": 200,
+                    "max": 100,
                     "step": 1
                 }),
             },
