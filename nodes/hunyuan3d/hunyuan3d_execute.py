@@ -99,12 +99,6 @@ print("Importing texture pipeline...")
 from textureGenPipeline import Hunyuan3DPaintPipeline, Hunyuan3DPaintConfig
 print("✓ Texture pipeline imported")
 
-# Apply fix for image_path bug in texture pipeline
-print("Applying texture pipeline fix...")
-sys.path.insert(0, str(Path(__file__).parent))
-from texture_pipeline_fix import apply_texture_pipeline_fix
-apply_texture_pipeline_fix()
-
 # Torchvision fix already applied at the beginning (like demo.py)
 
 # No seed setting - removed for consistent generation
@@ -113,7 +107,12 @@ apply_texture_pipeline_fix()
 print("Loading images...")
 image_paths = config['image_paths']
 print(f"Image paths: {image_paths}")
-images = [Image.open(p).convert("RGB") for p in image_paths]
+images = []
+for i, p in enumerate(image_paths):
+    print(f"  Loading image {i+1}/{len(image_paths)}: {p}")
+    img = Image.open(p).convert("RGB")
+    images.append(img)
+    print(f"    Size: {img.size}")
 print(f"✓ Loaded {len(images)} images")
 
 # Output paths
@@ -218,11 +217,12 @@ try:
     
     # Paint texture (returns path to textured OBJ)
     print(f"Painting texture...")
-    # Paint pipeline can accept list of image paths for multi-view texture painting
-    # Pass all image paths for better texture quality
+    # Due to bug in textureGenPipeline, we need to pass a single image
+    # The bug is: it checks isinstance(image_prompt, List) before image_prompt is defined when image_path is a list
+    # For now, just pass the first image
     textured_result = paint_pipeline(
         str(shape_path),
-        image_path=image_paths if len(image_paths) > 1 else image_paths[0],  # List for multi-view, single for single-view
+        image_path=image_paths[0],  # Pass single image to avoid bug
     )
     
     print(f"✅ Texture painting complete: {textured_result}")
