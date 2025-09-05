@@ -110,7 +110,6 @@ class Hunyuan3D21Node:
             "texture_resolution": int(texture_resolution),
             "guidance_scale": guidance_scale,
             "inference_steps": inference_steps,
-            "seed": None  # No seed, let it be random
         }
         
         # Write config to temp file
@@ -130,13 +129,33 @@ class Hunyuan3D21Node:
         print(f"🔨 Executing: {' '.join(cmd)}")
         print("⏳ This will take 5-10 minutes...")
         
+        # Create a minimal clean environment to avoid ComfyUI pollution
+        clean_env = {
+            'PATH': os.environ.get('PATH', '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'),
+            'HOME': os.environ.get('HOME', os.path.expanduser('~')),
+            'USER': os.environ.get('USER', ''),
+            'SHELL': os.environ.get('SHELL', '/bin/bash'),
+            'TERM': os.environ.get('TERM', 'xterm'),
+            'LANG': os.environ.get('LANG', 'en_US.UTF-8'),
+            'LC_ALL': os.environ.get('LC_ALL', 'C.UTF-8'),
+        }
+        
+        # Only add CUDA_VISIBLE_DEVICES if it exists
+        if 'CUDA_VISIBLE_DEVICES' in os.environ:
+            clean_env['CUDA_VISIBLE_DEVICES'] = os.environ['CUDA_VISIBLE_DEVICES']
+        
+        # Add DISPLAY for Blender if it exists (though we run headless)
+        if 'DISPLAY' in os.environ:
+            clean_env['DISPLAY'] = os.environ['DISPLAY']
+        
         try:
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
                 timeout=600,
-                cwd=str(Path(__file__).resolve().parent.parent.parent)  # Project root (resolve symlinks)
+                cwd=str(Path(__file__).resolve().parent.parent.parent),  # Project root (resolve symlinks)
+                env=clean_env  # Use clean environment
             )
             
             # Print ALL output from the script

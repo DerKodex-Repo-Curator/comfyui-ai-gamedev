@@ -232,12 +232,33 @@ class CondaRunner:
                 self.blender_path, "--background", "--python", str(script_path), "--"
             ] + args
             
+            # Create a minimal clean environment instead of inheriting from parent
+            # This prevents ALL ComfyUI pollution
+            clean_env = {
+                'PATH': os.environ.get('PATH', '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'),
+                'HOME': os.environ.get('HOME', os.path.expanduser('~')),
+                'USER': os.environ.get('USER', ''),
+                'SHELL': os.environ.get('SHELL', '/bin/bash'),
+                'TERM': os.environ.get('TERM', 'xterm'),
+                'LANG': os.environ.get('LANG', 'en_US.UTF-8'),
+                'LC_ALL': os.environ.get('LC_ALL', 'C.UTF-8'),
+            }
+            
+            # Only add CUDA_VISIBLE_DEVICES if it exists
+            if 'CUDA_VISIBLE_DEVICES' in os.environ:
+                clean_env['CUDA_VISIBLE_DEVICES'] = os.environ['CUDA_VISIBLE_DEVICES']
+            
+            # Add DISPLAY for Blender if it exists (though we run headless)
+            if 'DISPLAY' in os.environ:
+                clean_env['DISPLAY'] = os.environ['DISPLAY']
+            
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                cwd=str(self.project_root)
+                cwd=str(self.project_root),
+                env=clean_env  # Use clean environment
             )
             
             # Print output for debugging
