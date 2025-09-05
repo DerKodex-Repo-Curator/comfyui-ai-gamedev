@@ -58,15 +58,26 @@ comfyui-ai-gamedev/
 ## 🚨 CRITICAL REQUIREMENTS - NEVER FORGET
 
 ### ALWAYS RUN HUNYUAN3D THROUGH BLENDER
-**NEVER run Hunyuan3D scripts directly with Python - ALWAYS use Blender**
+**The Hunyuan3D node MUST execute a SINGLE Python script through Blender - NO dynamic script generation**
 ```bash
-# WRONG - THIS WILL FAIL:
-conda run -n hunyuan3d python script.py
-
-# CORRECT - ALWAYS DO THIS:
-conda run -n hunyuan3d blender --background --python script.py
+# ONLY CORRECT WAY:
+conda run -n hunyuan3d blender --background --python single_script.py
 ```
-**WHY**: Hunyuan3D texture painting requires the `bpy` module which is ONLY available inside Blender's Python environment. Even shape generation should run through Blender for consistency.
+**REQUIREMENTS**:
+1. The node writes input images to disk
+2. The node calls ONE pre-written Python script (not generated on the fly)
+3. That script is executed via: `conda run -n hunyuan3d blender --background --python script.py`
+4. The script will segfault at the end - THIS IS EXPECTED AND OK
+5. Check that output files exist after execution
+6. The script must log completion of each step (shape generation, texture painting, export)
+
+**EXPORTS**:
+1. First export textured GLB
+2. Then export STL from the same textured mesh object
+3. Then export OBJ from the same textured mesh object
+4. Never use trimesh library - export directly from the mesh object using mesh.export()
+
+**BASE CODE**: Use `/home/matt/src/comfyui-ai-gamedev/test_minimal.py` as the reference - it is tested and working
 
 ### Prove Problems Before Proposing Fixes
 **ALWAYS investigate and prove the root cause before suggesting solutions**
@@ -78,13 +89,15 @@ conda run -n hunyuan3d blender --background --python script.py
 
 ### Hunyuan3D 2.1 REQUIRES Blender
 **BLENDER IS MANDATORY FOR HUNYUAN3D 2.1 - NO EXCEPTIONS**
-- Texture painting REQUIRES Blender (`blender --background --python`)
+- Texture painting REQUIRES Blender (`conda run -n hunyuan3d blender --background --python`)
 - Without Blender, you only get untextured gray models (OBJ files)
 - Install: `sudo snap install blender --classic` or `sudo apt install blender`
 - Verify: `blender --version`
 - Blender 3.0.1+ required for texture painting pipeline
-- **For debugging**: Run Python scripts in Blender's environment with `blender --background --python script.py`
-- **Known issue**: Blender crashes/segfaults on exit after texture painting - this is a Blender bug and should be ignored. The texture painting completes successfully before the crash. Silence/suppress these errors.
+- **For debugging**: Run Python scripts in Blender's environment with `conda run -n hunyuan3d blender --background --python script.py`
+- **Known issues**: 
+  - Blender crashes/segfaults on exit after texture painting - IGNORE THIS, texture completes before crash
+  - `torchvision.transforms.functional_tensor` import error - Apply torchvision fix before importing
 
 #### Texture Troubleshooting
 If textures are not appearing:
@@ -129,29 +142,25 @@ from textureGenPipeline import Hunyuan3DPaintPipeline, Hunyuan3DPaintConfig
 ### Configuration
 The Hunyuan3D nodes support flexible configuration:
 
-#### Using Configuration Script
-```bash
-# Show current configuration
-python configure_hunyuan3d.py --show
+#### Node Input Parameters (Highest Priority)
+The Hunyuan3D 2.1 node accepts optional parameters to override conda settings:
+- `conda_env`: Name of the conda environment (default: "hunyuan3d")
+- `conda_path`: Path to conda executable (default: "conda")
 
-# Set conda environment name
-python configure_hunyuan3d.py --conda-env my_custom_env
+These can be set directly in the ComfyUI workflow for per-execution control.
 
-# Set custom paths
-python configure_hunyuan3d.py --conda-path /path/to/conda --blender-path /usr/bin/blender
-```
-
-#### Using Environment Variables
+#### Using Environment Variables (Medium Priority)
 ```bash
 export HUNYUAN3D_CONDA_ENV=my_env
 export HUNYUAN3D_CONDA_PATH=/path/to/conda
 export HUNYUAN3D_BLENDER_PATH=/usr/bin/blender
 ```
 
-#### Configuration File
-Settings are saved to `hunyuan3d_config.json` in the project root.
+#### Default Values (Lowest Priority)
+- `conda_env`: "hunyuan3d"
+- `conda_path`: "conda" (assumes conda is in PATH)
 
-Priority order: Environment Variables > Config File > Defaults
+Priority order: Node Parameters > Environment Variables > Defaults
 
 ### Model Storage
 Models are automatically downloaded to shared cache:

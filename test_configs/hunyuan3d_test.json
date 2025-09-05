@@ -1,0 +1,11 @@
+{
+    "image_paths": ["/home/matt/src/comfyui-ai-gamedev/examples/input_images/single_view/railgun/frame_001_4x.png"],
+    "output_dir": "/tmp", 
+    "base_name": "test_hunyuan3d",
+    "resolution": 512,
+    "texture_resolution": 768,
+    "guidance_scale": 7.5,
+    "shape_steps": 30,
+    "texture_steps": 30,
+    "seed": null
+}
