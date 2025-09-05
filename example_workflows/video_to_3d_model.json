@@ -61,9 +61,9 @@
         "Node name for S&R": "VideoFrameExtractor"
       },
       "widgets_values": [
-        10,
-        10,
-        5
+        8,
+        0,
+        0
       ]
     },
     {
@@ -111,7 +111,7 @@
         "512",
         "768",
         7.5,
-        30,
+        50,
         "hunyuan3d",
         "conda"
       ]
@@ -120,7 +120,7 @@
       "id": 4,
       "type": "Preview3D",
       "pos": [1150, 200],
-      "size": [350, 350],
+      "size": [700, 700],
       "flags": {},
       "order": 3,
       "mode": 0,
@@ -132,7 +132,8 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "Preview3D"
+        "Node name for S&R": "Preview3D",
+        "Background Color": "#000000"
       }
     }
   ],

@@ -1,6 +1,6 @@
 {
-  "last_node_id": 5,
-  "last_link_id": 4,
+  "last_node_id": 3,
+  "last_link_id": 2,
   "nodes": [
     {
       "id": 1,
@@ -53,13 +53,13 @@
         {
           "name": "obj_filepath",
           "type": "STRING",
-          "links": [3],
+          "links": null,
           "slot_index": 1
         },
         {
           "name": "stl_filepath",
           "type": "STRING",
-          "links": [4],
+          "links": null,
           "slot_index": 2
         }
       ],
@@ -70,7 +70,7 @@
         "512",
         "768",
         7.5,
-        30,
+        50,
         "hunyuan3d",
         "conda"
       ]
@@ -79,7 +79,7 @@
       "id": 3,
       "type": "Preview3D",
       "pos": [850, 100],
-      "size": [350, 350],
+      "size": [700, 700],
       "flags": {},
       "order": 2,
       "mode": 0,
@@ -91,55 +91,14 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "Preview3D"
-      }
-    },
-    {
-      "id": 4,
-      "type": "Preview3D",
-      "pos": [850, 480],
-      "size": [350, 350],
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "title": "Preview 3D (OBJ Format)",
-      "inputs": [
-        {
-          "name": "model_file",
-          "type": "STRING",
-          "link": 3
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Preview3D"
-      }
-    },
-    {
-      "id": 5,
-      "type": "Preview3D",
-      "pos": [850, 860],
-      "size": [350, 350],
-      "flags": {},
-      "order": 4,
-      "mode": 0,
-      "title": "Preview 3D (STL Format)",
-      "inputs": [
-        {
-          "name": "model_file",
-          "type": "STRING",
-          "link": 4
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Preview3D"
+        "Node name for S&R": "Preview3D",
+        "Background Color": "#000000"
       }
     }
   ],
   "links": [
     [1, 1, 0, 2, 0, "IMAGE"],
-    [2, 2, 0, 3, 0, "STRING"],
-    [3, 2, 1, 4, 0, "STRING"],
-    [4, 2, 2, 5, 0, "STRING"]
+    [2, 2, 0, 3, 0, "STRING"]
   ],
   "groups": [],
   "config": {},

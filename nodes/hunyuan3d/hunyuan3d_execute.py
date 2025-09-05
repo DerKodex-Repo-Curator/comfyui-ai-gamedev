@@ -47,6 +47,10 @@ print("Importing PIL...")
 from PIL import Image
 print("✓ PIL imported")
 
+print("Importing torch...")
+import torch
+print("✓ torch imported")
+
 # Apply torchvision fix BEFORE importing pipelines (like demo.py)
 print("Applying torchvision fix...")
 try:
@@ -95,14 +99,15 @@ print("Importing texture pipeline...")
 from textureGenPipeline import Hunyuan3DPaintPipeline, Hunyuan3DPaintConfig
 print("✓ Texture pipeline imported")
 
+# Apply fix for image_path bug in texture pipeline
+print("Applying texture pipeline fix...")
+sys.path.insert(0, str(Path(__file__).parent))
+from texture_pipeline_fix import apply_texture_pipeline_fix
+apply_texture_pipeline_fix()
+
 # Torchvision fix already applied at the beginning (like demo.py)
 
-# Set seed if provided
-if config.get('seed'):
-    print(f"Setting seed to {config['seed']}...")
-    import torch
-    torch.manual_seed(config['seed'])
-    print("✓ Seed set")
+# No seed setting - removed for consistent generation
 
 # Load images
 print("Loading images...")
@@ -114,6 +119,12 @@ print(f"✓ Loaded {len(images)} images")
 # Output paths
 output_dir = Path(config['output_dir'])
 output_dir.mkdir(parents=True, exist_ok=True)
+
+# Change to output directory so all temp files go there
+original_cwd = os.getcwd()
+os.chdir(str(output_dir))
+print(f"Changed working directory to: {os.getcwd()}")
+
 base_name = config['base_name']
 shape_path = output_dir / f"{base_name}_shape.obj"
 textured_glb_path = output_dir / f"{base_name}_textured.glb"
@@ -122,6 +133,7 @@ textured_stl_path = output_dir / f"{base_name}_textured.stl"
 
 # Print directory information
 print(f"\n📁 Directory Setup:")
+print(f"  Original directory: {original_cwd}")
 print(f"  Working directory: {os.getcwd()}")
 print(f"  Output directory: {output_dir}")
 print(f"  Output directory exists: {output_dir.exists()}")
@@ -165,6 +177,15 @@ print(f"Saving shape to {shape_path}...")
 mesh.export(str(shape_path))
 print(f"✅ Shape saved: {shape_path.name}")
 
+# Free up memory from shape pipeline before texture painting
+print("\n♻️ Freeing shape generation memory...")
+del shape_pipeline
+del result
+import gc
+gc.collect()
+torch.cuda.empty_cache()
+print("✓ Memory freed")
+
 # Step 2: Paint texture (exactly like test_minimal.py)
 print("\n🎨 Step 2: Texture Painting")
 print("-" * 40)
@@ -179,13 +200,16 @@ try:
     print(f"Configuring paint with {max_num_view} views, resolution {config['texture_resolution']}...")
     paint_config = Hunyuan3DPaintConfig(max_num_view, config['texture_resolution'])
     
-    # Set absolute paths for all required files (like test_minimal.py)
-    # Use the actual working directory which is set to project root
-    project_root = Path(os.getcwd())  # This is set to /home/matt/src/comfyui-ai-gamedev by the node
+    # Set absolute paths for all required files
+    # Use the original working directory before we changed to output_dir
+    project_root = Path(original_cwd)  # Use the original cwd which is the project root
     paint_config.realesrgan_ckpt_path = str(project_root / "external/Hunyuan3D-2.1/hy3dpaint/ckpt/RealESRGAN_x4plus.pth")
     paint_config.multiview_cfg_path = str(project_root / "external/Hunyuan3D-2.1/hy3dpaint/cfgs/hunyuan-paint-pbr.yaml")
     paint_config.custom_pipeline = str(project_root / "external/Hunyuan3D-2.1/hy3dpaint/hunyuanpaintpbr")
-    print("✓ Paint config set")
+    print("✓ Paint config set with absolute paths:")
+    print(f"    RealESRGAN: {paint_config.realesrgan_ckpt_path}")
+    print(f"    Config: {paint_config.multiview_cfg_path}")
+    print(f"    Pipeline: {paint_config.custom_pipeline}")
     
     # Initialize paint pipeline
     print("Initializing paint pipeline...")
@@ -194,9 +218,11 @@ try:
     
     # Paint texture (returns path to textured OBJ)
     print(f"Painting texture...")
+    # Paint pipeline can accept list of image paths for multi-view texture painting
+    # Pass all image paths for better texture quality
     textured_result = paint_pipeline(
         str(shape_path),
-        image_path=image_paths if len(image_paths) > 1 else image_paths[0],
+        image_path=image_paths if len(image_paths) > 1 else image_paths[0],  # List for multi-view, single for single-view
     )
     
     print(f"✅ Texture painting complete: {textured_result}")
@@ -228,18 +254,7 @@ except Exception as e:
     print(f"❌ Texture painting failed: {e}")
     import traceback
     traceback.print_exc()
-    
-    # If texture fails, still export untextured mesh
-    try:
-        print("Attempting to export untextured mesh as fallback...")
-        import trimesh
-        mesh_untextured = trimesh.load(str(shape_path))
-        mesh_untextured.export(str(textured_glb_path))
-        mesh_untextured.export(str(textured_obj_path))
-        mesh_untextured.export(str(textured_stl_path))
-        print("⚠️ Exported untextured mesh as fallback")
-    except:
-        print("❌ Failed to export fallback")
+    sys.exit(1)  # Complete failure - no recovery
 
 # Clean up temporary shape file
 try:

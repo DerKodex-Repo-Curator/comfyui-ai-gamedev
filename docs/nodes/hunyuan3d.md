@@ -131,6 +131,90 @@ This opens an interactive Python console with Blender's API available, useful fo
 4. Save textured output
 5. Exit with status code
 
+## Pipeline API Documentation
+
+### Hunyuan3DDiTFlowMatchingPipeline
+
+Main pipeline for shape generation from images.
+
+#### Parameters for __call__ method:
+
+- **image** (`Union[str, List[str], PIL.Image.Image, dict, List[dict], torch.Tensor]`, optional):
+  - Input image(s) for 3D generation
+  - Can be single image path, list of paths, PIL Image, or tensor
+  - Multi-view: Pass list of 2-10 images for better reconstruction
+
+- **num_inference_steps** (`int`, default=50):
+  - Number of denoising steps
+  - Higher values = better quality but slower (30-50 recommended)
+  - Minimum: 10 steps
+
+- **timesteps** (`List[int]`, optional):
+  - Custom timesteps for sampling
+
+- **sigmas** (`List[float]`, optional):
+  - Custom noise schedule
+
+- **eta** (`float`, default=0.0):
+  - Parameter for DDIM sampler
+
+- **guidance_scale** (`float`, default=5.0):
+  - Classifier-free guidance scale
+  - Higher = more adherence to input image (7.5-10 typical)
+  - Range: 1.0-20.0
+
+- **generator** (optional):
+  - Random number generator for reproducibility
+
+- **box_v** (`float`, default=1.01):
+  - Bounding box scale for marching cubes
+
+- **octree_resolution** (`int`, default=384):
+  - Resolution for octree-based mesh extraction
+
+- **mc_level** (`float`, default=0.0):
+  - Marching cubes isosurface level
+
+- **mc_algo** (optional):
+  - Marching cubes algorithm selection
+
+- **num_chunks** (`int`, default=8000):
+  - Memory optimization parameter for mesh extraction
+
+- **output_type** (`str`, default='trimesh'):
+  - Output format ('trimesh' for mesh object)
+
+- **enable_pbar** (`bool`, default=True):
+  - Show progress bar during generation
+
+- **mask** (optional):
+  - Optional mask for selective reconstruction
+
+#### Returns:
+- `List[List[trimesh.base.Trimesh]]`: Generated 3D mesh(es)
+
+#### Other Methods:
+
+- **from_pretrained(model_id, subfolder)**: Load pretrained model weights
+- **enable_model_cpu_offload()**: Reduce VRAM usage by offloading to CPU
+- **enable_flashvdm()**: Enable Flash attention optimizations
+- **to(device, dtype)**: Move pipeline to device/dtype
+
+### Usage Example:
+```python
+pipeline = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained(
+    'tencent/Hunyuan3D-2.1', 
+    subfolder='hunyuan3d-dit-v2-1'
+)
+
+result = pipeline(
+    image=images,  # PIL Image or list of images
+    num_inference_steps=50,
+    guidance_scale=7.5,
+    resolution=512  # Not in signature but accepted via kwargs
+)
+```
+
 ## Testing
 
 ### Test Images

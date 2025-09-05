@@ -87,33 +87,38 @@ class Hunyuan3D21Node:
         print(f"\n🎮 Hunyuan3D 2.1 - Generating 3D model from {batch_size} image(s)")
         print(f"   Using conda: {conda_path} with environment: {conda_env}")
         
-        # Create unique run ID
+        # Create unique run ID and directory for this generation
         run_id = uuid.uuid4().hex[:8]
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         base_name = f"hunyuan3d_{timestamp}_{run_id}"
         
-        # Save input images
+        # Create a unique directory for this generation
+        generation_dir = self.output_dir / base_name
+        generation_dir.mkdir(parents=True, exist_ok=True)
+        print(f"📁 Generation directory: {generation_dir}")
+        
+        # Save input images to the generation directory
         image_paths = []
         for i in range(batch_size):
             img_array = (images[i].cpu().numpy() * 255).astype(np.uint8)
             img = Image.fromarray(img_array, mode='RGB')
-            img_path = self.output_dir / f"input_{run_id}_{i:03d}.png"
+            img_path = generation_dir / f"input_{i:03d}.png"
             img.save(img_path)
             image_paths.append(str(img_path))
         
         # Prepare config for the script (use absolute paths)
         config = {
             "image_paths": [str(Path(p).resolve()) for p in image_paths],
-            "output_dir": str(self.output_dir.resolve()),  # Use absolute path
-            "base_name": base_name,
+            "output_dir": str(generation_dir.resolve()),  # Use generation-specific directory
+            "base_name": "output",  # Simplified name since we're in a unique directory
             "resolution": int(resolution),
             "texture_resolution": int(texture_resolution),
             "guidance_scale": guidance_scale,
             "inference_steps": inference_steps,
         }
         
-        # Write config to temp file
-        config_path = self.output_dir / f"config_{run_id}.json"
+        # Write config to generation directory
+        config_path = generation_dir / "config.json"
         print(f"Writing config to: {config_path}")
         print(f"Config contents: {json.dumps(config, indent=2)}")
         with open(config_path, 'w') as f:
@@ -173,9 +178,10 @@ class Hunyuan3D21Node:
                     print(f"  {line}")
             
             # Check if files were created (script WILL segfault but that's OK if files exist)
-            glb_path = self.output_dir / f"{base_name}_textured.glb"
-            obj_path = self.output_dir / f"{base_name}_textured.obj"
-            stl_path = self.output_dir / f"{base_name}_textured.stl"
+            # Files are now in the generation-specific directory
+            glb_path = generation_dir / "output_textured.glb"
+            obj_path = generation_dir / "output_textured.obj"
+            stl_path = generation_dir / "output_textured.stl"
             
             # Verify outputs exist (ignore return code - Blender segfaults are expected)
             if glb_path.exists():
@@ -186,10 +192,9 @@ class Hunyuan3D21Node:
                 if stl_path.exists():
                     print(f"   STL: {stl_path.name}")
                 
-                # Cleanup temp files
+                # Cleanup temp files in generation directory
+                # Keep the generation directory and outputs, but remove config
                 config_path.unlink(missing_ok=True)
-                for path in image_paths:
-                    Path(path).unlink(missing_ok=True)
                 
                 return (
                     str(glb_path) if glb_path.exists() else "",
@@ -211,10 +216,8 @@ class Hunyuan3D21Node:
         except Exception as e:
             print(f"❌ Execution failed: {e}")
         
-        # Cleanup on failure
+        # Cleanup on failure - just remove config
         config_path.unlink(missing_ok=True)
-        for path in image_paths:
-            Path(path).unlink(missing_ok=True)
         
         return ("", "", "")
     
