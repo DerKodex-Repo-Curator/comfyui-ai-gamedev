@@ -96,43 +96,43 @@
     },
     {
       "id": 4,
-      "type": "ShowText",
+      "type": "Preview3D",
       "pos": [850, 480],
-      "size": [350, 100],
+      "size": [350, 350],
       "flags": {},
       "order": 3,
       "mode": 0,
+      "title": "Preview 3D (OBJ Format)",
       "inputs": [
         {
-          "name": "text",
+          "name": "model_file",
           "type": "STRING",
           "link": 3
         }
       ],
       "properties": {
-        "Node name for S&R": "ShowText"
-      },
-      "widgets_values": ["OBJ Path"]
+        "Node name for S&R": "Preview3D"
+      }
     },
     {
       "id": 5,
-      "type": "ShowText",
-      "pos": [850, 600],
-      "size": [350, 100],
+      "type": "Preview3D",
+      "pos": [850, 860],
+      "size": [350, 350],
       "flags": {},
       "order": 4,
       "mode": 0,
+      "title": "Preview 3D (STL Format)",
       "inputs": [
         {
-          "name": "text",
+          "name": "model_file",
           "type": "STRING",
           "link": 4
         }
       ],
       "properties": {
-        "Node name for S&R": "ShowText"
-      },
-      "widgets_values": ["STL Path"]
+        "Node name for S&R": "Preview3D"
+      }
     }
   ],
   "links": [
