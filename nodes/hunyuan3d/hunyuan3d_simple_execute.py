@@ -18,7 +18,9 @@ output_dir = Path(sys.argv[sys.argv.index('--') + 2])
 base_name = sys.argv[sys.argv.index('--') + 3]
 
 print(f"Processing: {image_path}")
-print(f"Output to: {output_dir}/{base_name}")
+print(f"Working directory: {os.getcwd()}")
+print(f"Output directory: {output_dir}")
+print(f"Output base name: {base_name}")
 
 # Setup paths
 sys.path.insert(0, 'external/Hunyuan3D-2.1')

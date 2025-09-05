@@ -5,6 +5,5 @@
     "resolution": 512,
     "texture_resolution": 768,
     "guidance_scale": 7.5,
-    "inference_steps": 30,
-    "seed": null
+    "inference_steps": 30
 }
