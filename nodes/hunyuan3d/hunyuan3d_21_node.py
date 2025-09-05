@@ -44,15 +44,9 @@ class Hunyuan3D21Node:
                     "max": 20.0,
                     "step": 0.5
                 }),
-                "shape_steps": ("INT", {
+                "inference_steps": ("INT", {
                     "default": 30,  # Standard quality (3 min generation per testing guide)
                     "min": 10,  # Minimum 10 steps required for shape generation
-                    "max": 100,
-                    "step": 1
-                }),
-                "texture_steps": ("INT", {
-                    "default": 30,  # Standard quality
-                    "min": 10,  # Minimum 10 steps for texture
                     "max": 100,
                     "step": 1
                 }),
@@ -81,7 +75,7 @@ class Hunyuan3D21Node:
         print(f"Hunyuan3D 2.1 initialized - output dir: {self.output_dir}")
     
     def generate_3d(self, images, resolution, texture_resolution,
-                   guidance_scale, shape_steps, texture_steps, 
+                   guidance_scale, inference_steps, 
                    conda_env=None, conda_path=None, **kwargs):
         """Generate 3D model using single script execution through Blender"""
         
@@ -115,8 +109,7 @@ class Hunyuan3D21Node:
             "resolution": int(resolution),
             "texture_resolution": int(texture_resolution),
             "guidance_scale": guidance_scale,
-            "shape_steps": shape_steps,
-            "texture_steps": texture_steps,
+            "inference_steps": inference_steps,
             "seed": None  # No seed, let it be random
         }
         

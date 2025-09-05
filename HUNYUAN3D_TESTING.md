@@ -116,13 +116,15 @@ for i in range(60):
 
 ## Quality Settings
 
-| Quality | Resolution | Steps | Time | Use Case |
-|---------|------------|-------|------|----------|
-| fast | 256px | 20 | ~1 min | Quick preview |
-| standard | 512px | 30 | ~3 min | Testing |
-| enhanced | 768px | 40 | ~5 min | Production |
-| high | 1024px | 50 | ~7 min | High quality |
-| ultra | 2048px | 60 | ~10 min | Maximum quality |
+| Quality | Shape Resolution | Inference Steps | Texture Resolution | Time | Use Case |
+|---------|-----------------|-----------------|-------------------|------|----------|
+| fast | 256px | 20 | 512px | ~1 min | Quick preview |
+| standard | 512px | 30 | 768px | ~3 min | Testing |
+| enhanced | 768px | 40 | 1024px | ~5 min | Production |
+| high | 1024px | 50 | 1024px | ~7 min | High quality |
+| ultra | 2048px | 60 | 2048px | ~10 min | Maximum quality |
+
+Note: Only inference steps affect shape generation. Texture painting has no configurable steps.
 
 ## Troubleshooting
 

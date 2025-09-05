@@ -136,10 +136,10 @@ shape_pipeline = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained(
 )
 print("✓ Model loaded", flush=True)
 
-print(f"Generating shape with {config['shape_steps']} steps...", flush=True)
+print(f"Generating shape with {config['inference_steps']} steps...", flush=True)
 result = shape_pipeline(
     image=images if len(images) > 1 else images[0],
-    num_inference_steps=config['shape_steps'],
+    num_inference_steps=config['inference_steps'],
     guidance_scale=config['guidance_scale'],
     resolution=config['resolution']
 )
@@ -184,7 +184,7 @@ try:
     print("✓ Paint pipeline initialized", flush=True)
     
     # Paint texture (returns path to textured OBJ)
-    print(f"Painting texture with {config['texture_steps']} steps...", flush=True)
+    print(f"Painting texture...", flush=True)
     textured_result = paint_pipeline(
         str(shape_path),
         image_path=image_paths if len(image_paths) > 1 else image_paths[0],
