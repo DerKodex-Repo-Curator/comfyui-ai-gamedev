@@ -237,11 +237,12 @@
       },
       "widgets_values": [
         "flux_dev",
-        "a majestic dragon flying through clouds",
+        "A realistic photo of a cheerful, big-eared fairy child dancing on a sunny hillside.",
         "localhost:11434",
         "qwen2.5vl:7b",
         0.7,
         -1,
+        "randomize",
         0
       ]
     }

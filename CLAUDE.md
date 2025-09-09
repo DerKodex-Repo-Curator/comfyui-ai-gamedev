@@ -297,6 +297,48 @@ Custom node workflows appear in ComfyUI's template browser when placed in:
 }
 ```
 
+### 🚨 CRITICAL: Editing Workflow Templates
+**ALWAYS verify widget_values array length matches node inputs when editing workflows**
+
+When adding/removing node parameters:
+1. Count the number of inputs in the node's INPUT_TYPES definition
+2. Verify the `widgets_values` array has exactly the same number of elements
+3. Check that parameter order matches the INPUT_TYPES order
+4. Missing or extra values cause ComfyUI to reset nodes to defaults
+
+**Example verification:**
+```python
+# Node has 7 inputs: target_model, prompt, ollama_host, ollama_model, temperature, seed, max_tokens_override
+INPUT_TYPES = {
+    "required": {"target_model": ..., "prompt": ...},
+    "optional": {"ollama_host": ..., "ollama_model": ..., "temperature": ..., "seed": ..., "max_tokens_override": ...}
+}
+
+# widgets_values MUST have exactly 8 values including seed control:
+"widgets_values": ["flux_dev", "prompt text", "localhost:11434", "qwen2.5vl:7b", 0.7, -1, "fixed", 0]
+#                                                                                      ^^^^^^^^
+#                                                                        seed control_after_generate
+```
+
+### 🚨 CRITICAL: control_after_generate for Seed Parameters
+**Seed parameters in ComfyUI have BOTH a value AND a control setting in widgets_values**
+
+For nodes with seed parameters:
+1. The seed value comes first (e.g., `-1`)
+2. Immediately followed by the control string: `"fixed"`, `"increment"`, `"decrement"`, or `"randomize"`
+3. This is embedded in widgets_values, NOT a separate property
+
+**Example from actual ComfyUI workflow:**
+```json
+// KSampler node widgets_values
+"widgets_values": [1881954142, "fixed", 20, 1, "euler", "simple", 1]
+//                            ^^^^^^^^
+//                    seed control_after_generate
+```
+
+**Common mistake**: Adding `"control_after_generate": "fixed"` as separate property - this is WRONG
+**Correct approach**: Include control string in widgets_values array after seed value
+
 ### Current Example Workflows
 Located in `/example_workflows/`:
 1. **image_to_3d_model.json** - Single image to textured 3D using Hunyuan3D

@@ -281,7 +281,11 @@
         "flux_dev",
         "a majestic dragon flying through clouds",
         "localhost:11434",
-        "qwen2.5vl:7b"
+        "qwen2.5vl:7b",
+        0.7,
+        -1,
+        "fixed",
+        0
       ]
     }
   ],
