@@ -232,7 +232,7 @@ class PromptOptimizer:
         
         try:
             logger.info(f"🎯 Optimizing with Ollama - Host: {ollama_host}, Model: {ollama_model}")
-            logger.debug(f"User prompt: {user_prompt[:100]}...")
+            logger.info(f"Full user prompt: {user_prompt}")
             logger.debug(f"Image provided: {bool(image_path)}")
             
             # Set up client with custom host if provided
@@ -245,8 +245,8 @@ class PromptOptimizer:
             
             # Log the system prompt to verify correct model config
             if messages and messages[0].get("role") == "system":
-                system_preview = messages[0].get("content", "")[:150]
-                logger.debug(f"System prompt preview: {system_preview}...")
+                system_content = messages[0].get("content", "")
+                logger.info(f"Full system prompt: {system_content}")
             
             # Add user message with optional image
             user_message = {
@@ -301,7 +301,8 @@ class PromptOptimizer:
             
             # Extract and clean response
             optimized = response.get("message", {}).get("content", "").strip()
-            logger.debug(f"Received response length: {len(optimized)} chars")
+            logger.info(f"Received response length: {len(optimized)} chars")
+            logger.info(f"Full Ollama response: {optimized}")
             
             # Ensure we got a response
             if not optimized:
@@ -424,13 +425,15 @@ class PromptOptimizer:
                     if "video" in system_content.lower() or "motion" in system_content.lower() or "-no" in system_content:
                         logger.warning(f"⚠️ Detected video-related negative prompt system message for image model {target_model}")
                 
-                # Pass the optimized positive prompt as context for negative generation
-                # Add a unique timestamp to avoid potential caching issues
+                # Pass BOTH original and optimized prompts for comprehensive negative generation
+                # This ensures we catch exclusions from both the user's original intent and the enhanced version
                 import time
-                timestamped_prompt = f"{positive_prompt}\n[Request ID: {time.time()}]"
+                combined_prompt = f"Original prompt: {prompt}\n\nOptimized prompt: {positive_prompt}\n[Request ID: {time.time()}]"
+                logger.info(f"   Combined prompt for negative generation: {combined_prompt}")
+                
                 negative_prompt = self._optimize_with_ollama(
                     negative_messages,
-                    timestamped_prompt,  # Use optimized positive with timestamp as input
+                    combined_prompt,  # Use both original and optimized prompts
                     None,  # Don't include image for negative prompts
                     ollama_host,
                     ollama_model,
@@ -444,7 +447,7 @@ class PromptOptimizer:
                     negative_prompt = negative_prompt.split("[Request ID:")[0].strip()
                 
                 logger.info(f"   Negative result: {len(negative_prompt)} chars")
-                logger.debug(f"   Negative prompt preview: {negative_prompt[:200]}...")
+                logger.info(f"   Full negative prompt: {negative_prompt}")
                 
                 # Check if we got video-related negative prompts for an image model
                 video_keywords = ["motion blur", "frame rate", "temporal", "sound", "dialogue", "music", "ambient sounds", "narrative", "plot"]
