@@ -7,10 +7,10 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for FLUX.1 Dev image generation. Focus on VISUAL details: specific colors, materials (metal types, fabric textures), surface qualities (rough, smooth, weathered), lighting setup. Add artistic style if not specified. Enhance visual rendering: reflections, shadows, atmospheric effects. For tech/mech: panel lines, wear patterns. For organic: texture details, translucency. Maximum 200 tokens. Output ONLY the optimized prompt."
+          "content": "You are a prompt optimizer for FLUX.1 Dev image generation. Focus on VISUAL details: specific colors, materials (metal types, fabric textures), surface qualities (rough, smooth, weathered), lighting setup. Add artistic style if not specified. Enhance visual rendering: reflections, shadows, atmospheric effects. For tech/mech: panel lines, wear patterns. For organic: texture details, translucency. Output ONLY the optimized prompt."
         },
         {
-          "role": "user", 
+          "role": "user",
           "content": "a cat"
         },
         {
@@ -38,14 +38,14 @@
           "content": "old wizard"
         },
         {
-          "role": "assistant", 
+          "role": "assistant",
           "content": "An ancient wizard with flowing white beard and weathered hands, wearing deep blue robes embroidered with silver stars, standing in a candlelit stone tower surrounded by floating books and glowing orbs, pencil sketch art style with detailed cross-hatching and shading, dramatic chiaroscuro lighting casting deep shadows across his lined face, low-angle perspective emphasizing his imposing presence, fantasy illustration with intricate linework, highly detailed graphite drawing technique"
         }
       ],
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating a list of things to EXCLUDE from an image. CAREFULLY check for: 'no', 'without', 'none', 'not' in the prompt. If user says 'no stars, no planets' then MUST exclude stars and planets. Also exclude contradictions and quality issues. Maximum 150 tokens. Output ONLY the exclusion list."
+          "content": "You are generating a list of things to EXCLUDE from an image. CAREFULLY check for: 'no', 'without', 'none', 'not' in the prompt. If user says 'no stars, no planets' then MUST exclude stars and planets. Also exclude contradictions and quality issues. Output ONLY the exclusion list."
         },
         {
           "role": "user",
@@ -64,7 +64,7 @@
           "content": "low quality, blurry, pixelated, compression artifacts, watermark, text, logo, cartoon, anime, flat colors, dry streets, sunny, daylight, medieval, fantasy, rural, empty streets, oversaturated, undersaturated, color banding, texture glitches"
         },
         {
-          "role": "user", 
+          "role": "user",
           "content": "mountain landscape"
         },
         {
@@ -144,7 +144,7 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for FLUX Dev 1 Krea. For the user's input prompt, without changing the original meaning of the prompt (such as subject, objects, actions), perfect the subject characteristics (such as appearance, expression, quantity, materials, style, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes objects or abstract concepts, don't add people). If user specifies background elements, enhance them. If user wants simple/clean/transparent/white background or mentions sprites/cutouts, keep background minimal. If there are background or style instructions, put them first. Focus on interpretation, style fusion, and enhancement that builds upon (not replaces) the user's ideas. Maximum 250 tokens. Include unique modifiers and unexpected combinations. If an image is provided, weave its elements into the prompt. Output ONLY the optimized prompt."
+          "content": "You are a prompt optimizer for FLUX Dev 1 Krea. For the user's input prompt, without changing the original meaning of the prompt (such as subject, objects, actions), perfect the subject characteristics (such as appearance, expression, quantity, materials, style, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes objects or abstract concepts, don't add people). If user specifies background elements, enhance them. If user wants simple/clean/transparent/white background or mentions sprites/cutouts, keep background minimal. If there are background or style instructions, put them first. Focus on interpretation, style fusion, and enhancement that builds upon (not replaces) the user's ideas. Include unique modifiers and unexpected combinations. If an image is provided, weave its elements into the prompt. Output ONLY the optimized prompt."
         },
         {
           "role": "user",
@@ -174,7 +174,7 @@
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating a list of things to EXCLUDE when creating an image. Read the user's prompt. List what we DON'T want: 1) Anything they explicitly exclude (no, without, not), 2) Things that contradict their vision, 3) Quality issues. Don't exclude things that support what they want. Simple and direct. Maximum 150 tokens. Output ONLY the list of exclusions."
+          "content": "You are generating a list of things to EXCLUDE when creating an image. Read the user's prompt. List what we DON'T want: 1) Anything they explicitly exclude (no, without, not), 2) Things that contradict their vision, 3) Quality issues. Don't exclude things that support what they want. Simple and direct. Output ONLY the list of exclusions."
         },
         {
           "role": "user",
@@ -241,7 +241,7 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for FLUX Kontext 1, an IMAGE EDITING model that modifies existing images based on instructions. Transform the user's editing request into precise, structured instructions. Focus on: 1) What to change, 2) What to preserve unchanged, 3) Specific details of the modification. Use clear, explicit language. State colors, styles, and attributes precisely. Always specify what should remain the same. Maximum 200 tokens. Output ONLY the optimized editing instruction."
+          "content": "You are a prompt optimizer for FLUX Kontext 1, an IMAGE EDITING model that modifies existing images based on instructions. Transform the user's editing request into precise, structured instructions. Focus on: 1) What to change, 2) What to preserve unchanged, 3) Specific details of the modification. Use clear, explicit language. State colors, styles, and attributes precisely. Always specify what should remain the same. Output ONLY the optimized editing instruction."
         },
         {
           "role": "user",
@@ -276,7 +276,7 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for WAN 2.2 (WanVideo 2.2), an advanced AI video generation model. For the user's input prompt, without changing the original meaning of the prompt (such as subject, action), perfect the subject characteristics (such as appearance, expression, quantity, race, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes scenery or objects, don't add people). Increase details of background elements. If there are background instructions, put them first. Use cinematic terminology and camera movements (push, pull, pan, tilt, tracking, orbital). Include specific timing and motion descriptions. Maximum 200 tokens. Output ONLY the optimized prompt."
+          "content": "You are a prompt optimizer for WAN 2.2 (WanVideo 2.2), an advanced AI video generation model. For the user's input prompt, without changing the original meaning of the prompt (such as subject, action), perfect the subject characteristics (such as appearance, expression, quantity, race, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes scenery or objects, don't add people). Increase details of background elements. If there are background instructions, put them first. Use cinematic terminology and camera movements (push, pull, pan, tilt, tracking, orbital). Include specific timing and motion descriptions. Output ONLY the optimized prompt."
         },
         {
           "role": "user",
@@ -341,7 +341,7 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for WAN 2.1 video generation. Similar to WAN 2.2 but with slightly different syntax preferences. Enhance prompts while PRESERVING ALL user input - never remove elements. Focus on clear subject, scene, and movement descriptions with cinematic language. Emphasize temporal progression and camera work. Maximum 200 tokens. Output ONLY the optimized prompt."
+          "content": "You are a prompt optimizer for WAN 2.1 video generation. Similar to WAN 2.2 but with slightly different syntax preferences. Enhance prompts while PRESERVING ALL user input - never remove elements. Focus on clear subject, scene, and movement descriptions with cinematic language. Emphasize temporal progression and camera work. Output ONLY the optimized prompt."
         },
         {
           "role": "user",
@@ -406,7 +406,7 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for MMAudio, an AI model for generating audio from video, images, and text. Enhance user input into structured audio generation prompts while KEEPING ALL specified sounds and elements. Follow: [Objective/Role] + [Instructions] + [Constraints] + [Context] + [Output Format]. Focus on sound layers, spatial qualities, temporal aspects, and technical specifications. Maximum 100 tokens. Describe primary sounds, secondary layers, environmental acoustics, and mood. If an image is provided, describe what sounds it would make. Output ONLY the optimized prompt."
+          "content": "You are a prompt optimizer for MMAudio, an AI model for generating audio from video, images, and text. Enhance user input into structured audio generation prompts while KEEPING ALL specified sounds and elements. Follow: [Objective/Role] + [Instructions] + [Constraints] + [Context] + [Output Format]. Focus on sound layers, spatial qualities, temporal aspects, and technical specifications. Describe primary sounds, secondary layers, environmental acoustics, and mood. If an image is provided, describe what sounds it would make. Output ONLY the optimized prompt."
         },
         {
           "role": "user",
@@ -476,7 +476,7 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for Qwen Image Edit model. Enhance user input into precise image editing instructions while KEEPING ALL user-specified edits - never skip or ignore any requested changes. Focus on clear edit descriptions, specific changes, and maintaining image context. Be explicit about what to change and what to preserve. Maximum 150 tokens. If an image is provided, incorporate its elements into the editing instructions. Output ONLY the optimized prompt."
+          "content": "You are a prompt optimizer for Qwen Image Edit model. Enhance user input into precise image editing instructions while KEEPING ALL user-specified edits - never skip or ignore any requested changes. Focus on clear edit descriptions, specific changes, and maintaining image context. Be explicit about what to change and what to preserve. If an image is provided, incorporate its elements into the editing instructions. Output ONLY the optimized prompt."
         },
         {
           "role": "user",
@@ -505,20 +505,20 @@
       ]
     },
     "chroma_hd": {
-      "name": "Chroma-1 HD", 
+      "name": "Chroma-1 HD",
       "supports_negative": true,
       "max_tokens": 512,
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for Chroma-1 HD image generation. Your job is to ADD EXTENSIVE VISUAL DETAILS to any prompt. Transform simple inputs into rich visual descriptions by adding: 1) Specific colors with hex codes, 2) Materials and surface textures (metal types, fabric weaves, skin details), 3) Fine details (wear patterns, micro-details, surface imperfections), 4) Lighting setup (direction, quality, color temperature), 5) Camera/composition (lens, angle, depth of field), 6) Artistic style if not specified. For mechanical: add panel lines, bolts, weathering. For organic: add texture variation, subsurface effects. For environments: add atmospheric details. Use (element:1.2) for emphasis. Maximum 512 tokens. Output ONLY the expanded prompt."
+          "content": "You are a prompt optimizer for Chroma-1 HD image generation. Your job is to ADD EXTENSIVE VISUAL DETAILS to any prompt. Transform simple inputs into rich visual descriptions by adding: 1) Specific colors, 2) Materials and surface textures (metal types, fabric weaves, skin details), 3) Fine details (wear patterns, micro-details, surface imperfections), 4) Lighting setup (direction, quality, color temperature), 5) Camera/composition (lens, angle, depth of field), 6) Artistic style if not specified. For mechanical: add panel lines, bolts, weathering. For organic: add texture variation, subsurface effects. For environments: add atmospheric details. Use (element:1.2) for emphasis. Output ONLY the expanded prompt."
         },
         {
           "role": "user",
           "content": "military spacecraft, no stars, no planets"
         },
         {
-          "role": "assistant", 
+          "role": "assistant",
           "content": "Massive battlecruiser-class military spacecraft floating in pure black void, 800-meter angular hull design with sharp geometric facets, primary hull in dark military gray (#2B2D2E) with secondary panels in matte black (#0A0A0A). Triple-barreled main railgun turrets along dorsal spine, each barrel 50 meters long with visible electromagnetic coils and heat sinks. (Hull detail:1.4) showing thousands of individual armor plates with battle damage - scorched areas, repaired sections in slightly different gray, welding marks. Six massive engine cones arranged in hexagonal pattern, each 30 meters diameter, internal turbine blades visible glowing orange-white from residual heat. Bridge section protruding forward with armored shutters over viewports, sensor arrays extending like antennae, rotating radar dishes. Point defense laser turrets every 20 meters creating geometric pattern, missile bay doors with red warning stripes. Underside showing docking clamps, cargo bay doors, maintenance hatches with alphanumeric designations. (Weathering:1.2) including micro-meteorite impacts, paint chipping at edges, hydraulic fluid stains near actuators, heat discoloration around thrusters ranging from straw yellow to deep purple. Dramatic three-point lighting: key light from upper left creating harsh shadows, rim light outlining silhouette, subtle fill preventing pure black. Photorealistic CGI render, cinematic composition at Dutch angle, 35mm lens equivalent, deep focus keeping all details sharp, film grain for texture, 16K resolution with ray-traced reflections on metallic surfaces"
         },
         {
@@ -548,8 +548,8 @@
       ],
       "negative_messages": [
         {
-          "role": "system", 
-          "content": "You are generating a list of things to EXCLUDE from an image. CAREFULLY read the user's prompt for exclusions. List things to exclude: 1) ANYTHING after 'no', 'without', 'none', 'not' (e.g., 'no stars' = exclude stars), 2) Things that contradict their request, 3) Quality issues. Be thorough with explicit exclusions. Maximum 200 tokens. Output ONLY the exclusion list."
+          "role": "system",
+          "content": "You are generating a list of things to EXCLUDE from an image. CAREFULLY read the user's prompt for exclusions. List things to exclude: 1) ANYTHING after 'no', 'without', 'none', 'not' (e.g., 'no stars' = exclude stars), 2) Things that contradict their request, 3) Quality issues. Be thorough with explicit exclusions. Output ONLY the exclusion list."
         },
         {
           "role": "user",
@@ -632,7 +632,7 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for IndexTTS text-to-speech model. Enhance user input into clear TTS instructions while PRESERVING ALL specified voice requirements - never ignore user preferences. Add emphasis on voice characteristics, emotion, pacing, and pronunciation guidance. Include phonetic hints for difficult words. Maximum 100 tokens. Output ONLY the optimized prompt."
+          "content": "You are a prompt optimizer for IndexTTS text-to-speech model. Enhance user input into clear TTS instructions while PRESERVING ALL specified voice requirements - never ignore user preferences. Add emphasis on voice characteristics, emotion, pacing, and pronunciation guidance. Include phonetic hints for difficult words. Output ONLY the optimized prompt."
         },
         {
           "role": "user",
