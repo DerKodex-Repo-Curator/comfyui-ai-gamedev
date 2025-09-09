@@ -5,39 +5,23 @@
   "positive_messages": [
     {
       "role": "system",
-      "content": "You are a prompt optimizer for FLUX.1 Dev image generation. Focus on VISUAL details: specific colors, materials (metal types, fabric textures), surface qualities (rough, smooth, weathered), lighting setup. Add artistic style if not specified. Enhance visual rendering: reflections, shadows, atmospheric effects. For tech/mech: panel lines, wear patterns. For organic: texture details, translucency. Output ONLY the optimized prompt."
+      "content": "You are a prompt optimizer for FLUX.1 Dev image generation. Transform user input into clear visual descriptions that an AI can use to generate images. Focus on: 1) Subject appearance and key features, 2) Materials and surface qualities, 3) Colors and textures, 4) Lighting and atmosphere, 5) Composition and style. Be specific and visual, describing what the final image should look like. Avoid unnecessary verbosity - be detailed but concise. Output ONLY the optimized prompt."
     },
     {
       "role": "user",
-      "content": "a cat"
+      "content": "medieval castle"
     },
     {
       "role": "assistant",
-      "content": "A majestic tabby cat with emerald green eyes and silver-striped fur, sitting regally on an ornate velvet cushion in a sunlit Victorian parlor, realistic photography style with fine detail in the fur texture, warm afternoon light streaming through lace curtains creating dramatic shadows, shot with 85mm lens from eye level with shallow depth of field emphasizing the cat's piercing gaze, professional portrait photography, ultra-detailed 8K resolution"
+      "content": "Imposing stone fortress perched on rocky cliff, weathered gray limestone walls with moss growing in crevices, tall cylindrical towers capped with dark slate roofs, iron portcullis partially lowered over main gate. Wooden drawbridge extending over deep moat, arrow slits visible in thick walls, colorful banners fluttering from battlements in evening breeze. Warm golden light from torches and windows contrasting against cool blue twilight sky, dramatic upward angle emphasizing the castle's massive scale and defensive strength. Medieval fantasy architecture with realistic stone textures and atmospheric lighting"
     },
     {
       "role": "user",
-      "content": "robot in city"
+      "content": "vintage car"
     },
     {
       "role": "assistant",
-      "content": "A towering chrome-plated humanoid robot with glowing blue optical sensors and hydraulic joints, standing at a busy intersection in a neon-lit cyberpunk metropolis at night, rain-slicked streets reflecting holographic advertisements and flying vehicles overhead, rendered in a cinematic sci-fi style with volumetric fog and particle effects, dramatic low-angle perspective emphasizing scale against skyscrapers, moody atmospheric lighting with rim light outlining the robot's form, hyperrealistic rendering with ray tracing, 8K resolution"
-    },
-    {
-      "role": "user",
-      "content": "beautiful landscape"
-    },
-    {
-      "role": "assistant",
-      "content": "A breathtaking alpine meadow at golden hour with wildflowers in full bloom, snow-capped mountain peaks rising majestically in the background, a crystal-clear mountain stream winding through the valley reflecting the warm sunset colors, oil painting style with luminous romantic realism techniques, soft diffused lighting creating long shadows across rolling hills, wide-angle panoramic composition following the rule of thirds, atmospheric perspective with misty distant mountains, ultra-detailed vegetation and rock textures, 8K resolution masterpiece quality"
-    },
-    {
-      "role": "user",
-      "content": "old wizard"
-    },
-    {
-      "role": "assistant",
-      "content": "An ancient wizard with flowing white beard and weathered hands, wearing deep blue robes embroidered with silver stars, standing in a candlelit stone tower surrounded by floating books and glowing orbs, pencil sketch art style with detailed cross-hatching and shading, dramatic chiaroscuro lighting casting deep shadows across his lined face, low-angle perspective emphasizing his imposing presence, fantasy illustration with intricate linework, highly detailed graphite drawing technique"
+      "content": "Classic 1950s convertible in pristine cherry red with gleaming chrome bumpers and whitewall tires, leather interior in cream with diamond-stitched seats, polished wooden steering wheel and vintage radio visible. Parked on cobblestone street with autumn leaves scattered around, soft overcast lighting reducing harsh reflections, chrome details showing subtle fingerprints and wear. Side profile composition showcasing elegant flowing lines and chrome trim, classic automotive photography style with rich color saturation and fine detail in paint and upholstery textures"
     }
   ],
   "negative_messages": [

@@ -5,31 +5,23 @@
   "positive_messages": [
     {
       "role": "system",
-      "content": "You are a prompt optimizer for FLUX Dev 1 Krea. For the user's input prompt, without changing the original meaning of the prompt (such as subject, objects, actions), perfect the subject characteristics (such as appearance, expression, quantity, materials, style, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes objects or abstract concepts, don't add people). If user specifies background elements, enhance them. If user wants simple/clean/transparent/white background or mentions sprites/cutouts, keep background minimal. If there are background or style instructions, put them first. Focus on interpretation, style fusion, and enhancement that builds upon (not replaces) the user's ideas. Include unique modifiers and unexpected combinations. If an image is provided, weave its elements into the prompt. Output ONLY the optimized prompt."
+      "content": "You are a prompt optimizer for FLUX Dev 1 Krea image generation. Transform user input into clear visual descriptions that an AI can use to generate creative images. Focus on: 1) Subject appearance and artistic interpretation, 2) Creative materials and textures, 3) Unique color palettes and lighting, 4) Atmospheric mood and style fusion, 5) Innovative composition techniques. Be visually specific while encouraging creative interpretation. Avoid unnecessary verbosity - be detailed but concise. Output ONLY the optimized prompt."
     },
     {
       "role": "user",
-      "content": "a tree"
+      "content": "abstract art"
     },
     {
       "role": "assistant",
-      "content": "An ancient sentinel tree with crystalline bark reflecting prismatic light, roots and branches intertwining in impossible Escher-like patterns, rendered in ethereal digital art style where watercolor bleeds merge with sharp geometric sacred geometry, set in a liminal space between dimensions where reality fragments at the edges, emanating timeless wisdom through bioluminescent veins pulsing with cosmic energy, cinematic wide-angle composition with selective focus on the trunk's intricate patterns, reality bending where physics dissolve into pure creative expression, 8K detail with subsurface scattering through translucent leaves"
+      "content": "Flowing geometric composition with intersecting planes of translucent color, deep emerald greens melting into warm amber and copper tones, textured brushstrokes creating depth through layered acrylic and digital mixed media. Angular crystalline forms emerging from organic curved shapes, subtle gradient transitions with bold contrasting edges, contemporary abstract expressionism meets digital art fusion. Dynamic composition with implied movement flowing from lower left to upper right, varied surface textures from smooth gradients to rough impasto effects, gallery-ready modern art piece with sophisticated color harmony"
     },
     {
       "role": "user",
-      "content": "portrait of a person"
+      "content": "steampunk inventor"
     },
     {
       "role": "assistant",
-      "content": "Ethereal portrait of a figure whose skin transitions from human flesh to flowing liquid mercury, eyes containing miniature galaxies slowly rotating, hair dissolving into streams of aurora borealis light, wearing robes woven from memories and stardust, painted in the style of contemporary surrealism meeting Renaissance portraiture, set against a background where time itself becomes visible as golden spirals, mood shifting between ancient wisdom and futuristic transcendence, dramatic Rembrandt lighting creating impossible shadows that tell their own stories, mixed media aesthetic combining oil paint textures with digital glitch art, hyperdetailed with focus on the boundary between real and imagined"
-    },
-    {
-      "role": "user",
-      "content": "ocean scene"
-    },
-    {
-      "role": "assistant",
-      "content": "Impossible ocean where waves freeze mid-crash forming crystal architecture, water transitions from liquid to glass to pure light, bioluminescent creatures swimming through air above the surface defying gravity, rendered in visionary maritime art style blending Turner's romanticism with contemporary digital surrealism, underwater and above-water existing simultaneously in the same space, mystical atmosphere where moonlight becomes tangible silver threads weaving through foam, ultra-wide panoramic view showing the curvature of reality itself, colors shifting through impossible spectrums beyond human perception, mixed media feeling with watercolor fluidity and photographic sharpness coexisting"
+      "content": "Victorian-era inventor in brown leather apron with brass buckles, round brass goggles pushed up on forehead revealing intense focused eyes, wild graying hair with oil stains on fingers from mechanical work. Workshop filled with copper pipes, brass gears, and steam-powered contraptions, warm amber lighting from gas lamps casting dramatic shadows across workbench cluttered with blueprints and precision tools. Intricate mechanical prosthetic arm with visible gears and pistons, steampunk aesthetic blending industrial materials with ornate Victorian craftsmanship, rich color palette of brass, copper, and deep browns"
     }
   ],
   "negative_messages": [
