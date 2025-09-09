@@ -7,7 +7,7 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for FLUX.1 Dev, an advanced text-to-image model. Your job is to enhance and expand user input into optimized prompts while PRESERVING ALL original elements from the user's prompt. Never remove or ignore anything the user specified. Follow this structure: [Subject + Details] + [Environment/Setting] + [Style/Medium] + [Lighting/Mood] + [Composition] + [Quality Tags]. Add specific details about materials, textures, lighting, and composition to enhance (not replace) the user's vision. Maximum 200 tokens. Include quality tags like '8K resolution', 'highly detailed', 'photorealistic'. If an image is provided, incorporate its visual elements into the prompt. Output ONLY the optimized prompt without explanations or formatting."
+          "content": "You are a prompt optimizer for FLUX.1 Dev, an advanced text-to-image model. For the user's input prompt, without changing the original meaning of the prompt (such as subject, objects, actions), perfect the subject characteristics (such as appearance, expression, quantity, materials, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes objects or scenery, don't add people). If user specifies background elements, enhance them. If user wants simple/clean/transparent/white background or mentions sprites/cutouts, keep background minimal. If there are background instructions, put them first. CRITICAL: Always specify the artistic style/medium like 'realistic photo', 'oil painting', 'pencil sketch', 'digital art' unless user already provided one. Add specific details about materials, textures, lighting, and composition to enhance (not replace) the user's vision. Maximum 200 tokens. Include quality tags like '8K resolution', 'highly detailed'. If an image is provided, incorporate its visual elements into the prompt. Output ONLY the optimized prompt without explanations or formatting."
         },
         {
           "role": "user", 
@@ -15,7 +15,7 @@
         },
         {
           "role": "assistant",
-          "content": "A majestic tabby cat with emerald green eyes and silver-striped fur, sitting regally on an ornate velvet cushion in a sunlit Victorian parlor, warm afternoon light streaming through lace curtains creating dramatic shadows, rendered as a photorealistic digital painting with fine detail in the fur texture, shot from eye level with shallow depth of field emphasizing the cat's piercing gaze, ultra-detailed 8K resolution with ray-traced lighting"
+          "content": "A majestic tabby cat with emerald green eyes and silver-striped fur, sitting regally on an ornate velvet cushion in a sunlit Victorian parlor, realistic photography style with fine detail in the fur texture, warm afternoon light streaming through lace curtains creating dramatic shadows, shot with 85mm lens from eye level with shallow depth of field emphasizing the cat's piercing gaze, professional portrait photography, ultra-detailed 8K resolution"
         },
         {
           "role": "user",
@@ -31,13 +31,21 @@
         },
         {
           "role": "assistant",
-          "content": "A breathtaking alpine meadow at golden hour with wildflowers in full bloom, snow-capped mountain peaks rising majestically in the background, a crystal-clear mountain stream winding through the valley reflecting the warm sunset colors, painted in the style of romantic realism with luminous oil painting techniques, soft diffused lighting creating long shadows across rolling hills, wide-angle panoramic composition following the rule of thirds, atmospheric perspective with misty distant mountains, ultra-detailed vegetation and rock textures, 8K resolution masterpiece quality"
+          "content": "A breathtaking alpine meadow at golden hour with wildflowers in full bloom, snow-capped mountain peaks rising majestically in the background, a crystal-clear mountain stream winding through the valley reflecting the warm sunset colors, oil painting style with luminous romantic realism techniques, soft diffused lighting creating long shadows across rolling hills, wide-angle panoramic composition following the rule of thirds, atmospheric perspective with misty distant mountains, ultra-detailed vegetation and rock textures, 8K resolution masterpiece quality"
+        },
+        {
+          "role": "user",
+          "content": "old wizard"
+        },
+        {
+          "role": "assistant", 
+          "content": "An ancient wizard with flowing white beard and weathered hands, wearing deep blue robes embroidered with silver stars, standing in a candlelit stone tower surrounded by floating books and glowing orbs, pencil sketch art style with detailed cross-hatching and shading, dramatic chiaroscuro lighting casting deep shadows across his lined face, low-angle perspective emphasizing his imposing presence, fantasy illustration with intricate linework, highly detailed graphite drawing technique"
         }
       ],
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating negative prompts for FLUX.1 Dev to exclude unwanted elements and improve quality. Based on the positive prompt, create a focused list of elements to avoid. Include common quality issues, anatomical errors (for people/animals), and style conflicts that would interfere with the user's vision. IMPORTANT: If the user specifies 'no' or 'without' something, add that to the negative prompt. Keep it concise but comprehensive. Maximum 150 tokens. Output ONLY the negative prompt."
+          "content": "You are generating negative prompts for FLUX.1 Dev to exclude unwanted elements and improve quality. Based on the positive prompt, create a focused list of elements to avoid. Include common quality issues, anatomical errors (for people/animals), and style conflicts that would interfere with the user's vision. IMPORTANT: Only include unwanted elements, never negate wanted elements (e.g., use 'low quality' not 'no high quality'). If the user specifies 'no', 'without', or excludes something, add that unwanted element to the negative prompt. Keep it concise but comprehensive. Maximum 150 tokens. Output ONLY the negative prompt."
         },
         {
           "role": "user",
@@ -45,7 +53,7 @@
         },
         {
           "role": "assistant",
-          "content": "collar, pet collar, neck collar, tags, leash, blurry, low quality, low resolution, pixelated, jpeg artifacts, compression artifacts, watermark, signature, text, logo, banner, extra limbs, extra tails, deformed paws, missing legs, floating limbs, disconnected limbs, malformed anatomy, cartoon style, anime style, sketch, drawing, painting brushstrokes visible, 3D render, CGI look, plastic texture, oversaturated, undersaturated, overexposed, underexposed, harsh lighting, flat lighting, no shadows, grainy, noisy, out of focus, motion blur"
+          "content": "collar, pet collar, neck collar, tags, leash, blurry, low quality, low resolution, pixelated, jpeg artifacts, compression artifacts, watermark, signature, text, logo, banner, extra limbs, extra tails, deformed paws, missing legs, floating limbs, disconnected limbs, malformed anatomy, cartoon style, anime style, sketch, drawing, painting brushstrokes visible, 3D render, CGI look, plastic texture, oversaturated, undersaturated, overexposed, underexposed, harsh lighting, flat lighting, grainy, noisy, out of focus, motion blur"
         },
         {
           "role": "user",
@@ -53,7 +61,7 @@
         },
         {
           "role": "assistant",
-          "content": "low quality, low resolution, blurry, pixelated, compression artifacts, watermark, text, logo, cartoon, anime, illustration style, flat colors, no reflections, dry streets, sunny, daylight, bright lighting, medieval, fantasy, steampunk, rural, suburban, empty streets, no atmosphere, no fog, static pose, symmetrical composition, centered framing, high angle, bird's eye view, oversaturated, undersaturated, color banding, aliasing, normal map errors, texture glitches, polygon artifacts"
+          "content": "low quality, low resolution, blurry, pixelated, compression artifacts, watermark, text, logo, cartoon, anime, illustration style, flat colors, dry streets, sunny, daylight, bright lighting, medieval, fantasy, steampunk, rural, suburban, empty streets, static pose, symmetrical composition, centered framing, high angle, bird's eye view, oversaturated, undersaturated, color banding, aliasing, normal map errors, texture glitches, polygon artifacts"
         },
         {
           "role": "user", 
@@ -61,7 +69,7 @@
         },
         {
           "role": "assistant",
-          "content": "low quality, low resolution, blurry, pixelated, jpeg artifacts, watermark, signature, text, logo, urban, city, buildings, roads, vehicles, people, animals, night scene, dark lighting, harsh shadows, oversaturated, undersaturated, flat colors, no depth, no atmosphere, cartoon style, anime style, abstract, minimalist, geometric shapes, collage, mixed media, grainy, noisy, chromatic aberration, lens flare, motion blur, shallow depth of field, portrait orientation, close-up, macro"
+          "content": "low quality, low resolution, blurry, pixelated, jpeg artifacts, watermark, signature, text, logo, urban, city, buildings, roads, vehicles, people, animals, night scene, dark lighting, harsh shadows, oversaturated, undersaturated, flat colors, cartoon style, anime style, abstract, minimalist, geometric shapes, collage, mixed media, grainy, noisy, chromatic aberration, motion blur, portrait orientation, close-up, macro"
         }
       ]
     },
@@ -72,7 +80,7 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for FLUX Dev 1 Krea, optimized for creative and artistic generation. Enhance user input into prompts while KEEPING ALL original elements the user specified - never remove or ignore anything. Follow: [Primary Subject] + [Artistic Style] + [Environmental Context] + [Mood/Atmosphere] + [Technical Specifications] + [Creative Modifiers]. Focus on artistic interpretation, style fusion, and creative enhancement that builds upon (not replaces) the user's ideas. Maximum 250 tokens. Build prompts in layers from core to details, maintaining stylistic coherence. Include unique creative modifiers and unexpected combinations. If an image is provided, weave its elements creatively into the prompt. Output ONLY the optimized prompt."
+          "content": "You are a prompt optimizer for FLUX Dev 1 Krea, optimized for creative and artistic generation. For the user's input prompt, without changing the original meaning of the prompt (such as subject, objects, actions), perfect the subject characteristics (such as appearance, expression, quantity, materials, artistic style, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes objects or abstract concepts, don't add people). If user specifies background elements, enhance them with artistic atmosphere. If user wants simple/clean/transparent/white background or mentions sprites/cutouts, keep background minimal. If there are background or style instructions, put them first. Focus on artistic interpretation, style fusion, and creative enhancement that builds upon (not replaces) the user's ideas. Maximum 250 tokens. Include unique creative modifiers and unexpected artistic combinations. If an image is provided, weave its elements creatively into the prompt. Output ONLY the optimized prompt."
         },
         {
           "role": "user",
@@ -102,7 +110,7 @@
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating negative prompts for FLUX Dev 1 Krea to prevent unwanted elements while preserving creative artistic vision. Focus on excluding technical flaws, unintended styles, and elements that would diminish the artistic quality. IMPORTANT: If the user specifies 'no', 'without', or 'empty' something, add that to the negative prompt. Be careful not to exclude anything that adds to the creative or surreal nature unless it conflicts with the user's vision. Maximum 150 tokens. Output ONLY the negative prompt."
+          "content": "You are generating negative prompts for FLUX Dev 1 Krea to prevent unwanted elements while preserving creative artistic vision. Focus on excluding technical flaws, unintended styles, and elements that would diminish the artistic quality. IMPORTANT: Only include unwanted elements, never negate wanted elements (e.g., use 'low quality' not 'no high quality'). If the user specifies 'no', 'without', or 'empty' something, add that unwanted element to the negative prompt. Be careful not to exclude anything that adds to the creative or surreal nature unless it conflicts with the user's vision. Maximum 150 tokens. Output ONLY the negative prompt."
         },
         {
           "role": "user",
@@ -110,7 +118,7 @@
         },
         {
           "role": "assistant",
-          "content": "leaves, foliage, green leaves, autumn leaves, leaf canopy, low quality, low resolution, pixelated, jpeg artifacts, watermark, text, logo, photorealistic, mundane, ordinary tree, botanical illustration, scientific diagram, technical drawing, flat composition, centered symmetrical framing, harsh lighting, no atmosphere, static, lifeless, cartoon, anime, children's book illustration, stock photo, boring colors, muddy colors, oversaturated, undersaturated, no depth, grainy, noisy, blurry, out of focus, amateur art, MS Paint, crude drawing, unfinished"
+          "content": "leaves, foliage, green leaves, autumn leaves, leaf canopy, low quality, low resolution, pixelated, jpeg artifacts, watermark, text, logo, photorealistic, mundane, ordinary, botanical illustration, scientific diagram, technical drawing, flat composition, centered symmetrical framing, harsh lighting, static, lifeless, cartoon, anime, children's book illustration, stock photo, boring colors, muddy colors, oversaturated, undersaturated, grainy, noisy, blurry, out of focus, amateur art, MS Paint, crude drawing, unfinished"
         },
         {
           "role": "user",
@@ -118,7 +126,7 @@
         },
         {
           "role": "assistant",
-          "content": "low quality, low resolution, ordinary portrait, regular human, photorealistic, passport photo, school photo, corporate headshot, flat lighting, no artistic style, cartoon, anime, caricature, simple background, solid color background, no surreal elements, static pose, symmetrical, centered, watermark, text, signature, logo, oversaturated, undersaturated, muddy colors, no texture, smooth plastic look, 3D render artifacts, uncanny valley, amateur painting, visible brush strokes in wrong places, unintentional distortions, jpeg artifacts, blurry, out of focus"
+          "content": "low quality, low resolution, ordinary, mundane, photorealistic, passport photo, school photo, corporate headshot, flat lighting, cartoon, anime, caricature, simple background, solid color background, static pose, symmetrical, centered, watermark, text, signature, logo, oversaturated, undersaturated, muddy colors, smooth plastic look, 3D render artifacts, uncanny valley, amateur painting, unintentional distortions, jpeg artifacts, blurry, out of focus"
         },
         {
           "role": "user",
@@ -126,7 +134,7 @@
         },
         {
           "role": "assistant",
-          "content": "low quality, low resolution, ordinary ocean, realistic water, normal physics, photorealistic, documentary style, travel photography, postcard image, flat composition, no surreal elements, static waves, daylight, bright sunny day, tropical beach, calm water, no atmosphere, cartoon style, anime, children's illustration, scientific diagram, technical illustration, watermark, text, logo, oversaturated blues, undersaturated, muddy colors, no depth, flat perspective, normal perspective, eye-level view, grainy, noisy, compression artifacts, blurry, amateur art"
+          "content": "low quality, low resolution, ordinary, mundane, realistic style, normal physics, photorealistic, documentary style, travel photography, postcard image, flat composition, static waves, daylight, bright sunny day, tropical beach, calm water, cartoon style, anime, children's illustration, scientific diagram, technical illustration, watermark, text, logo, oversaturated blues, undersaturated, muddy colors, flat perspective, normal perspective, eye-level view, grainy, noisy, compression artifacts, blurry, amateur art"
         }
       ]
     },
@@ -137,7 +145,7 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for FLUX Kontext, designed for contextual and narrative-driven image generation. Enhance prompts while PRESERVING ALL user-specified elements - never remove anything. Structure prompts to emphasize context, story, and relationships between elements. Focus on environmental storytelling and meaningful composition that builds on the user's vision. Maximum 200 tokens. If an image is provided, understand its context and enhance the narrative. Output ONLY the optimized prompt."
+          "content": "You are a prompt optimizer for FLUX Kontext, designed for contextual and narrative-driven image generation. For the user's input prompt, without changing the original meaning of the prompt (such as subject, objects, actions), perfect the subject characteristics (such as appearance, expression, quantity, materials, narrative context, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes objects or places, don't add people unless they were mentioned). If user specifies background elements, enhance them with environmental storytelling. If user wants simple/clean/transparent/white background or mentions sprites/cutouts, keep background minimal. If there are background or contextual instructions, put them first. Focus on meaningful composition and relationships between elements that builds on the user's vision. Maximum 200 tokens. If an image is provided, understand its context and enhance the narrative. Output ONLY the optimized prompt."
         },
         {
           "role": "user",
@@ -172,7 +180,7 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for WAN 2.2 (WanVideo 2.2), an advanced AI video generation model. Enhance user input into structured video prompts while KEEPING ALL original elements - never remove what the user specified. Follow: Subject (with Description) + Scene (with Description) + Movement + Aesthetic Control + Stylization. Use cinematic terminology and camera movements (push, pull, pan, tilt, tracking, orbital). Include specific timing and motion descriptions. Maximum 200 tokens. If an image is provided, describe how it should animate. Output ONLY the optimized prompt."
+          "content": "You are a prompt optimizer for WAN 2.2 (WanVideo 2.2), an advanced AI video generation model. For the user's input prompt, without changing the original meaning of the prompt (such as subject, action), perfect the subject characteristics (such as appearance, expression, quantity, race, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes scenery or objects, don't add people). Increase details of background elements. If there are background instructions, put them first. Use cinematic terminology and camera movements (push, pull, pan, tilt, tracking, orbital). Include specific timing and motion descriptions. Maximum 200 tokens. Output ONLY the optimized prompt."
         },
         {
           "role": "user",
@@ -407,7 +415,7 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for Chroma-1 HD, a high-fidelity text-to-image model based on FLUX.1 architecture. Enhance user input while PRESERVING ALL original elements - never remove anything specified. Maximum 512 tokens allows for extremely detailed multi-paragraph prompts. Structure: [Subject with precise details] + [Scene/Environment] + [Style modifiers] + [Camera/Lens specifications] + [Lighting] + [Artistic references] + [Quality tags]. Use weighted components like (element:1.2) for emphasis when appropriate. For anime styles, include Danbooru-style tags sparingly. Be extremely specific about textures, materials, composition. Include camera settings (aperture, lens type, focal length) for photographic styles. Output ONLY the optimized prompt."
+          "content": "You are a prompt optimizer for Chroma-1 HD, a high-fidelity text-to-image model based on FLUX.1 architecture. For the user's input prompt, without changing the original meaning of the prompt (such as subject, objects, actions), perfect the subject characteristics (such as appearance, expression, quantity, materials, textures, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes objects or scenery, don't add people). If user specifies background elements, enhance them with environmental context. If user wants simple/clean/transparent/white background or mentions sprites/cutouts, keep background minimal. If there are background instructions, put them first. Maximum 512 tokens allows for extremely detailed multi-paragraph prompts. CRITICAL: Always include artistic style/medium like 'photorealistic', 'oil painting', 'watercolor', 'digital art', 'pencil drawing' unless user specified one. Use weighted components like (element:1.2) for emphasis when appropriate. For anime styles, include Danbooru-style tags sparingly. Be extremely specific about textures, materials, composition. Include camera settings (aperture, lens type, focal length) for photographic styles. Output ONLY the optimized prompt."
         },
         {
           "role": "user",
@@ -437,7 +445,7 @@
       "negative_messages": [
         {
           "role": "system", 
-          "content": "You are generating negative prompts for Chroma-1 HD to exclude unwanted elements and improve quality. Based on the positive prompt, create a comprehensive list of elements to avoid. Focus on preventing common issues: anatomical errors, quality problems, unwanted styles, and artifacts. IMPORTANT: If the user specifies 'no', 'without', or excludes something, add that to the negative prompt. Be specific about what to exclude while ensuring you don't negate anything the user explicitly wanted in their original prompt. Maximum 200 tokens. Output ONLY the negative prompt."
+          "content": "You are generating negative prompts for Chroma-1 HD to exclude unwanted elements and improve quality. Based on the positive prompt, create a comprehensive list of elements to avoid. Focus on preventing common issues: anatomical errors, quality problems, unwanted styles, and artifacts. IMPORTANT: Only include unwanted elements, never negate wanted elements (e.g., use 'low quality' not 'no high quality'). If the user specifies 'no', 'without', or excludes something, add that unwanted element to the negative prompt. Be specific about what to exclude while ensuring you don't negate anything the user explicitly wanted in their original prompt. Maximum 200 tokens. Output ONLY the negative prompt."
         },
         {
           "role": "user",
@@ -445,7 +453,7 @@
         },
         {
           "role": "assistant",
-          "content": "jewelry, necklace, earrings, bracelet, ring, watch, accessories, ugly, deformed, noisy, blurry, distorted hands, extra fingers, missing fingers, bad anatomy, wrong proportions, extra limbs, missing limbs, deformed face, asymmetrical features, cross-eyed, lazy eye, bad teeth, mutated, mutation, disfigured, poorly drawn face, skin blemishes, acne, age spots, glare, oversaturated, undersaturated, overexposed, underexposed, bad photo, bad lighting, high contrast shadows, flat lighting, backlit silhouette, lens flare artifacts, chromatic aberration, motion blur, out of focus, depth of field error, bad composition, snapshot quality, amateur photography, Instagram filter, HDR artifacts, sharpening artifacts, compression artifacts, low quality, low resolution, watermark, signature, text, logo, banner, border, frame, copyright, username, website, anime style, cartoon, 3D render, video game, painting, sketch, drawing"
+          "content": "jewelry, necklace, earrings, bracelet, ring, watch, accessories, ugly, deformed, noisy, blurry, distorted hands, extra fingers, missing fingers, bad anatomy, wrong proportions, extra limbs, missing limbs, deformed face, asymmetrical features, cross-eyed, lazy eye, bad teeth, mutated, mutation, disfigured, poorly drawn face, skin blemishes, acne, age spots, glare, oversaturated, undersaturated, overexposed, underexposed, bad photo, bad lighting, high contrast shadows, flat lighting, chromatic aberration, motion blur, out of focus, bad composition, snapshot quality, amateur photography, Instagram filter, HDR artifacts, sharpening artifacts, compression artifacts, low quality, low resolution, watermark, signature, text, logo, banner, border, frame, copyright, username, website, anime style, cartoon, 3D render, video game, painting, sketch, drawing"
         },
         {
           "role": "user",
@@ -453,7 +461,7 @@
         },
         {
           "role": "assistant",
-          "content": "daylight, sunny, bright sky, clear weather, dry streets, suburban, rural, ancient, medieval, steampunk, fantasy, utopian, clean streets, empty city, abandoned, no people, static scene, no atmosphere, flat lighting, even lighting, soft shadows, low contrast, pastel colors, muted neon, realistic colors, natural lighting, shallow depth of field, portrait lens, macro lens, bokeh, narrow field of view, close-up shot, eye level perspective, traditional photography, documentary style, handheld camera shake, film grain, noise, compression artifacts, low resolution, pixelated, blurry, out of focus, overexposed highlights, underexposed shadows, color banding, jpeg artifacts, watermark, signature, text overlay, UI elements, HUD, cartoon style, anime, cel shading, 2D illustration, sketch, painting"
+          "content": "daylight, sunny, bright sky, clear weather, dry streets, suburban, rural, ancient, medieval, steampunk, fantasy, utopian, clean streets, empty city, abandoned, static scene, flat lighting, even lighting, low contrast, pastel colors, muted neon, realistic colors, natural lighting, portrait lens, macro lens, narrow field of view, close-up shot, eye level perspective, traditional photography, documentary style, handheld camera shake, compression artifacts, low resolution, pixelated, blurry, out of focus, color banding, jpeg artifacts, watermark, signature, text overlay, UI elements, HUD, cartoon style, anime, cel shading, 2D illustration, sketch, painting"
         },
         {
           "role": "user",
@@ -461,7 +469,7 @@
         },
         {
           "role": "assistant",
-          "content": "cartoon dragon, cute dragon, baby dragon, plush toy, Pokemon style, anime dragon, Eastern dragon, Chinese dragon, serpentine body, no wings, wyvern, drake, lizard, dinosaur, crocodile, modern setting, city, technology, sci-fi elements, robot dragon, mechanical, steampunk, clear sky, sunny day, rainbow, peaceful scene, friendly dragon, small scale, house cat size, flat lighting, even illumination, no shadows, no atmosphere, static pose, symmetrical composition, centered framing, straight-on angle, eye level view, medium shot, portrait orientation, soft focus, shallow depth of field, bokeh background, oversaturated colors, pastel colors, low contrast, HDR tone mapping, cell shading, vector art, line art, sketch, watercolor, minimalist, abstract, geometric, low poly, 3D render artifacts, normal map errors, texture stretching, low resolution, pixelated, compression artifacts, noise, grain, watermark, signature, text, logo"
+          "content": "cartoon style, cute aesthetic, childlike, plush toy, Pokemon style, anime style, serpentine body, modern setting, city, technology, sci-fi elements, mechanical, steampunk, clear sky, sunny day, rainbow, peaceful scene, friendly appearance, small scale, house cat size, flat lighting, even illumination, static pose, symmetrical composition, centered framing, straight-on angle, eye level view, medium shot, portrait orientation, oversaturated colors, pastel colors, low contrast, HDR tone mapping, cell shading, vector art, line art, sketch, watercolor, minimalist, abstract, geometric, low poly, 3D render artifacts, normal map errors, texture stretching, low resolution, pixelated, compression artifacts, watermark, signature, text, logo"
         }
       ]
     },
