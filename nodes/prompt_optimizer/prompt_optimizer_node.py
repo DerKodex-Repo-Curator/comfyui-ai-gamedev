@@ -199,6 +199,77 @@ class PromptOptimizer:
                 logger.warning(f"Failed to delete temp image {img_path}: {e}")
         self.temp_images = []
     
+    def _clean_repetitions(self, text: str) -> str:
+        """
+        Clean up repetitive patterns in text
+        
+        Args:
+            text: Text to clean
+            
+        Returns:
+            Cleaned text with repetitions removed
+        """
+        if not text:
+            return text
+            
+        # Split into items (comma or newline separated)
+        items = []
+        for part in text.replace('\n', ',').split(','):
+            part = part.strip()
+            if part:
+                items.append(part)
+        
+        # Detect consecutive repetitions
+        cleaned_items = []
+        prev_item = None
+        repeat_count = 0
+        
+        for item in items:
+            if item == prev_item:
+                repeat_count += 1
+                # Skip if we've seen this item more than once consecutively
+                if repeat_count > 1:
+                    logger.debug(f"Skipping repetition: '{item}' (seen {repeat_count} times)")
+                    continue
+            else:
+                repeat_count = 0
+            
+            cleaned_items.append(item)
+            prev_item = item
+        
+        # Also check for pattern repetitions (e.g., "A, B" repeated as "A, B, A, B")
+        if len(cleaned_items) > 4:
+            # Check for 2-item patterns
+            pattern_found = True
+            while pattern_found and len(cleaned_items) > 4:
+                pattern_found = False
+                for pattern_len in [2, 3, 4]:
+                    if len(cleaned_items) < pattern_len * 2:
+                        continue
+                    
+                    for i in range(len(cleaned_items) - pattern_len * 2 + 1):
+                        pattern = cleaned_items[i:i+pattern_len]
+                        next_pattern = cleaned_items[i+pattern_len:i+pattern_len*2]
+                        
+                        if pattern == next_pattern:
+                            # Remove the repeated pattern
+                            logger.debug(f"Removing pattern repetition: {pattern}")
+                            del cleaned_items[i+pattern_len:i+pattern_len*2]
+                            pattern_found = True
+                            break
+                    
+                    if pattern_found:
+                        break
+        
+        # Rejoin with commas
+        result = ', '.join(cleaned_items)
+        
+        # Log if we removed repetitions
+        if len(items) != len(cleaned_items):
+            logger.info(f"Removed {len(items) - len(cleaned_items)} repetitions from response")
+        
+        return result
+    
     def _optimize_with_ollama(
         self, 
         messages: List[Dict],
@@ -263,11 +334,14 @@ class PromptOptimizer:
             final_messages.append(user_message)
             logger.debug(f"Total messages to send: {len(final_messages)}")
             
-            # Prepare options
+            # Prepare options with repetition control
             options = {
                 "temperature": temperature,
                 "use_mlock": False,  # Disable memory locking  
-                "num_ctx": 2048  # Set context window
+                "num_ctx": 2048,  # Set context window
+                "repeat_penalty": 1.2,  # Penalize repetitions
+                "repeat_last_n": 64,  # Look back this many tokens for repetitions
+                "stop": ["\n\n", ".", "!", "?", "\n---", "\nUser:", "\nAssistant:"]  # Stop sequences
             }
             
             # Add seed if not using random (-1)
@@ -303,6 +377,10 @@ class PromptOptimizer:
             optimized = response.get("message", {}).get("content", "").strip()
             logger.info(f"Received response length: {len(optimized)} chars")
             logger.info(f"Full Ollama response: {optimized}")
+            
+            # Clean up repetitions
+            optimized = self._clean_repetitions(optimized)
+            logger.info(f"After cleaning repetitions: {len(optimized)} chars")
             
             # Ensure we got a response
             if not optimized:
