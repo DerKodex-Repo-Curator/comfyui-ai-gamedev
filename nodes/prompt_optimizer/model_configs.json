@@ -45,7 +45,7 @@
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating negative prompts for FLUX.1 Dev to exclude unwanted elements and improve quality. You will receive BOTH the original user prompt and the optimized version. Analyze both to create a comprehensive list of elements to avoid. Include common quality issues, anatomical errors (for people/animals), and style conflicts that would interfere with the user's vision. IMPORTANT: Only include unwanted elements, never negate wanted elements (e.g., use 'low quality' not 'no high quality'). If either prompt specifies 'no', 'without', or excludes something, add that unwanted element to the negative prompt. Keep it concise but comprehensive. Maximum 150 tokens. Output ONLY the negative prompt."
+          "content": "You are generating negative prompts for FLUX.1 Dev to exclude unwanted elements and improve quality. You will receive BOTH the original user prompt and the optimized version. Analyze both to create a comprehensive list of elements to avoid. Include common quality issues, anatomical errors (for people/animals), and style conflicts that would interfere with the user's vision. IMPORTANT: Only include unwanted elements, never negate wanted elements (e.g., use 'low quality' not 'no high quality'). Avoid repetition and redundant variations of the same concept (e.g., don't list 'extra arms, extra limbs, additional arms' - just use 'extra limbs'). If either prompt specifies 'no', 'without', or excludes something, add that unwanted element to the negative prompt. Keep it concise but comprehensive. Maximum 150 tokens. Output ONLY the negative prompt."
         },
         {
           "role": "user",
@@ -110,7 +110,7 @@
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating negative prompts for FLUX Dev 1 Krea to prevent unwanted elements while preserving creative artistic vision. You will receive BOTH the original user prompt and the optimized version. Analyze both to identify elements to exclude. Focus on technical flaws, unintended styles, and elements that would diminish the artistic quality. IMPORTANT: Only include unwanted elements, never negate wanted elements (e.g., use 'low quality' not 'no high quality'). If either prompt specifies 'no', 'without', or 'empty' something, add that unwanted element to the negative prompt. Be careful not to exclude anything that adds to the creative or surreal nature unless it conflicts with the user's vision. Maximum 150 tokens. Output ONLY the negative prompt."
+          "content": "You are generating negative prompts for FLUX Dev 1 Krea to prevent unwanted elements while preserving creative artistic vision. You will receive BOTH the original user prompt and the optimized version. Analyze both to identify elements to exclude. Focus on technical flaws, unintended styles, and elements that would diminish the artistic quality. IMPORTANT: Only include unwanted elements, never negate wanted elements (e.g., use 'low quality' not 'no high quality'). Avoid repetition and redundant variations of the same concept. If either prompt specifies 'no', 'without', or 'empty' something, add that unwanted element to the negative prompt. Be careful not to exclude anything that adds to the creative or surreal nature unless it conflicts with the user's vision. Maximum 150 tokens. Output ONLY the negative prompt."
         },
         {
           "role": "user",
@@ -210,7 +210,7 @@
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating negative prompts for WAN 2.2 video generation. You will receive BOTH the original user prompt and the optimized version. Analyze both to create a list of elements to exclude using '-no' format. Focus on preventing common video artifacts, unwanted elements, and quality issues that could interfere with the user's vision. Include: motion problems (blur, shake, distortion), quality issues (grain, artifacts, low resolution), unwanted overlays (text, watermarks), and style conflicts. IMPORTANT: If either prompt specifies 'no', 'without', or 'empty' something, add that to the negative prompt. DO NOT exclude anything the user specifically requested in their prompts. Output ONLY the negative prompt flags."
+          "content": "You are generating negative prompts for WAN 2.2 video generation. You will receive BOTH the original user prompt and the optimized version. Analyze both to create a list of elements to exclude using '-no' format. Focus on preventing common video artifacts, unwanted elements, and quality issues that could interfere with the user's vision. Include: motion problems (blur, shake, distortion), quality issues (grain, artifacts, low resolution), unwanted overlays (text, watermarks), and style conflicts. Avoid repetition and redundant variations of the same concept. IMPORTANT: If either prompt specifies 'no', 'without', or 'empty' something, add that to the negative prompt. DO NOT exclude anything the user specifically requested in their prompts. Output ONLY the negative prompt flags."
         },
         {
           "role": "user",
@@ -445,7 +445,7 @@
       "negative_messages": [
         {
           "role": "system", 
-          "content": "You are generating negative prompts for Chroma-1 HD to exclude unwanted elements and improve quality. You will receive BOTH the original user prompt and the optimized version. Analyze both to create a comprehensive list of elements to avoid. Focus on preventing common issues: anatomical errors, quality problems, unwanted styles, and artifacts. IMPORTANT: Only include unwanted elements, never negate wanted elements (e.g., use 'low quality' not 'no high quality'). If either prompt specifies 'no', 'without', or excludes something, add that unwanted element to the negative prompt. Be specific about what to exclude while ensuring you don't negate anything the user explicitly wanted in their prompts. Maximum 200 tokens. Output ONLY the negative prompt."
+          "content": "You are generating negative prompts for Chroma-1 HD to exclude unwanted elements and improve quality. You will receive BOTH the original user prompt and the optimized version. Analyze both to create a comprehensive list of elements to avoid. Focus on preventing common issues: anatomical errors, quality problems, unwanted styles, and artifacts. IMPORTANT: Only include unwanted elements, never negate wanted elements (e.g., use 'low quality' not 'no high quality'). Avoid repetition and redundant variations of the same concept (e.g., don't list 'extra sensor arrays, extra sensor domes, extra sensor dishes' - just use 'extra sensors'). If either prompt specifies 'no', 'without', or excludes something, add that unwanted element to the negative prompt. Be specific about what to exclude while ensuring you don't negate anything the user explicitly wanted in their prompts. Maximum 200 tokens. Output ONLY the negative prompt."
         },
         {
           "role": "user",
