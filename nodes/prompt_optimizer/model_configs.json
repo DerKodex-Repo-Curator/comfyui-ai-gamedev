@@ -45,11 +45,11 @@
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating negative prompts for FLUX.1 Dev to exclude unwanted elements and improve quality. You will receive BOTH the original user prompt and the optimized version. Analyze both to create a comprehensive list of elements to avoid. Include common quality issues, anatomical errors (for people/animals), and style conflicts that would interfere with the user's vision. IMPORTANT: Only include unwanted elements, never negate wanted elements (e.g., use 'low quality' not 'no high quality'). Avoid repetition and redundant variations of the same concept (e.g., don't list 'extra arms, extra limbs, additional arms' - just use 'extra limbs'). If either prompt specifies 'no', 'without', or excludes something, add that unwanted element to the negative prompt. Keep it concise but comprehensive. Maximum 150 tokens. Output ONLY the negative prompt."
+          "content": "You are generating a list of things to EXCLUDE when creating an image. Read the user's prompt carefully. List things we DON'T want in the image: 1) Anything the user says 'no', 'without', or 'not' about, 2) Things that would contradict what they want (e.g., if they want night, exclude daylight), 3) Basic quality issues (blur, watermark, text). Don't exclude things that match their request. Keep it simple and direct. Maximum 150 tokens. Output ONLY the list of things to exclude."
         },
         {
           "role": "user",
-          "content": "Original prompt: cat without collar\n\nOptimized prompt: A majestic tabby cat with no collar, emerald green eyes and silver-striped fur, sitting regally on an ornate velvet cushion in a sunlit Victorian parlor, warm afternoon light streaming through lace curtains creating dramatic shadows, rendered as a photorealistic digital painting with fine detail in the fur texture, shot from eye level with shallow depth of field emphasizing the cat's piercing gaze, ultra-detailed 8K resolution with ray-traced lighting"
+          "content": "cat without collar"
         },
         {
           "role": "assistant",
@@ -57,19 +57,83 @@
         },
         {
           "role": "user",
-          "content": "A towering chrome-plated humanoid robot with glowing blue optical sensors and hydraulic joints, standing at a busy intersection in a neon-lit cyberpunk metropolis at night, rain-slicked streets reflecting holographic advertisements and flying vehicles overhead, rendered in a cinematic sci-fi style with volumetric fog and particle effects, dramatic low-angle perspective emphasizing scale against skyscrapers, moody atmospheric lighting with rim light outlining the robot's form, hyperrealistic rendering with ray tracing, 8K resolution"
+          "content": "robot in city"
         },
         {
           "role": "assistant",
-          "content": "low quality, low resolution, blurry, pixelated, compression artifacts, watermark, text, logo, cartoon, anime, illustration style, flat colors, dry streets, sunny, daylight, bright lighting, medieval, fantasy, steampunk, rural, suburban, empty streets, static pose, symmetrical composition, centered framing, high angle, bird's eye view, oversaturated, undersaturated, color banding, aliasing, normal map errors, texture glitches, polygon artifacts"
+          "content": "low quality, blurry, pixelated, compression artifacts, watermark, text, logo, cartoon, anime, flat colors, dry streets, sunny, daylight, medieval, fantasy, rural, empty streets, oversaturated, undersaturated, color banding, texture glitches"
         },
         {
           "role": "user", 
-          "content": "A breathtaking alpine meadow at golden hour with wildflowers in full bloom, snow-capped mountain peaks rising majestically in the background, a crystal-clear mountain stream winding through the valley reflecting the warm sunset colors, painted in the style of romantic realism with luminous oil painting techniques, soft diffused lighting creating long shadows across rolling hills, wide-angle panoramic composition following the rule of thirds, atmospheric perspective with misty distant mountains, ultra-detailed vegetation and rock textures, 8K resolution masterpiece quality"
+          "content": "mountain landscape"
         },
         {
           "role": "assistant",
-          "content": "low quality, low resolution, blurry, pixelated, jpeg artifacts, watermark, signature, text, logo, urban, city, buildings, roads, vehicles, people, animals, night scene, dark lighting, harsh shadows, oversaturated, undersaturated, flat colors, cartoon style, anime style, abstract, minimalist, geometric shapes, collage, mixed media, grainy, noisy, chromatic aberration, motion blur, portrait orientation, close-up, macro"
+          "content": "low quality, blurry, jpeg artifacts, watermark, text, urban, buildings, vehicles, people, night scene, dark lighting, cartoon, anime, abstract, minimalist, grainy, noisy, close-up, macro"
+        },
+        {
+          "role": "user",
+          "content": "spaceship without weapons"
+        },
+        {
+          "role": "assistant",
+          "content": "weapons, guns, cannons, turrets, missiles, armaments, military, warship, low quality, blurry, pixelated, cartoon, anime, sketch, watermark, text, oversaturated, flat lighting"
+        },
+        {
+          "role": "user",
+          "content": "empty throne room"
+        },
+        {
+          "role": "assistant",
+          "content": "people, figures, characters, guards, king, queen, royalty, crowds, low quality, blurry, cartoon, anime, flat lighting, oversaturated, watermark, text"
+        },
+        {
+          "role": "user",
+          "content": "dead steam engine in junkyard"
+        },
+        {
+          "role": "assistant",
+          "content": "steam, smoke, fire, flames, glowing coals, movement, motion blur, operational, working, pristine, new, clean, polished, people, low quality, blurry, cartoon, anime, watermark, text"
+        },
+        {
+          "role": "user",
+          "content": "abandoned house at night without lights"
+        },
+        {
+          "role": "assistant",
+          "content": "lights on, illuminated windows, warm glow, people, inhabitants, smoke from chimney, well-maintained, fresh paint, new, daylight, sunny, low quality, blurry, cartoon, anime, watermark, text"
+        },
+        {
+          "role": "user",
+          "content": "broken robot without power"
+        },
+        {
+          "role": "assistant",
+          "content": "glowing eyes, LED lights, power indicators, movement, functioning, operational, electricity, energy beams, holographic displays, active, low quality, blurry, cartoon, anime, watermark, text"
+        },
+        {
+          "role": "user",
+          "content": "spaceship game asset on black background, no stars, no planets, no exhaust, engines off"
+        },
+        {
+          "role": "assistant",
+          "content": "stars, planets, nebulae, space dust, asteroids, exhaust, engine glow, thrusters firing, energy trails, motion blur, space background, cosmic elements, lens flares, atmospheric effects, low quality, blurry, watermark, text"
+        },
+        {
+          "role": "user",
+          "content": "clean modern office, no people, no clutter, minimalist"
+        },
+        {
+          "role": "assistant",
+          "content": "people, workers, figures, clutter, papers, messy desk, personal items, crowded, busy, complex decorations, ornate furniture, vintage style, industrial, low quality, blurry, watermark, text"
+        },
+        {
+          "role": "user",
+          "content": "still life fruit bowl, no bananas, no grapes, just apples and oranges"
+        },
+        {
+          "role": "assistant",
+          "content": "bananas, grapes, pears, strawberries, other fruits, vegetables, people, hands, motion, low quality, blurry, watermark, text"
         }
       ]
     },
@@ -80,7 +144,7 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for FLUX Dev 1 Krea, optimized for creative and artistic generation. For the user's input prompt, without changing the original meaning of the prompt (such as subject, objects, actions), perfect the subject characteristics (such as appearance, expression, quantity, materials, artistic style, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes objects or abstract concepts, don't add people). If user specifies background elements, enhance them with artistic atmosphere. If user wants simple/clean/transparent/white background or mentions sprites/cutouts, keep background minimal. If there are background or style instructions, put them first. Focus on artistic interpretation, style fusion, and creative enhancement that builds upon (not replaces) the user's ideas. Maximum 250 tokens. Include unique creative modifiers and unexpected artistic combinations. If an image is provided, weave its elements creatively into the prompt. Output ONLY the optimized prompt."
+          "content": "You are a prompt optimizer for FLUX Dev 1 Krea. For the user's input prompt, without changing the original meaning of the prompt (such as subject, objects, actions), perfect the subject characteristics (such as appearance, expression, quantity, materials, style, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes objects or abstract concepts, don't add people). If user specifies background elements, enhance them. If user wants simple/clean/transparent/white background or mentions sprites/cutouts, keep background minimal. If there are background or style instructions, put them first. Focus on interpretation, style fusion, and enhancement that builds upon (not replaces) the user's ideas. Maximum 250 tokens. Include unique modifiers and unexpected combinations. If an image is provided, weave its elements into the prompt. Output ONLY the optimized prompt."
         },
         {
           "role": "user",
@@ -110,31 +174,63 @@
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating negative prompts for FLUX Dev 1 Krea to prevent unwanted elements while preserving creative artistic vision. You will receive BOTH the original user prompt and the optimized version. Analyze both to identify elements to exclude. Focus on technical flaws, unintended styles, and elements that would diminish the artistic quality. IMPORTANT: Only include unwanted elements, never negate wanted elements (e.g., use 'low quality' not 'no high quality'). Avoid repetition and redundant variations of the same concept. If either prompt specifies 'no', 'without', or 'empty' something, add that unwanted element to the negative prompt. Be careful not to exclude anything that adds to the creative or surreal nature unless it conflicts with the user's vision. Maximum 150 tokens. Output ONLY the negative prompt."
+          "content": "You are generating a list of things to EXCLUDE when creating an image. Read the user's prompt. List what we DON'T want: 1) Anything they explicitly exclude (no, without, not), 2) Things that contradict their vision, 3) Quality issues. Don't exclude things that support what they want. Simple and direct. Maximum 150 tokens. Output ONLY the list of exclusions."
         },
         {
           "role": "user",
-          "content": "Original prompt: a tree\n\nOptimized prompt: An ancient sentinel tree without leaves, crystalline bark reflecting prismatic light, roots and branches intertwining in impossible Escher-like patterns, rendered in ethereal digital art style where watercolor bleeds merge with sharp geometric sacred geometry, set in a liminal space between dimensions where reality fragments at the edges, emanating timeless wisdom through bioluminescent veins pulsing with cosmic energy, cinematic wide-angle composition with selective focus on the trunk's intricate patterns, reality bending where physics dissolve into pure creative expression, 8K detail with subsurface scattering"
+          "content": "a tree"
         },
         {
           "role": "assistant",
-          "content": "leaves, foliage, green leaves, autumn leaves, leaf canopy, low quality, low resolution, pixelated, jpeg artifacts, watermark, text, logo, photorealistic, mundane, ordinary, botanical illustration, scientific diagram, technical drawing, flat composition, centered symmetrical framing, harsh lighting, static, lifeless, cartoon, anime, children's book illustration, stock photo, boring colors, muddy colors, oversaturated, undersaturated, grainy, noisy, blurry, out of focus, amateur art, MS Paint, crude drawing, unfinished"
+          "content": "low quality, jpeg artifacts, watermark, text, logo, mundane, flat composition, harsh lighting, muddy colors, grainy, blurry, amateur art"
         },
         {
           "role": "user",
-          "content": "Ethereal portrait of a figure whose skin transitions from human flesh to flowing liquid mercury, eyes containing miniature galaxies slowly rotating, hair dissolving into streams of aurora borealis light, wearing robes woven from memories and stardust, painted in the style of contemporary surrealism meeting Renaissance portraiture, set against a background where time itself becomes visible as golden spirals, mood shifting between ancient wisdom and futuristic transcendence, dramatic Rembrandt lighting creating impossible shadows that tell their own stories, mixed media aesthetic combining oil paint textures with digital glitch art, hyperdetailed with focus on the boundary between real and imagined"
+          "content": "portrait of a person"
         },
         {
           "role": "assistant",
-          "content": "low quality, low resolution, ordinary, mundane, photorealistic, passport photo, school photo, corporate headshot, flat lighting, cartoon, anime, caricature, simple background, solid color background, static pose, symmetrical, centered, watermark, text, signature, logo, oversaturated, undersaturated, muddy colors, smooth plastic look, 3D render artifacts, uncanny valley, amateur painting, unintentional distortions, jpeg artifacts, blurry, out of focus"
+          "content": "low quality, flat lighting, cartoon, anime, watermark, text, muddy colors, blurry"
         },
         {
           "role": "user",
-          "content": "Impossible ocean where waves freeze mid-crash forming crystal architecture, water transitions from liquid to glass to pure light, bioluminescent creatures swimming through air above the surface defying gravity, rendered in visionary maritime art style blending Turner's romanticism with contemporary digital surrealism, underwater and above-water existing simultaneously in the same space, mystical atmosphere where moonlight becomes tangible silver threads weaving through foam, ultra-wide panoramic view showing the curvature of reality itself, colors shifting through impossible spectrums beyond human perception, mixed media feeling with watercolor fluidity and photographic sharpness coexisting"
+          "content": "ocean scene"
         },
         {
           "role": "assistant",
-          "content": "low quality, low resolution, ordinary, mundane, realistic style, normal physics, photorealistic, documentary style, travel photography, postcard image, flat composition, static waves, daylight, bright sunny day, tropical beach, calm water, cartoon style, anime, children's illustration, scientific diagram, technical illustration, watermark, text, logo, oversaturated blues, undersaturated, muddy colors, flat perspective, normal perspective, eye-level view, grainy, noisy, compression artifacts, blurry, amateur art"
+          "content": "low quality, flat composition, cartoon, anime, watermark, text, muddy colors, grainy, blurry"
+        },
+        {
+          "role": "user",
+          "content": "extinct volcano"
+        },
+        {
+          "role": "assistant",
+          "content": "lava, magma, eruption, smoke, steam, fire, glowing, active, erupting, volcanic activity, ash cloud, low quality, blurry, watermark, text"
+        },
+        {
+          "role": "user",
+          "content": "dry riverbed"
+        },
+        {
+          "role": "assistant",
+          "content": "water, flowing water, river, stream, wet, moisture, reflection, aquatic plants, fish, splashing, low quality, blurry, watermark, text"
+        },
+        {
+          "role": "user",
+          "content": "night scene without moon, no streetlights, pitch black sky"
+        },
+        {
+          "role": "assistant",
+          "content": "moon, moonlight, streetlights, lamp posts, illumination, stars, bright sky, twilight, dawn, sunset, light sources, glowing windows, car headlights, low quality, blurry, watermark, text"
+        },
+        {
+          "role": "user",
+          "content": "medieval castle, no flags, no banners, abandoned"
+        },
+        {
+          "role": "assistant",
+          "content": "flags, banners, pennants, people, guards, inhabitants, smoke from chimneys, lit torches, maintained, new, modern additions, low quality, blurry, watermark, text"
         }
       ]
     },
@@ -145,31 +241,31 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for FLUX Kontext, designed for contextual and narrative-driven image generation. For the user's input prompt, without changing the original meaning of the prompt (such as subject, objects, actions), perfect the subject characteristics (such as appearance, expression, quantity, materials, narrative context, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes objects or places, don't add people unless they were mentioned). If user specifies background elements, enhance them with environmental storytelling. If user wants simple/clean/transparent/white background or mentions sprites/cutouts, keep background minimal. If there are background or contextual instructions, put them first. Focus on meaningful composition and relationships between elements that builds on the user's vision. Maximum 200 tokens. If an image is provided, understand its context and enhance the narrative. Output ONLY the optimized prompt."
+          "content": "You are a prompt optimizer for FLUX Kontext 1, an IMAGE EDITING model that modifies existing images based on instructions. Transform the user's editing request into precise, structured instructions. Focus on: 1) What to change, 2) What to preserve unchanged, 3) Specific details of the modification. Use clear, explicit language. State colors, styles, and attributes precisely. Always specify what should remain the same. Maximum 200 tokens. Output ONLY the optimized editing instruction."
         },
         {
           "role": "user",
-          "content": "old book"
+          "content": "make the car red"
         },
         {
           "role": "assistant",
-          "content": "An ancient leather-bound tome with gilt edges lying open on a mahogany desk, candlelight flickering across yellowed pages filled with mysterious diagrams and faded ink annotations, surrounded by scattered quill pens and dried wax seals suggesting urgent late-night research, dust motes dancing in a shaft of moonlight from a gothic window, the scene telling a story of forgotten knowledge being rediscovered, warm amber tones contrasting with cool blue shadows, shallow depth of field focusing on handwritten marginalia while background fades into scholarly mystery, photorealistic detail capturing paper texture and age, 8K resolution"
+          "content": "Change the car color to bright cherry red with metallic finish and glossy reflections. Keep the car model, position, angle, and all other elements unchanged. Maintain the original lighting, shadows, and background exactly as they are."
         },
         {
           "role": "user",
-          "content": "empty chair"
+          "content": "remove the person"
         },
         {
           "role": "assistant",
-          "content": "A weathered wooden rocking chair on a porch overlooking golden wheat fields, still swaying slightly as if just vacated, a half-finished knitting project draped over one arm and reading glasses left on the seat, late afternoon sun casting long nostalgic shadows, the scene speaking of patient waiting and quiet contemplation, painted in the style of American realism with attention to worn wood grain and fabric textures, warm pastoral lighting suggesting end of day rituals, composed to emphasize the chair's solitary presence against vast landscape, storytelling through absence, highly detailed with visible history in every scratch and worn edge"
+          "content": "Remove the person from the image completely. Fill the area where the person was with appropriate background elements that match the surrounding environment seamlessly. Keep all other elements, composition, lighting, and perspective unchanged."
         },
         {
           "role": "user",
-          "content": "street corner"
+          "content": "change to night"
         },
         {
           "role": "assistant",
-          "content": "A rain-soaked street corner where old brick buildings meet modern glass towers, a vintage newsstand with yellowing papers contrasting with digital billboards above, puddles reflecting neon signs and streetlights creating a temporal collision, a lone umbrella abandoned against a lamppost hints at a sudden departure, the intersection of past and present captured in architectural layers, cinematic noir lighting with high contrast between light and shadow, diagonal composition emphasizing the corner's convergence of different eras, atmospheric fog softening distant buildings, hyperrealistic urban textures from wet asphalt to rust stains, 8K detail"
+          "content": "Convert the scene to nighttime with dark blue sky, add street lights with warm yellow glow, adjust all lighting to moonlight and artificial sources, add stars if sky is visible. Keep all objects, positions, and composition identical. Maintain the same perspective and framing while adjusting colors and shadows for night ambiance."
         }
       ]
     },
@@ -210,11 +306,11 @@
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating negative prompts for WAN 2.2 video generation. You will receive BOTH the original user prompt and the optimized version. Analyze both to create a list of elements to exclude using '-no' format. Focus on preventing common video artifacts, unwanted elements, and quality issues that could interfere with the user's vision. Include: motion problems (blur, shake, distortion), quality issues (grain, artifacts, low resolution), unwanted overlays (text, watermarks), and style conflicts. Avoid repetition and redundant variations of the same concept. IMPORTANT: If either prompt specifies 'no', 'without', or 'empty' something, add that to the negative prompt. DO NOT exclude anything the user specifically requested in their prompts. Output ONLY the negative prompt flags."
+          "content": "You are generating a list of things to EXCLUDE from a video. Read the user's prompt. List what we DON'T want using '-no' format: 1) Things they say 'no', 'without', or 'not' about, 2) Video problems (motion blur, shake), 3) Things that contradict their request. Don't exclude things they want. Output ONLY the -no flags."
         },
         {
           "role": "user",
-          "content": "Original prompt: golden retriever running no collar\n\nOptimized prompt: A golden retriever without a collar, flowing fur, sprinting joyfully through a sunlit meadow filled with wildflowers, slow motion tracking shot following alongside at dog's eye level, camera gradually pulling back to reveal the vast landscape, warm golden hour lighting with lens flares, shallow depth of field keeping dog in sharp focus while background softly blurs, cinematic nature documentary style, natural color grading with enhanced warm tones"
+          "content": "golden retriever running no collar"
         },
         {
           "role": "assistant",
@@ -222,7 +318,7 @@
         },
         {
           "role": "user",
-          "content": "Bustling metropolitan skyline with illuminated skyscrapers and streaming traffic lights, camera starts with wide establishing shot then smoothly pushes through the cityscape weaving between buildings, neon signs reflecting on wet streets after rain, time-lapse effect showing light trails from vehicles, dramatic night lighting with strong contrast between shadows and artificial lights, cyberpunk aesthetic with enhanced neon colors, cinematic drone footage style"
+          "content": "city skyline timelapse"
         },
         {
           "role": "assistant",
@@ -230,7 +326,7 @@
         },
         {
           "role": "user",
-          "content": "A monarch butterfly with intricate orange and black wing patterns, delicately landing on a blooming lavender flower, ultra slow motion capture showing wing movements in detail, camera orbits slowly around the flower maintaining macro focus, soft morning light filtering through garden foliage creating bokeh, extreme close-up revealing wing scales and antennae movement, nature documentary style with pristine detail, dreamy atmosphere with gentle breeze moving surrounding flowers"
+          "content": "butterfly landing on flower"
         },
         {
           "role": "assistant",
@@ -275,7 +371,7 @@
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating negative prompts for WAN 2.1 video. Create exclusion flags based on the positive prompt to prevent artifacts and unwanted elements while being careful NOT to exclude anything the user specifically wants. Focus on motion quality, rendering issues, and style consistency problems that would detract from the user's vision. Output ONLY the negative prompt flags using '-no' format."
+          "content": "You are generating a list of things to EXCLUDE from a video. Read the user's prompt. List what we DON'T want using '-no' format: 1) Things they explicitly exclude, 2) Video artifacts and quality issues, 3) Things that would ruin their vision. Keep it simple. Output ONLY the -no flags."
         },
         {
           "role": "user",
@@ -339,37 +435,37 @@
       ]
     },
     "ace_step": {
-      "name": "ACE Step",
+      "name": "ACE-Step V1 Music",
       "supports_negative": false,
       "max_tokens": 150,
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for ACE Step model. Enhance user input into clear, structured prompts while PRESERVING ALL original elements - never remove anything the user specified. Add emphasis on step-by-step progression and detailed instructions. Focus on clarity and specificity. Maximum 150 tokens. Output ONLY the optimized prompt."
+          "content": "You are a prompt optimizer for ACE-Step V1, a MUSIC GENERATION model. Transform user input into structured music prompts with two fields: 1) TAGS: comma-separated keywords for genre, mood, instruments, style (max 100 tokens), 2) LYRICS: structured song content with [verse], [chorus], [bridge], [intro], [outro] tags and language tags like [en]. For instrumental requests, describe the instrumentation. Output format: 'Tags: [tags]\nLyrics: [structured lyrics or instrumental description]'. Maximum 150 tokens total."
         },
         {
           "role": "user",
-          "content": "mountain landscape"
+          "content": "chill lofi beat"
         },
         {
           "role": "assistant",
-          "content": "Dramatic mountain landscape with snow-capped peaks piercing through morning clouds, alpine meadow in foreground with scattered wildflowers, crystalline mountain lake reflecting the peaks, golden sunrise light illuminating the highest summits while valleys remain in blue shadow, photorealistic style with exceptional detail in rock textures and atmospheric haze, wide-angle perspective capturing vast scale"
+          "content": "Tags: lofi hiphop, chill, relaxed, instrumental, vinyl crackle, jazz samples, warm bass, soft drums, study music, nostalgic\nLyrics: [intro]\n[instrumental] Warm vinyl crackle, soft jazz piano loop\n[verse]\n[instrumental] Mellow hip-hop drums, deep bass, jazzy piano chords\n[bridge]\n[instrumental] Saxophone sample, rain sounds, lo-fi atmosphere"
         },
         {
           "role": "user",
-          "content": "futuristic car"
+          "content": "upbeat summer song"
         },
         {
           "role": "assistant",
-          "content": "Sleek aerodynamic vehicle with transparent cockpit and holographic displays, metallic surface with color-shifting nanotechnology paint, hovering above magnetic road with blue energy trails, set in neo-Tokyo environment with neon signs and towering buildings, night scene with dramatic lighting, concept art style with high technical detail, three-quarter view angle showcasing design"
+          "content": "Tags: pop, upbeat, summer, energetic, guitar, drums, synth, feel-good, beach vibes, catchy\nLyrics: [verse]\n[en] Sun is shining, feeling free\nDancing waves calling me\n[chorus]\n[en] Summer days, endless nights\nEverything feels so right\n[bridge]\n[instrumental] Electric guitar solo, tropical percussion"
         },
         {
           "role": "user",
-          "content": "magical potion"
+          "content": "dark electronic"
         },
         {
           "role": "assistant",
-          "content": "Ornate crystal vial containing swirling iridescent liquid with floating luminescent particles, cork sealed with wax bearing mystical symbol, wisps of colored vapor escaping, sitting on ancient wooden alchemist table surrounded by dried herbs and spell components, candlelit atmosphere with dramatic shadows, fantasy art style with magical glow effects, close-up view with selective focus"
+          "content": "Tags: dark electronic, industrial, synth-heavy, atmospheric, dystopian, aggressive bass, techno, ambient, cinematic\nLyrics: [intro]\n[instrumental] Dark synth pads, distorted bass, glitch effects\n[verse]\n[instrumental] Heavy 808 drums, industrial percussion, ominous synth leads\n[outro]\n[instrumental] Ambient fade with distant echoes"
         }
       ]
     },
@@ -445,31 +541,71 @@
       "negative_messages": [
         {
           "role": "system", 
-          "content": "You are generating negative prompts for Chroma-1 HD to exclude unwanted elements and improve quality. You will receive BOTH the original user prompt and the optimized version. Analyze both to create a comprehensive list of elements to avoid. Focus on preventing common issues: anatomical errors, quality problems, unwanted styles, and artifacts. IMPORTANT: Only include unwanted elements, never negate wanted elements (e.g., use 'low quality' not 'no high quality'). Avoid repetition and redundant variations of the same concept (e.g., don't list 'extra sensor arrays, extra sensor domes, extra sensor dishes' - just use 'extra sensors'). If either prompt specifies 'no', 'without', or excludes something, add that unwanted element to the negative prompt. Be specific about what to exclude while ensuring you don't negate anything the user explicitly wanted in their prompts. Maximum 200 tokens. Output ONLY the negative prompt."
+          "content": "You are generating a list of things to EXCLUDE from an image. Read the user's prompt carefully. List everything we DON'T want: 1) Things they say 'no', 'without', 'none', or 'not' about, 2) Things that would ruin what they're asking for (e.g., stars in a 'pure black background'), 3) Quality problems. Be thorough but don't exclude things they actually want. Maximum 200 tokens. Output ONLY the list of things to exclude."
         },
         {
           "role": "user",
-          "content": "Original prompt: photo of woman without jewelry in garden\n\nOptimized prompt: A photo of a young woman in her mid-twenties with flowing auburn hair, no jewelry, gentle smile revealing subtle dimples, wearing a white cotton sundress with delicate lace trim, standing gracefully in a sunlit English cottage garden filled with blooming roses and lavender bushes. Natural soft lighting filtering through overhead tree branches creating dappled shadows on her face, warm golden hour ambiance. Shot with 85mm lens at f/1.8 for creamy bokeh background separation, subtle depth of field keeping focus on subject's expressive green eyes. Organic color grading with enhanced warm tones, skin texture details preserved, natural makeup look. Ultra-sharp focus on subject, photorealistic rendering, professional portrait photography style reminiscent of Annie Leibovitz's natural light work, 8K resolution, film grain texture"
+          "content": "photo of woman without jewelry in garden"
         },
         {
           "role": "assistant",
-          "content": "jewelry, necklace, earrings, bracelet, ring, watch, accessories, ugly, deformed, noisy, blurry, distorted hands, extra fingers, missing fingers, bad anatomy, wrong proportions, extra limbs, missing limbs, deformed face, asymmetrical features, cross-eyed, lazy eye, bad teeth, mutated, mutation, disfigured, poorly drawn face, skin blemishes, acne, age spots, glare, oversaturated, undersaturated, overexposed, underexposed, bad photo, bad lighting, high contrast shadows, flat lighting, chromatic aberration, motion blur, out of focus, bad composition, snapshot quality, amateur photography, Instagram filter, HDR artifacts, sharpening artifacts, compression artifacts, low quality, low resolution, watermark, signature, text, logo, banner, border, frame, copyright, username, website, anime style, cartoon, 3D render, video game, painting, sketch, drawing"
+          "content": "jewelry, accessories, deformed, blurry, extra fingers, bad anatomy, extra limbs, oversaturated, bad lighting, compression artifacts, low quality, watermark, text, anime, cartoon, 3D render"
         },
         {
           "role": "user",
-          "content": "Sprawling cyberpunk metropolis at midnight, rain-slicked streets reflecting neon advertisements in vibrant cyan and magenta, towering skyscrapers with holographic projections cutting through dense fog. Street level view showing crowded marketplace with augmented humans, flying vehicles leaving light trails overhead, steam rising from street vendors' stalls. Blade Runner 2049 cinematography style with volumetric lighting piercing through atmospheric haze, (neon glow:1.3), (wet surfaces:1.2). Wide angle 24mm lens perspective with deep depth of field capturing both foreground detail and distant megastructures. High contrast with crushed blacks and blown-out neon highlights, film noir mood with techno-dystopian aesthetic. Ray-traced reflections on wet pavement, particle effects in air, photorealistic urban decay mixed with high-tech elements, inspired by Syd Mead's concept art, ultra-detailed architecture, 16K resolution masterpiece"
+          "content": "cyberpunk city at night"
         },
         {
           "role": "assistant",
-          "content": "daylight, sunny, bright sky, clear weather, dry streets, suburban, rural, ancient, medieval, steampunk, fantasy, utopian, clean streets, empty city, abandoned, static scene, flat lighting, even lighting, low contrast, pastel colors, muted neon, realistic colors, natural lighting, portrait lens, macro lens, narrow field of view, close-up shot, eye level perspective, traditional photography, documentary style, handheld camera shake, compression artifacts, low resolution, pixelated, blurry, out of focus, color banding, jpeg artifacts, watermark, signature, text overlay, UI elements, HUD, cartoon style, anime, cel shading, 2D illustration, sketch, painting"
+          "content": "daylight, sunny, dry streets, suburban, medieval, fantasy, empty city, flat lighting, pastel colors, compression artifacts, low quality, blurry, watermark, text"
         },
         {
           "role": "user",
-          "content": "Majestic ancient dragon with iridescent emerald scales that shift to sapphire blue at the edges, each scale meticulously detailed with battle scars and age patterns, wingspan stretching 200 feet across a stormy mountain peak. Intelligent golden eyes with vertical pupils reflecting wisdom of millennia, smoke wisping from nostrils, muscular form coiled around crumbling stone tower. Lightning crackling between horn ridges, (bioluminescent throat glow:1.2) suggesting imminent fire breath. Epic fantasy art style combining photorealism with painterly elements, dramatic low-angle hero perspective emphasizing the creature's massive scale against tiny pine trees below. Atmospheric storm lighting with rim light outlining the dragon's silhouette, volumetric clouds swirling around wings. Digital painting technique reminiscent of Justin Gerard and Todd Lockwood, with oil painting texture overlay. Dynamic composition following golden ratio, selective focus on dragon's head with motion blur on wing tips, fantasy realism with mythological gravitas, ultra-high detail in scale texture and membrane translucency, 8K resolution epic scene"
+          "content": "epic dragon"
         },
         {
           "role": "assistant",
-          "content": "cartoon style, cute aesthetic, childlike, plush toy, Pokemon style, anime style, serpentine body, modern setting, city, technology, sci-fi elements, mechanical, steampunk, clear sky, sunny day, rainbow, peaceful scene, friendly appearance, small scale, house cat size, flat lighting, even illumination, static pose, symmetrical composition, centered framing, straight-on angle, eye level view, medium shot, portrait orientation, oversaturated colors, pastel colors, low contrast, HDR tone mapping, cell shading, vector art, line art, sketch, watercolor, minimalist, abstract, geometric, low poly, 3D render artifacts, normal map errors, texture stretching, low resolution, pixelated, compression artifacts, watermark, signature, text, logo"
+          "content": "cute style, peaceful, small scale, flat lighting, pastel colors, 3D render artifacts, low quality, watermark, text"
+        },
+        {
+          "role": "user",
+          "content": "frozen lake in winter"
+        },
+        {
+          "role": "assistant",
+          "content": "liquid water, waves, ripples, flowing, splashing, swimming, boats, summer, warm, green vegetation, leaves on trees, low quality, blurry, watermark, text"
+        },
+        {
+          "role": "user",
+          "content": "ancient ruins no people"
+        },
+        {
+          "role": "assistant",
+          "content": "people, tourists, guides, modern elements, new construction, pristine condition, intact roof, fresh paint, electricity, lights, low quality, blurry, watermark, text"
+        },
+        {
+          "role": "user",
+          "content": "military spaceship for game asset, isolated on pure black, no stars, no planets, no nebulae, no exhaust, engines off, no energy effects"
+        },
+        {
+          "role": "assistant",
+          "content": "stars, planets, nebulae, galaxies, space dust, asteroids, cosmic elements, exhaust trails, engine glow, thrusters, energy beams, plasma effects, motion blur, lens flares, background elements, environmental details, atmospheric effects, low quality, blurry, watermark, text"
+        },
+        {
+          "role": "user",
+          "content": "desert landscape, no vegetation, no water, no oasis, just sand dunes"
+        },
+        {
+          "role": "assistant",
+          "content": "vegetation, plants, trees, grass, cacti, water, oasis, lake, river, streams, puddles, rain, clouds, people, animals, buildings, roads, low quality, blurry, watermark, text"
+        },
+        {
+          "role": "user",
+          "content": "clean product shot, white background, no shadows, no reflections, isolated"
+        },
+        {
+          "role": "assistant",
+          "content": "shadows, reflections, gradient background, colored background, props, hands, people, surface texture, environmental context, dramatic lighting, complex background, low quality, blurry, watermark, text"
         }
       ]
     },

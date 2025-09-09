@@ -421,20 +421,20 @@ class PromptOptimizer:
                 # Debug: Log the system prompt being used for negative generation
                 if negative_messages and negative_messages[0].get("role") == "system":
                     system_content = negative_messages[0].get("content", "")
-                    logger.debug(f"   Negative system prompt preview: {system_content[:200]}...")
+                    logger.info(f"   Full negative system prompt: {system_content}")
                     # Check if this is a video-related prompt
                     if "video" in system_content.lower() or "motion" in system_content.lower() or "-no" in system_content:
                         logger.warning(f"⚠️ Detected video-related negative prompt system message for image model {target_model}")
                 
-                # Pass BOTH original and optimized prompts for comprehensive negative generation
-                # This ensures we catch exclusions from both the user's original intent and the enhanced version
+                # Pass only the original prompt for negative generation to avoid confusion
+                # The optimized prompt might add details that shouldn't be excluded
                 import time
-                combined_prompt = f"Original prompt: {prompt}\n\nOptimized prompt: {positive_prompt}\n[Request ID: {time.time()}]"
-                logger.info(f"   Combined prompt for negative generation: {combined_prompt}")
+                prompt_with_timestamp = f"{prompt}\n[Request ID: {time.time()}]"
+                logger.info(f"   Full prompt for negative generation: {prompt_with_timestamp}")
                 
                 negative_prompt = self._optimize_with_ollama(
                     negative_messages,
-                    combined_prompt,  # Use both original and optimized prompts
+                    prompt_with_timestamp,  # Use only original prompt
                     None,  # Don't include image for negative prompts
                     ollama_host,
                     ollama_model,
@@ -493,18 +493,6 @@ class PromptOptimizer:
                 
                 logger.info(f"   Negative result: {len(negative_prompt)} chars")
                 logger.info(f"   Full negative prompt: {negative_prompt}")
-                
-                # If the negative prompt seems problematic, use a fallback
-                if len(negative_prompt) < 20 or "high quality" in negative_prompt.lower() or "8k resolution" in negative_prompt.lower():
-                    logger.error(f"❌ ERROR: Invalid negative prompt generated (contains positive terms or too short)")
-                    # Use a simple fallback for the model
-                    fallback_negatives = {
-                        "flux_dev": "low quality, blurry, watermark, text, logo, oversaturated, jpeg artifacts, distorted",
-                        "flux_krea": "low quality, blurry, watermark, mundane, photorealistic, jpeg artifacts",
-                        "chroma_hd": "low quality, blurry, watermark, text, distorted anatomy, compression artifacts",
-                    }
-                    negative_prompt = fallback_negatives.get(target_model, "low quality, blurry, watermark, text")
-                    logger.info(f"   Using fallback negative prompt: {negative_prompt}")
         else:
             if not model_config.get("supports_negative", False):
                 logger.debug(f"Model {target_model} doesn't support negative prompts")
