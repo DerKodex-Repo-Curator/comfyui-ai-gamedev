@@ -367,14 +367,39 @@ class PromptOptimizer:
             
             # Make request to Ollama
             logger.info(f"📡 Sending request to Ollama...")
+            import time
+            start_time = time.time()
             response = client.chat(
                 model=ollama_model,
                 messages=final_messages,
                 options=options
             )
+            elapsed_time = time.time() - start_time
             
             # Extract and clean response
             optimized = response.get("message", {}).get("content", "").strip()
+            
+            # Log token usage and performance
+            prompt_eval_count = response.get("prompt_eval_count", 0)
+            eval_count = response.get("eval_count", 0)
+            total_tokens = prompt_eval_count + eval_count
+            
+            # Calculate tokens per second if available
+            prompt_eval_duration = response.get("prompt_eval_duration", 0) / 1e9  # Convert nanoseconds to seconds
+            eval_duration = response.get("eval_duration", 0) / 1e9
+            
+            tokens_per_sec = ""
+            if eval_duration > 0:
+                tps = eval_count / eval_duration
+                tokens_per_sec = f", Speed: {tps:.1f} tokens/sec"
+            
+            logger.info(f"📊 Token usage - Input: {prompt_eval_count}, Output: {eval_count}, Total: {total_tokens}{tokens_per_sec}")
+            logger.info(f"⏱️ Response time: {elapsed_time:.2f}s (prompt eval: {prompt_eval_duration:.2f}s, generation: {eval_duration:.2f}s)")
+            
+            # Warn if approaching context limit
+            if total_tokens > 1800:  # 90% of 2048
+                logger.warning(f"⚠️ High token usage ({total_tokens}/2048) - approaching context limit")
+            
             logger.info(f"Received response length: {len(optimized)} chars")
             logger.info(f"Full Ollama response: {optimized}")
             
