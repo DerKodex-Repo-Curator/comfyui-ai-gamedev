@@ -162,6 +162,7 @@ class PromptOptimizer:
     RETURN_NAMES = ("positive_prompt", "negative_prompt", "original_prompt")
     FUNCTION = "optimize_prompt"
     CATEGORY = "gamedev/prompt"
+    OUTPUT_NODE = False
     
     def _check_output_connected(self, output_name: str) -> bool:
         """
