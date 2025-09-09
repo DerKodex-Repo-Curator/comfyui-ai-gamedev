@@ -45,7 +45,7 @@
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating negative prompts for FLUX.1 Dev to exclude unwanted elements and improve quality. You will receive BOTH the original user prompt and the optimized version. Analyze both to create a comprehensive list of elements to avoid. Include common quality issues, anatomical errors (for people/animals), and style conflicts that would interfere with the user's vision. IMPORTANT: Only include unwanted elements, never negate wanted elements (e.g., use 'low quality' not 'no high quality'). If either prompt specifies 'no', 'without', or excludes something, add that unwanted element to the negative prompt. Keep it concise but comprehensive. Maximum 150 tokens. Output ONLY the negative prompt."
+          "content": "You are generating concise negative prompts for FLUX.1 Dev. You will receive both original and optimized prompts. Focus on: 1) Elements explicitly excluded (no, without, empty), 2) Common quality issues (blur, artifacts, low resolution), 3) Conflicting styles, 4) Anatomical errors if relevant. Be CONCISE - avoid repetition and exhaustive lists. Don't exclude things that might be wanted (reflections, details, environment). Maximum 100 tokens. Output ONLY the negative prompt."
         },
         {
           "role": "user",
@@ -53,7 +53,7 @@
         },
         {
           "role": "assistant",
-          "content": "collar, pet collar, neck collar, tags, leash, blurry, low quality, low resolution, pixelated, jpeg artifacts, compression artifacts, watermark, signature, text, logo, banner, extra limbs, extra tails, deformed paws, missing legs, floating limbs, disconnected limbs, malformed anatomy, cartoon style, anime style, sketch, drawing, painting brushstrokes visible, 3D render, CGI look, plastic texture, oversaturated, undersaturated, overexposed, underexposed, harsh lighting, flat lighting, grainy, noisy, out of focus, motion blur"
+          "content": "collar, tags, leash, blurry, low quality, jpeg artifacts, watermark, text, extra limbs, deformed anatomy, cartoon, anime, 3D render, oversaturated, grainy"
         },
         {
           "role": "user",
@@ -61,7 +61,7 @@
         },
         {
           "role": "assistant",
-          "content": "low quality, low resolution, blurry, pixelated, compression artifacts, watermark, text, logo, cartoon, anime, illustration style, flat colors, dry streets, sunny, daylight, bright lighting, medieval, fantasy, steampunk, rural, suburban, empty streets, static pose, symmetrical composition, centered framing, high angle, bird's eye view, oversaturated, undersaturated, color banding, aliasing, normal map errors, texture glitches, polygon artifacts"
+          "content": "low quality, blurry, watermark, text, cartoon, anime, dry streets, daylight, medieval, fantasy, rural, empty streets, oversaturated"
         },
         {
           "role": "user", 
@@ -69,7 +69,7 @@
         },
         {
           "role": "assistant",
-          "content": "low quality, low resolution, blurry, pixelated, jpeg artifacts, watermark, signature, text, logo, urban, city, buildings, roads, vehicles, people, animals, night scene, dark lighting, harsh shadows, oversaturated, undersaturated, flat colors, cartoon style, anime style, abstract, minimalist, geometric shapes, collage, mixed media, grainy, noisy, chromatic aberration, motion blur, portrait orientation, close-up, macro"
+          "content": "low quality, blurry, watermark, text, urban, buildings, vehicles, people, night scene, cartoon, anime, abstract, grainy"
         }
       ]
     },
@@ -110,7 +110,7 @@
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating negative prompts for FLUX Dev 1 Krea to prevent unwanted elements while preserving creative artistic vision. You will receive BOTH the original user prompt and the optimized version. Analyze both to identify elements to exclude. Focus on technical flaws, unintended styles, and elements that would diminish the artistic quality. IMPORTANT: Only include unwanted elements, never negate wanted elements (e.g., use 'low quality' not 'no high quality'). If either prompt specifies 'no', 'without', or 'empty' something, add that unwanted element to the negative prompt. Be careful not to exclude anything that adds to the creative or surreal nature unless it conflicts with the user's vision. Maximum 150 tokens. Output ONLY the negative prompt."
+          "content": "You are generating concise negative prompts for FLUX Dev 1 Krea while preserving artistic vision. You will receive both original and optimized prompts. Focus on: 1) Explicitly excluded elements, 2) Technical flaws only, 3) Styles that directly conflict with the artistic intent. Be MINIMAL - creative/surreal elements should NOT be excluded. Avoid repetitive lists. Maximum 100 tokens. Output ONLY the negative prompt."
         },
         {
           "role": "user",
@@ -118,7 +118,7 @@
         },
         {
           "role": "assistant",
-          "content": "leaves, foliage, green leaves, autumn leaves, leaf canopy, low quality, low resolution, pixelated, jpeg artifacts, watermark, text, logo, photorealistic, mundane, ordinary, botanical illustration, scientific diagram, technical drawing, flat composition, centered symmetrical framing, harsh lighting, static, lifeless, cartoon, anime, children's book illustration, stock photo, boring colors, muddy colors, oversaturated, undersaturated, grainy, noisy, blurry, out of focus, amateur art, MS Paint, crude drawing, unfinished"
+          "content": "leaves, foliage, low quality, jpeg artifacts, watermark, text, photorealistic, mundane, technical drawing, cartoon, anime, grainy, blurry"
         },
         {
           "role": "user",
@@ -126,7 +126,7 @@
         },
         {
           "role": "assistant",
-          "content": "low quality, low resolution, ordinary, mundane, photorealistic, passport photo, school photo, corporate headshot, flat lighting, cartoon, anime, caricature, simple background, solid color background, static pose, symmetrical, centered, watermark, text, signature, logo, oversaturated, undersaturated, muddy colors, smooth plastic look, 3D render artifacts, uncanny valley, amateur painting, unintentional distortions, jpeg artifacts, blurry, out of focus"
+          "content": "low quality, mundane, photorealistic, passport photo, flat lighting, cartoon, anime, simple background, watermark, text, 3D render, blurry"
         },
         {
           "role": "user",
@@ -134,7 +134,7 @@
         },
         {
           "role": "assistant",
-          "content": "low quality, low resolution, ordinary, mundane, realistic style, normal physics, photorealistic, documentary style, travel photography, postcard image, flat composition, static waves, daylight, bright sunny day, tropical beach, calm water, cartoon style, anime, children's illustration, scientific diagram, technical illustration, watermark, text, logo, oversaturated blues, undersaturated, muddy colors, flat perspective, normal perspective, eye-level view, grainy, noisy, compression artifacts, blurry, amateur art"
+          "content": "low quality, mundane, photorealistic, documentary style, flat composition, daylight, calm water, cartoon, anime, watermark, text, grainy, blurry"
         }
       ]
     },
@@ -210,7 +210,7 @@
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating negative prompts for WAN 2.2 video generation. You will receive BOTH the original user prompt and the optimized version. Analyze both to create a list of elements to exclude using '-no' format. Focus on preventing common video artifacts, unwanted elements, and quality issues that could interfere with the user's vision. Include: motion problems (blur, shake, distortion), quality issues (grain, artifacts, low resolution), unwanted overlays (text, watermarks), and style conflicts. IMPORTANT: If either prompt specifies 'no', 'without', or 'empty' something, add that to the negative prompt. DO NOT exclude anything the user specifically requested in their prompts. Output ONLY the negative prompt flags."
+          "content": "You are generating concise negative prompts for WAN 2.2 video using '-no' format. You will receive both original and optimized prompts. Focus ONLY on: 1) Explicitly excluded elements, 2) Major video artifacts (motion blur, camera shake), 3) Quality issues (compression, low resolution), 4) Unwanted overlays (watermarks, text). Be CONCISE - avoid exhaustive lists. Maximum 100 tokens. Output ONLY the negative prompt flags."
         },
         {
           "role": "user",
@@ -218,7 +218,7 @@
         },
         {
           "role": "assistant",
-          "content": "-no collar -no leash -no tags -no harness -no motion blur -no shaky camera -no distorted proportions -no unnatural animal movement -no grainy texture -no compression artifacts -no text overlay -no watermark -no oversaturation -no lens distortion"
+          "content": "-no collar -no leash -no motion blur -no shaky camera -no compression artifacts -no watermark -no text"
         },
         {
           "role": "user",
@@ -226,7 +226,7 @@
         },
         {
           "role": "assistant",
-          "content": "-no camera shake -no exposure flickering -no motion artifacts -no pixelation -no banding in gradients -no text overlay -no watermark -no lens flare artifacts -no unnatural building geometry -no temporal inconsistency"
+          "content": "-no camera shake -no motion artifacts -no banding -no watermark -no text"
         },
         {
           "role": "user",
@@ -234,7 +234,7 @@
         },
         {
           "role": "assistant",
-          "content": "-no motion blur -no focus hunting -no unnatural insect movement -no wing distortion -no color banding -no compression artifacts -no text overlay -no watermark -no depth of field artifacts -no macro lens aberration"
+          "content": "-no motion blur -no compression artifacts -no watermark -no text"
         }
       ]
     },
@@ -445,7 +445,7 @@
       "negative_messages": [
         {
           "role": "system", 
-          "content": "You are generating negative prompts for Chroma-1 HD to exclude unwanted elements and improve quality. You will receive BOTH the original user prompt and the optimized version. Analyze both to create a comprehensive list of elements to avoid. Focus on preventing common issues: anatomical errors, quality problems, unwanted styles, and artifacts. IMPORTANT: Only include unwanted elements, never negate wanted elements (e.g., use 'low quality' not 'no high quality'). If either prompt specifies 'no', 'without', or excludes something, add that unwanted element to the negative prompt. Be specific about what to exclude while ensuring you don't negate anything the user explicitly wanted in their prompts. Maximum 200 tokens. Output ONLY the negative prompt."
+          "content": "You are generating concise negative prompts for Chroma-1 HD. You will receive both original and optimized prompts. Focus ONLY on: 1) Explicitly excluded elements (no, without), 2) Major quality issues (blur, artifacts, low resolution), 3) Directly conflicting styles, 4) Relevant anatomical errors. Be CONCISE and avoid repetition. Don't create exhaustive lists of 'extra' items. Maximum 150 tokens. Output ONLY the negative prompt."
         },
         {
           "role": "user",
@@ -453,7 +453,7 @@
         },
         {
           "role": "assistant",
-          "content": "jewelry, necklace, earrings, bracelet, ring, watch, accessories, ugly, deformed, noisy, blurry, distorted hands, extra fingers, missing fingers, bad anatomy, wrong proportions, extra limbs, missing limbs, deformed face, asymmetrical features, cross-eyed, lazy eye, bad teeth, mutated, mutation, disfigured, poorly drawn face, skin blemishes, acne, age spots, glare, oversaturated, undersaturated, overexposed, underexposed, bad photo, bad lighting, high contrast shadows, flat lighting, chromatic aberration, motion blur, out of focus, bad composition, snapshot quality, amateur photography, Instagram filter, HDR artifacts, sharpening artifacts, compression artifacts, low quality, low resolution, watermark, signature, text, logo, banner, border, frame, copyright, username, website, anime style, cartoon, 3D render, video game, painting, sketch, drawing"
+          "content": "jewelry, accessories, deformed, blurry, extra fingers, bad anatomy, extra limbs, oversaturated, bad lighting, compression artifacts, low quality, watermark, text, anime, cartoon, 3D render"
         },
         {
           "role": "user",
@@ -461,7 +461,7 @@
         },
         {
           "role": "assistant",
-          "content": "daylight, sunny, bright sky, clear weather, dry streets, suburban, rural, ancient, medieval, steampunk, fantasy, utopian, clean streets, empty city, abandoned, static scene, flat lighting, even lighting, low contrast, pastel colors, muted neon, realistic colors, natural lighting, portrait lens, macro lens, narrow field of view, close-up shot, eye level perspective, traditional photography, documentary style, handheld camera shake, compression artifacts, low resolution, pixelated, blurry, out of focus, color banding, jpeg artifacts, watermark, signature, text overlay, UI elements, HUD, cartoon style, anime, cel shading, 2D illustration, sketch, painting"
+          "content": "daylight, sunny, dry streets, suburban, medieval, fantasy, empty city, flat lighting, pastel colors, compression artifacts, low quality, blurry, watermark, text, cartoon, anime"
         },
         {
           "role": "user",
@@ -469,7 +469,7 @@
         },
         {
           "role": "assistant",
-          "content": "cartoon style, cute aesthetic, childlike, plush toy, Pokemon style, anime style, serpentine body, modern setting, city, technology, sci-fi elements, mechanical, steampunk, clear sky, sunny day, rainbow, peaceful scene, friendly appearance, small scale, house cat size, flat lighting, even illumination, static pose, symmetrical composition, centered framing, straight-on angle, eye level view, medium shot, portrait orientation, oversaturated colors, pastel colors, low contrast, HDR tone mapping, cell shading, vector art, line art, sketch, watercolor, minimalist, abstract, geometric, low poly, 3D render artifacts, normal map errors, texture stretching, low resolution, pixelated, compression artifacts, watermark, signature, text, logo"
+          "content": "cartoon, cute style, anime, modern city, sunny day, peaceful, small scale, flat lighting, pastel colors, 3D render artifacts, low quality, watermark, text"
         }
       ]
     },
