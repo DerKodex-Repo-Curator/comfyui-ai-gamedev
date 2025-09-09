@@ -357,7 +357,7 @@ class PromptOptimizer:
                 logger.debug(f"Using max_tokens: {max_tokens}")
             
             logger.info(f"📡 Ollama request parameters:")
-            logger.info(f"   Model: {ollama_model}")
+            logger.info(f"   Ollama Model: {ollama_model}")
             logger.info(f"   Temperature: {temperature}")
             logger.info(f"   Seed: {seed if seed != -1 else 'random'}")
             logger.info(f"   Max tokens: {max_tokens if max_tokens else 'model default'}")
@@ -424,10 +424,10 @@ class PromptOptimizer:
             Tuple of (positive_prompt, negative_prompt, original_prompt)
         """
         logger.info(f"=" * 60)
-        logger.info(f"🚀 Starting prompt optimization")
+        logger.info(f"🚀 Starting prompt optimization for: {target_model}")
         logger.info(f"📊 Input Parameters (after defaults applied):")
-        logger.info(f"   target_model: {target_model}")
-        logger.info(f"   prompt: {prompt[:100]}{'...' if len(prompt) > 100 else ''}")
+        logger.info(f"   Target Model: {target_model}")
+        logger.info(f"   User Prompt: {prompt[:100]}{'...' if len(prompt) > 100 else ''}")
         logger.info(f"   image: {'provided' if image is not None else 'none'}")
         if image is not None:
             logger.debug(f"   image details - Type: {type(image)}, Shape: {getattr(image, 'shape', 'N/A')}")

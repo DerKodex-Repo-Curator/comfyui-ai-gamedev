@@ -7,7 +7,7 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for FLUX.1 Dev, an advanced text-to-image model. For the user's input prompt, without changing the original meaning of the prompt (such as subject, objects, actions), perfect the subject characteristics (such as appearance, expression, quantity, materials, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes objects or scenery, don't add people). If user specifies background elements, enhance them. If user wants simple/clean/transparent/white background or mentions sprites/cutouts, keep background minimal. If there are background instructions, put them first. CRITICAL: Always specify the artistic style/medium like 'realistic photo', 'oil painting', 'pencil sketch', 'digital art' unless user already provided one. Add specific details about materials, textures, lighting, and composition to enhance (not replace) the user's vision. Maximum 200 tokens. Include quality tags like '8K resolution', 'highly detailed'. If an image is provided, incorporate its visual elements into the prompt. Output ONLY the optimized prompt without explanations or formatting."
+          "content": "You are a prompt optimizer for FLUX.1 Dev image generation. Focus on VISUAL details: specific colors, materials (metal types, fabric textures), surface qualities (rough, smooth, weathered), lighting setup. Add artistic style if not specified. Enhance visual rendering: reflections, shadows, atmospheric effects. For tech/mech: panel lines, wear patterns. For organic: texture details, translucency. Maximum 200 tokens. Output ONLY the optimized prompt."
         },
         {
           "role": "user", 
@@ -45,7 +45,7 @@
       "negative_messages": [
         {
           "role": "system",
-          "content": "You are generating a list of things to EXCLUDE when creating an image. Read the user's prompt carefully. List things we DON'T want in the image: 1) Anything the user says 'no', 'without', or 'not' about, 2) Things that would contradict what they want (e.g., if they want night, exclude daylight), 3) Basic quality issues (blur, watermark, text). Don't exclude things that match their request. Keep it simple and direct. Maximum 150 tokens. Output ONLY the list of things to exclude."
+          "content": "You are generating a list of things to EXCLUDE from an image. CAREFULLY check for: 'no', 'without', 'none', 'not' in the prompt. If user says 'no stars, no planets' then MUST exclude stars and planets. Also exclude contradictions and quality issues. Maximum 150 tokens. Output ONLY the exclusion list."
         },
         {
           "role": "user",
@@ -511,53 +511,61 @@
       "positive_messages": [
         {
           "role": "system",
-          "content": "You are a prompt optimizer for Chroma-1 HD, a high-fidelity text-to-image model based on FLUX.1 architecture. For the user's input prompt, without changing the original meaning of the prompt (such as subject, objects, actions), perfect the subject characteristics (such as appearance, expression, quantity, materials, textures, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes objects or scenery, don't add people). If user specifies background elements, enhance them with environmental context. If user wants simple/clean/transparent/white background or mentions sprites/cutouts, keep background minimal. If there are background instructions, put them first. Maximum 512 tokens allows for extremely detailed multi-paragraph prompts. CRITICAL: Always include artistic style/medium like 'photorealistic', 'oil painting', 'watercolor', 'digital art', 'pencil drawing' unless user specified one. Use weighted components like (element:1.2) for emphasis when appropriate. For anime styles, include Danbooru-style tags sparingly. Be extremely specific about textures, materials, composition. Include camera settings (aperture, lens type, focal length) for photographic styles. Output ONLY the optimized prompt."
+          "content": "You are a prompt optimizer for Chroma-1 HD image generation. Focus on VISUAL details that an artist would need: exact colors (hex codes when precise), materials (brushed metal, matte plastic, rough stone), surface finishes (glossy, weathered, oxidized), lighting angles, camera settings for photos. Add specific artistic style ONLY if not provided. Enhance textures, reflections, subsurface scattering, atmospheric effects. For mechanical/tech subjects: describe panel lines, rivets, wear patterns, heat discoloration. For organic subjects: skin/fur/scale texture, translucency, wetness. Use weighted components (element:1.2) for emphasis. Maximum 512 tokens. Output ONLY the optimized prompt focusing on visual rendering details."
         },
         {
           "role": "user",
-          "content": "woman in garden"
+          "content": "military spacecraft, no stars, no planets"
         },
         {
           "role": "assistant", 
-          "content": "A photo of a young woman in her mid-twenties with flowing auburn hair, gentle smile revealing subtle dimples, wearing a white cotton sundress with delicate lace trim, standing gracefully in a sunlit English cottage garden filled with blooming roses and lavender bushes. Natural soft lighting filtering through overhead tree branches creating dappled shadows on her face, warm golden hour ambiance. Shot with 85mm lens at f/1.8 for creamy bokeh background separation, subtle depth of field keeping focus on subject's expressive green eyes. Organic color grading with enhanced warm tones, skin texture details preserved, natural makeup look. Ultra-sharp focus on subject, photorealistic rendering, professional portrait photography style reminiscent of Annie Leibovitz's natural light work, 8K resolution, film grain texture"
+          "content": "Photorealistic render of military corvette-class spacecraft against pure black void, aggressive wedge-shaped hull in matte gunmetal gray (#3A3F44) with weathered panel lines and micro-meteorite scoring. Brushed titanium engine bells showing blue-purple heat discoloration, glowing orange thruster ports with (heat shimmer:1.3). Angular bridge section with anti-glare coated viewports, rows of point defense turrets with worn chrome barrels. Hull number \"CV-2847\" stenciled in regulation white, carbon scoring around weapon hardpoints. (Surface detail:1.4) showing individual rivets, access hatches with yellow safety striping, sensor domes with subtle internal LED glow. Hard rim lighting from single directional source creating sharp shadows, no ambient fill light emphasizing the void. Subtle metallic sheen on edges, oxidation patterns near exhaust vents. Studio photography style, 50mm lens equivalent, f/8 for sharp detail throughout, high contrast lighting setup. Ray-traced reflections on metallic surfaces, 8K texture resolution, photorealistic materials with accurate BRDF"
         },
         {
           "role": "user",
-          "content": "cyberpunk city"
+          "content": "tree in meadow"
         },
         {
           "role": "assistant",
-          "content": "Sprawling cyberpunk metropolis at midnight, rain-slicked streets reflecting neon advertisements in vibrant cyan and magenta, towering skyscrapers with holographic projections cutting through dense fog. Street level view showing crowded marketplace with augmented humans, flying vehicles leaving light trails overhead, steam rising from street vendors' stalls. Blade Runner 2049 cinematography style with volumetric lighting piercing through atmospheric haze, (neon glow:1.3), (wet surfaces:1.2). Wide angle 24mm lens perspective with deep depth of field capturing both foreground detail and distant megastructures. High contrast with crushed blacks and blown-out neon highlights, film noir mood with techno-dystopian aesthetic. Ray-traced reflections on wet pavement, particle effects in air, photorealistic urban decay mixed with high-tech elements, inspired by Syd Mead's concept art, ultra-detailed architecture, 16K resolution masterpiece"
+          "content": "Ancient oak tree with deeply furrowed bark showing lichen patches in sage green (#87A96B) and pale gray, massive trunk 6 feet diameter with exposed root buttresses. Individual leaves visible with (subsurface scattering:1.2) showing vein structures, some yellowing autumn foliage mixed with deep green. Meadow grass in varied heights, seed heads catching backlight, wildflowers - purple lupines, white Queen Anne's lace, yellow buttercups scattered naturally. Golden hour side-lighting at 35-degree angle creating long shadows, warm color temperature 3200K. Atmospheric haze in distance, (volumetric light rays:1.1) filtering through branches. Bark texture showing individual ridges and valleys, moss growth on north side with tiny detail. Morning dew droplets on grass blades with prismatic light refraction. Shot with 35mm lens at f/5.6, circular polarizer reducing glare, natural color grading. Photorealistic style with painterly atmospheric perspective, 16K resolution capturing every texture detail"
         },
         {
           "role": "user",
-          "content": "fantasy dragon"
+          "content": "chrome robot"
         },
         {
           "role": "assistant",
-          "content": "Majestic ancient dragon with iridescent emerald scales that shift to sapphire blue at the edges, each scale meticulously detailed with battle scars and age patterns, wingspan stretching 200 feet across a stormy mountain peak. Intelligent golden eyes with vertical pupils reflecting wisdom of millennia, smoke wisping from nostrils, muscular form coiled around crumbling stone tower. Lightning crackling between horn ridges, (bioluminescent throat glow:1.2) suggesting imminent fire breath. Epic fantasy art style combining photorealism with painterly elements, dramatic low-angle hero perspective emphasizing the creature's massive scale against tiny pine trees below. Atmospheric storm lighting with rim light outlining the dragon's silhouette, volumetric clouds swirling around wings. Digital painting technique reminiscent of Justin Gerard and Todd Lockwood, with oil painting texture overlay. Dynamic composition following golden ratio, selective focus on dragon's head with motion blur on wing tips, fantasy realism with mythological gravitas, ultra-high detail in scale texture and membrane translucency, 8K resolution epic scene"
+          "content": "Humanoid robot with mirror-polished chrome plating reflecting environment with (ray-traced reflections:1.4), visible fingerprints and micro-scratches breaking up perfect mirror finish. Exposed hydraulic pistons in brushed steel at joints, braided steel cables visible through gaps, servo motors with anodized blue aluminum housings. Face plate with glossy black optical sensor array behind tempered glass, subtle internal LED glow in cyan (#00FFFF). Chrome surfaces showing different polish grades - high mirror on chest plates, satin finish on limbs, brushed texture on joint covers. (Mechanical detail:1.3) revealing hex bolts, Phillips head screws, cable management clips, pneumatic lines. Orange warning labels at joint hazard points, QR code manufacturing plate on left shoulder. Environmental reflections distorted across curved surfaces, fresnel effect at glancing angles. Three-point lighting setup with key light creating specular highlights, rim light defining edges, subtle fill preventing pure black shadows. Photorealistic CGI render, 85mm lens equivalent, shallow DOF with background bokeh, PBR materials with accurate metallic workflow, 8K resolution"
         }
       ],
       "negative_messages": [
         {
           "role": "system", 
-          "content": "You are generating a list of things to EXCLUDE from an image. Read the user's prompt carefully. List everything we DON'T want: 1) Things they say 'no', 'without', 'none', or 'not' about, 2) Things that would ruin what they're asking for (e.g., stars in a 'pure black background'), 3) Quality problems. Be thorough but don't exclude things they actually want. Maximum 200 tokens. Output ONLY the list of things to exclude."
+          "content": "You are generating a list of things to EXCLUDE from an image. CAREFULLY read the user's prompt for exclusions. List things to exclude: 1) ANYTHING after 'no', 'without', 'none', 'not' (e.g., 'no stars' = exclude stars), 2) Things that contradict their request, 3) Quality issues. Be thorough with explicit exclusions. Maximum 200 tokens. Output ONLY the exclusion list."
         },
         {
           "role": "user",
-          "content": "photo of woman without jewelry in garden"
+          "content": "spacecraft in space, no stars, no planets"
         },
         {
           "role": "assistant",
-          "content": "jewelry, accessories, deformed, blurry, extra fingers, bad anatomy, extra limbs, oversaturated, bad lighting, compression artifacts, low quality, watermark, text, anime, cartoon, 3D render"
+          "content": "stars, planets, celestial bodies, galaxies, nebulae, asteroids, moons, sun, starfield, constellation, milky way, cosmic dust, aurora, low quality, blurry, pixelated, compression artifacts, watermark, text, logo, cartoon, anime"
         },
         {
           "role": "user",
-          "content": "cyberpunk city at night"
+          "content": "forest without animals"
         },
         {
           "role": "assistant",
-          "content": "daylight, sunny, dry streets, suburban, medieval, fantasy, empty city, flat lighting, pastel colors, compression artifacts, low quality, blurry, watermark, text"
+          "content": "animals, birds, wildlife, creatures, insects, deer, rabbits, squirrels, foxes, bears, people, figures, low quality, blurry, oversaturated, watermark, text, cartoon, anime"
+        },
+        {
+          "role": "user",
+          "content": "cyberpunk city at night, no people"
+        },
+        {
+          "role": "assistant",
+          "content": "people, humans, figures, pedestrians, crowds, characters, portraits, daylight, sunny, morning, afternoon, low quality, blurry, pixelated, watermark, text, cartoon, anime"
         },
         {
           "role": "user",
