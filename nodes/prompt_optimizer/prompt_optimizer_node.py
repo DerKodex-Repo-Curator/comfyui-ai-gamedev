@@ -243,6 +243,11 @@ class PromptOptimizer:
             final_messages = messages.copy()
             logger.debug(f"Starting with {len(messages)} messages in history")
             
+            # Log the system prompt to verify correct model config
+            if messages and messages[0].get("role") == "system":
+                system_preview = messages[0].get("content", "")[:150]
+                logger.debug(f"System prompt preview: {system_preview}...")
+            
             # Add user message with optional image
             user_message = {
                 "role": "user",
@@ -260,7 +265,9 @@ class PromptOptimizer:
             
             # Prepare options
             options = {
-                "temperature": temperature
+                "temperature": temperature,
+                "use_mlock": False,  # Disable memory locking  
+                "num_ctx": 2048  # Set context window
             }
             
             # Add seed if not using random (-1)
@@ -406,10 +413,24 @@ class PromptOptimizer:
             negative_messages = model_config.get("negative_messages", [])
             if negative_messages:
                 logger.info(f"🎯 Optimizing negative prompt for {model_config.get('name', target_model)}...")
+                logger.info(f"   Using model key: {target_model}")
+                logger.info(f"   Number of negative messages: {len(negative_messages)}")
+                
+                # Debug: Log the system prompt being used for negative generation
+                if negative_messages and negative_messages[0].get("role") == "system":
+                    system_content = negative_messages[0].get("content", "")
+                    logger.debug(f"   Negative system prompt preview: {system_content[:200]}...")
+                    # Check if this is a video-related prompt
+                    if "video" in system_content.lower() or "motion" in system_content.lower() or "-no" in system_content:
+                        logger.warning(f"⚠️ Detected video-related negative prompt system message for image model {target_model}")
+                
                 # Pass the optimized positive prompt as context for negative generation
+                # Add a unique timestamp to avoid potential caching issues
+                import time
+                timestamped_prompt = f"{positive_prompt}\n[Request ID: {time.time()}]"
                 negative_prompt = self._optimize_with_ollama(
                     negative_messages,
-                    positive_prompt,  # Use optimized positive as input
+                    timestamped_prompt,  # Use optimized positive with timestamp as input
                     None,  # Don't include image for negative prompts
                     ollama_host,
                     ollama_model,
@@ -417,7 +438,20 @@ class PromptOptimizer:
                     seed,
                     max_tokens
                 )
+                
+                # Remove any timestamp artifacts from the response
+                if "[Request ID:" in negative_prompt:
+                    negative_prompt = negative_prompt.split("[Request ID:")[0].strip()
+                
                 logger.info(f"   Negative result: {len(negative_prompt)} chars")
+                logger.debug(f"   Negative prompt preview: {negative_prompt[:200]}...")
+                
+                # Check if we got video-related negative prompts for an image model
+                video_keywords = ["motion blur", "frame rate", "temporal", "sound", "dialogue", "music", "ambient sounds", "narrative", "plot"]
+                if any(keyword in negative_prompt.lower() for keyword in video_keywords):
+                    logger.error(f"❌ ERROR: Video-related negative prompt generated for image model {target_model}!")
+                    logger.error(f"   This suggests Ollama may be returning cached or incorrect results.")
+                    logger.error(f"   Target model: {target_model}, Config name: {model_config.get('name', target_model)}")
         else:
             if not model_config.get("supports_negative", False):
                 logger.debug(f"Model {target_model} doesn't support negative prompts")
