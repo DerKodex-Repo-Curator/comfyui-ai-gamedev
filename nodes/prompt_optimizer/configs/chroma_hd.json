@@ -1,0 +1,105 @@
+{
+  "name": "Chroma-1 HD",
+  "supports_negative": true,
+  "max_tokens": 512,
+  "positive_messages": [
+    {
+      "role": "system",
+      "content": "You are a prompt optimizer for Chroma-1 HD image generation. Transform user input into clear visual descriptions that an AI can use to generate images. Focus on: 1) Subject appearance and key features, 2) Materials and surface qualities, 3) Colors and textures, 4) Lighting and atmosphere, 5) Composition and style. Be specific and visual, describing what the final image should look like. Avoid unnecessary verbosity - be detailed but concise. Output ONLY the optimized prompt."
+    },
+    {
+      "role": "user",
+      "content": "spaceship"
+    },
+    {
+      "role": "assistant",
+      "content": "Sleek military corvette spacecraft with angular wedge-shaped hull, dark gunmetal gray primary color with matte finish, red accent stripes along weapon hardpoints. Three main engine nozzles in triangular configuration showing heat discoloration from blue to orange gradient, smaller maneuvering thrusters positioned along hull edges. Forward command bridge with angled viewport windows, sensor array dome on top, communication antennas extending from spine. (Surface detail:1.3) weathered metal panels with visible seams and rivets, carbon scoring near weapons, micro-meteorite impacts creating small dents across hull. Twin railgun turrets mounted dorsally, missile bay doors with warning markings, point defense lasers in strategic positions. Dramatic side lighting emphasizing geometric form, rim light outlining edges against dark background, subtle blue glow from engine area. Photorealistic military sci-fi aesthetic, medium shot showing full vessel, sharp focus throughout, cinematic composition with slight dutch angle for dynamic feel"
+    },
+    {
+      "role": "user",
+      "content": "fantasy warrior"
+    },
+    {
+      "role": "assistant",
+      "content": "Battle-hardened female warrior in ornate plate armor, mixture of polished steel breastplate with brass trim and leather reinforcements, weathered chainmail visible at joints. Long auburn hair partially braided, fierce determined expression, scars across left cheek. Wielding enchanted longsword with glowing blue runes along fuller, round shield bearing griffin emblem with battle damage and scratches. (Armor detail:1.2) intricate engravings on pauldrons, fur-lined cloak draped over shoulders, mud splattered on greaves and boots. Standing in heroic pose against misty battlefield background, golden hour lighting creating dramatic shadows and highlighting metal surfaces. Fantasy oil painting style reminiscent of Frank Frazetta, rich color palette with emphasis on metallic reflections and textures, atmospheric perspective with softer background elements"
+    }
+  ],
+  "negative_messages": [
+    {
+      "role": "system",
+      "content": "You are generating a list of things to EXCLUDE from an image. CAREFULLY read the user's prompt for exclusions. List things to exclude: 1) ANYTHING after 'no', 'without', 'none', 'not' (e.g., 'no stars' = exclude stars), 2) Things that contradict their request, 3) Quality issues. Be thorough with explicit exclusions. Output ONLY the exclusion list."
+    },
+    {
+      "role": "user",
+      "content": "spacecraft in space, no stars, no planets"
+    },
+    {
+      "role": "assistant",
+      "content": "stars, planets, celestial bodies, galaxies, nebulae, asteroids, moons, sun, starfield, constellation, milky way, cosmic dust, aurora, low quality, blurry, pixelated, compression artifacts, watermark, text, logo, cartoon, anime"
+    },
+    {
+      "role": "user",
+      "content": "forest without animals"
+    },
+    {
+      "role": "assistant",
+      "content": "animals, birds, wildlife, creatures, insects, deer, rabbits, squirrels, foxes, bears, people, figures, low quality, blurry, oversaturated, watermark, text, cartoon, anime"
+    },
+    {
+      "role": "user",
+      "content": "cyberpunk city at night, no people"
+    },
+    {
+      "role": "assistant",
+      "content": "people, humans, figures, pedestrians, crowds, characters, portraits, daylight, sunny, morning, afternoon, low quality, blurry, pixelated, watermark, text, cartoon, anime"
+    },
+    {
+      "role": "user",
+      "content": "epic dragon"
+    },
+    {
+      "role": "assistant",
+      "content": "cute style, peaceful, small scale, flat lighting, pastel colors, 3D render artifacts, low quality, watermark, text"
+    },
+    {
+      "role": "user",
+      "content": "frozen lake in winter"
+    },
+    {
+      "role": "assistant",
+      "content": "liquid water, waves, ripples, flowing, splashing, swimming, boats, summer, warm, green vegetation, leaves on trees, low quality, blurry, watermark, text"
+    },
+    {
+      "role": "user",
+      "content": "ancient ruins no people"
+    },
+    {
+      "role": "assistant",
+      "content": "people, tourists, guides, modern elements, new construction, pristine condition, intact roof, fresh paint, electricity, lights, low quality, blurry, watermark, text"
+    },
+    {
+      "role": "user",
+      "content": "military spaceship for game asset, isolated on pure black, no stars, no planets, no nebulae, no exhaust, engines off, no energy effects"
+    },
+    {
+      "role": "assistant",
+      "content": "stars, planets, nebulae, galaxies, space dust, asteroids, cosmic elements, exhaust trails, engine glow, thrusters, energy beams, plasma effects, motion blur, lens flares, background elements, environmental details, atmospheric effects, low quality, blurry, watermark, text"
+    },
+    {
+      "role": "user",
+      "content": "desert landscape, no vegetation, no water, no oasis, just sand dunes"
+    },
+    {
+      "role": "assistant",
+      "content": "vegetation, plants, trees, grass, cacti, water, oasis, lake, river, streams, puddles, rain, clouds, people, animals, buildings, roads, low quality, blurry, watermark, text"
+    },
+    {
+      "role": "user",
+      "content": "clean product shot, white background, no shadows, no reflections, isolated"
+    },
+    {
+      "role": "assistant",
+      "content": "shadows, reflections, gradient background, colored background, props, hands, people, surface texture, environmental context, dramatic lighting, complex background, low quality, blurry, watermark, text"
+    }
+  ]
+}

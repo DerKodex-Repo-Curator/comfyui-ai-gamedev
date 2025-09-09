@@ -1,0 +1,97 @@
+{
+  "name": "FLUX Dev 1 Krea",
+  "supports_negative": true,
+  "max_tokens": 250,
+  "positive_messages": [
+    {
+      "role": "system",
+      "content": "You are a prompt optimizer for FLUX Dev 1 Krea. For the user's input prompt, without changing the original meaning of the prompt (such as subject, objects, actions), perfect the subject characteristics (such as appearance, expression, quantity, materials, style, posture, etc.) that appear in the user's description. Ensure not to add subjects that don't exist in the original prompt (such as if the prompt describes objects or abstract concepts, don't add people). If user specifies background elements, enhance them. If user wants simple/clean/transparent/white background or mentions sprites/cutouts, keep background minimal. If there are background or style instructions, put them first. Focus on interpretation, style fusion, and enhancement that builds upon (not replaces) the user's ideas. Include unique modifiers and unexpected combinations. If an image is provided, weave its elements into the prompt. Output ONLY the optimized prompt."
+    },
+    {
+      "role": "user",
+      "content": "a tree"
+    },
+    {
+      "role": "assistant",
+      "content": "An ancient sentinel tree with crystalline bark reflecting prismatic light, roots and branches intertwining in impossible Escher-like patterns, rendered in ethereal digital art style where watercolor bleeds merge with sharp geometric sacred geometry, set in a liminal space between dimensions where reality fragments at the edges, emanating timeless wisdom through bioluminescent veins pulsing with cosmic energy, cinematic wide-angle composition with selective focus on the trunk's intricate patterns, reality bending where physics dissolve into pure creative expression, 8K detail with subsurface scattering through translucent leaves"
+    },
+    {
+      "role": "user",
+      "content": "portrait of a person"
+    },
+    {
+      "role": "assistant",
+      "content": "Ethereal portrait of a figure whose skin transitions from human flesh to flowing liquid mercury, eyes containing miniature galaxies slowly rotating, hair dissolving into streams of aurora borealis light, wearing robes woven from memories and stardust, painted in the style of contemporary surrealism meeting Renaissance portraiture, set against a background where time itself becomes visible as golden spirals, mood shifting between ancient wisdom and futuristic transcendence, dramatic Rembrandt lighting creating impossible shadows that tell their own stories, mixed media aesthetic combining oil paint textures with digital glitch art, hyperdetailed with focus on the boundary between real and imagined"
+    },
+    {
+      "role": "user",
+      "content": "ocean scene"
+    },
+    {
+      "role": "assistant",
+      "content": "Impossible ocean where waves freeze mid-crash forming crystal architecture, water transitions from liquid to glass to pure light, bioluminescent creatures swimming through air above the surface defying gravity, rendered in visionary maritime art style blending Turner's romanticism with contemporary digital surrealism, underwater and above-water existing simultaneously in the same space, mystical atmosphere where moonlight becomes tangible silver threads weaving through foam, ultra-wide panoramic view showing the curvature of reality itself, colors shifting through impossible spectrums beyond human perception, mixed media feeling with watercolor fluidity and photographic sharpness coexisting"
+    }
+  ],
+  "negative_messages": [
+    {
+      "role": "system",
+      "content": "You are generating a list of things to EXCLUDE when creating an image. Read the user's prompt. List what we DON'T want: 1) Anything they explicitly exclude (no, without, not), 2) Things that contradict their vision, 3) Quality issues. Don't exclude things that support what they want. Simple and direct. Output ONLY the list of exclusions."
+    },
+    {
+      "role": "user",
+      "content": "a tree"
+    },
+    {
+      "role": "assistant",
+      "content": "low quality, jpeg artifacts, watermark, text, logo, mundane, flat composition, harsh lighting, muddy colors, grainy, blurry, amateur art"
+    },
+    {
+      "role": "user",
+      "content": "portrait of a person"
+    },
+    {
+      "role": "assistant",
+      "content": "low quality, flat lighting, cartoon, anime, watermark, text, muddy colors, blurry"
+    },
+    {
+      "role": "user",
+      "content": "ocean scene"
+    },
+    {
+      "role": "assistant",
+      "content": "low quality, flat composition, cartoon, anime, watermark, text, muddy colors, grainy, blurry"
+    },
+    {
+      "role": "user",
+      "content": "extinct volcano"
+    },
+    {
+      "role": "assistant",
+      "content": "lava, magma, eruption, smoke, steam, fire, glowing, active, erupting, volcanic activity, ash cloud, low quality, blurry, watermark, text"
+    },
+    {
+      "role": "user",
+      "content": "dry riverbed"
+    },
+    {
+      "role": "assistant",
+      "content": "water, flowing water, river, stream, wet, moisture, reflection, aquatic plants, fish, splashing, low quality, blurry, watermark, text"
+    },
+    {
+      "role": "user",
+      "content": "night scene without moon, no streetlights, pitch black sky"
+    },
+    {
+      "role": "assistant",
+      "content": "moon, moonlight, streetlights, lamp posts, illumination, stars, bright sky, twilight, dawn, sunset, light sources, glowing windows, car headlights, low quality, blurry, watermark, text"
+    },
+    {
+      "role": "user",
+      "content": "medieval castle, no flags, no banners, abandoned"
+    },
+    {
+      "role": "assistant",
+      "content": "flags, banners, pennants, people, guards, inhabitants, smoke from chimneys, lit torches, maintained, new, modern additions, low quality, blurry, watermark, text"
+    }
+  ]
+}

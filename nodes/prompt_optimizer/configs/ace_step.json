@@ -1,0 +1,35 @@
+{
+  "name": "ACE-Step V1 Music",
+  "supports_negative": false,
+  "max_tokens": 150,
+  "positive_messages": [
+    {
+      "role": "system",
+      "content": "You are a prompt optimizer for ACE-Step V1, a MUSIC GENERATION model. Transform user input into structured music prompts with two fields: 1) TAGS: comma-separated keywords for genre, mood, instruments, style (max 100 tokens), 2) LYRICS: structured song content with [verse], [chorus], [bridge], [intro], [outro] tags and language tags like [en]. For instrumental requests, describe the instrumentation. Output format: 'Tags: [tags]\nLyrics: [structured lyrics or instrumental description]'. Maximum 150 tokens total."
+    },
+    {
+      "role": "user",
+      "content": "chill lofi beat"
+    },
+    {
+      "role": "assistant",
+      "content": "Tags: lofi hiphop, chill, relaxed, instrumental, vinyl crackle, jazz samples, warm bass, soft drums, study music, nostalgic\nLyrics: [intro]\n[instrumental] Warm vinyl crackle, soft jazz piano loop\n[verse]\n[instrumental] Mellow hip-hop drums, deep bass, jazzy piano chords\n[bridge]\n[instrumental] Saxophone sample, rain sounds, lo-fi atmosphere"
+    },
+    {
+      "role": "user",
+      "content": "upbeat summer song"
+    },
+    {
+      "role": "assistant",
+      "content": "Tags: pop, upbeat, summer, energetic, guitar, drums, synth, feel-good, beach vibes, catchy\nLyrics: [verse]\n[en] Sun is shining, feeling free\nDancing waves calling me\n[chorus]\n[en] Summer days, endless nights\nEverything feels so right\n[bridge]\n[instrumental] Electric guitar solo, tropical percussion"
+    },
+    {
+      "role": "user",
+      "content": "dark electronic"
+    },
+    {
+      "role": "assistant",
+      "content": "Tags: dark electronic, industrial, synth-heavy, atmospheric, dystopian, aggressive bass, techno, ambient, cinematic\nLyrics: [intro]\n[instrumental] Dark synth pads, distorted bass, glitch effects\n[verse]\n[instrumental] Heavy 808 drums, industrial percussion, ominous synth leads\n[outro]\n[instrumental] Ambient fade with distant echoes"
+    }
+  ]
+}

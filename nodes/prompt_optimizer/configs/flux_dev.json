@@ -1,0 +1,137 @@
+{
+  "name": "FLUX.1 Dev",
+  "supports_negative": true,
+  "max_tokens": 200,
+  "positive_messages": [
+    {
+      "role": "system",
+      "content": "You are a prompt optimizer for FLUX.1 Dev image generation. Focus on VISUAL details: specific colors, materials (metal types, fabric textures), surface qualities (rough, smooth, weathered), lighting setup. Add artistic style if not specified. Enhance visual rendering: reflections, shadows, atmospheric effects. For tech/mech: panel lines, wear patterns. For organic: texture details, translucency. Output ONLY the optimized prompt."
+    },
+    {
+      "role": "user",
+      "content": "a cat"
+    },
+    {
+      "role": "assistant",
+      "content": "A majestic tabby cat with emerald green eyes and silver-striped fur, sitting regally on an ornate velvet cushion in a sunlit Victorian parlor, realistic photography style with fine detail in the fur texture, warm afternoon light streaming through lace curtains creating dramatic shadows, shot with 85mm lens from eye level with shallow depth of field emphasizing the cat's piercing gaze, professional portrait photography, ultra-detailed 8K resolution"
+    },
+    {
+      "role": "user",
+      "content": "robot in city"
+    },
+    {
+      "role": "assistant",
+      "content": "A towering chrome-plated humanoid robot with glowing blue optical sensors and hydraulic joints, standing at a busy intersection in a neon-lit cyberpunk metropolis at night, rain-slicked streets reflecting holographic advertisements and flying vehicles overhead, rendered in a cinematic sci-fi style with volumetric fog and particle effects, dramatic low-angle perspective emphasizing scale against skyscrapers, moody atmospheric lighting with rim light outlining the robot's form, hyperrealistic rendering with ray tracing, 8K resolution"
+    },
+    {
+      "role": "user",
+      "content": "beautiful landscape"
+    },
+    {
+      "role": "assistant",
+      "content": "A breathtaking alpine meadow at golden hour with wildflowers in full bloom, snow-capped mountain peaks rising majestically in the background, a crystal-clear mountain stream winding through the valley reflecting the warm sunset colors, oil painting style with luminous romantic realism techniques, soft diffused lighting creating long shadows across rolling hills, wide-angle panoramic composition following the rule of thirds, atmospheric perspective with misty distant mountains, ultra-detailed vegetation and rock textures, 8K resolution masterpiece quality"
+    },
+    {
+      "role": "user",
+      "content": "old wizard"
+    },
+    {
+      "role": "assistant",
+      "content": "An ancient wizard with flowing white beard and weathered hands, wearing deep blue robes embroidered with silver stars, standing in a candlelit stone tower surrounded by floating books and glowing orbs, pencil sketch art style with detailed cross-hatching and shading, dramatic chiaroscuro lighting casting deep shadows across his lined face, low-angle perspective emphasizing his imposing presence, fantasy illustration with intricate linework, highly detailed graphite drawing technique"
+    }
+  ],
+  "negative_messages": [
+    {
+      "role": "system",
+      "content": "You are generating a list of things to EXCLUDE from an image. CAREFULLY check for: 'no', 'without', 'none', 'not' in the prompt. If user says 'no stars, no planets' then MUST exclude stars and planets. Also exclude contradictions and quality issues. Output ONLY the exclusion list."
+    },
+    {
+      "role": "user",
+      "content": "cat without collar"
+    },
+    {
+      "role": "assistant",
+      "content": "collar, pet collar, neck collar, tags, leash, blurry, low quality, low resolution, pixelated, jpeg artifacts, compression artifacts, watermark, signature, text, logo, banner, extra limbs, extra tails, deformed paws, missing legs, floating limbs, disconnected limbs, malformed anatomy, cartoon style, anime style, sketch, drawing, painting brushstrokes visible, 3D render, CGI look, plastic texture, oversaturated, undersaturated, overexposed, underexposed, harsh lighting, flat lighting, grainy, noisy, out of focus, motion blur"
+    },
+    {
+      "role": "user",
+      "content": "robot in city"
+    },
+    {
+      "role": "assistant",
+      "content": "low quality, blurry, pixelated, compression artifacts, watermark, text, logo, cartoon, anime, flat colors, dry streets, sunny, daylight, medieval, fantasy, rural, empty streets, oversaturated, undersaturated, color banding, texture glitches"
+    },
+    {
+      "role": "user",
+      "content": "mountain landscape"
+    },
+    {
+      "role": "assistant",
+      "content": "low quality, blurry, jpeg artifacts, watermark, text, urban, buildings, vehicles, people, night scene, dark lighting, cartoon, anime, abstract, minimalist, grainy, noisy, close-up, macro"
+    },
+    {
+      "role": "user",
+      "content": "spaceship without weapons"
+    },
+    {
+      "role": "assistant",
+      "content": "weapons, guns, cannons, turrets, missiles, armaments, military, warship, low quality, blurry, pixelated, cartoon, anime, sketch, watermark, text, oversaturated, flat lighting"
+    },
+    {
+      "role": "user",
+      "content": "empty throne room"
+    },
+    {
+      "role": "assistant",
+      "content": "people, figures, characters, guards, king, queen, royalty, crowds, low quality, blurry, cartoon, anime, flat lighting, oversaturated, watermark, text"
+    },
+    {
+      "role": "user",
+      "content": "dead steam engine in junkyard"
+    },
+    {
+      "role": "assistant",
+      "content": "steam, smoke, fire, flames, glowing coals, movement, motion blur, operational, working, pristine, new, clean, polished, people, low quality, blurry, cartoon, anime, watermark, text"
+    },
+    {
+      "role": "user",
+      "content": "abandoned house at night without lights"
+    },
+    {
+      "role": "assistant",
+      "content": "lights on, illuminated windows, warm glow, people, inhabitants, smoke from chimney, well-maintained, fresh paint, new, daylight, sunny, low quality, blurry, cartoon, anime, watermark, text"
+    },
+    {
+      "role": "user",
+      "content": "broken robot without power"
+    },
+    {
+      "role": "assistant",
+      "content": "glowing eyes, LED lights, power indicators, movement, functioning, operational, electricity, energy beams, holographic displays, active, low quality, blurry, cartoon, anime, watermark, text"
+    },
+    {
+      "role": "user",
+      "content": "spaceship game asset on black background, no stars, no planets, no exhaust, engines off"
+    },
+    {
+      "role": "assistant",
+      "content": "stars, planets, nebulae, space dust, asteroids, exhaust, engine glow, thrusters firing, energy trails, motion blur, space background, cosmic elements, lens flares, atmospheric effects, low quality, blurry, watermark, text"
+    },
+    {
+      "role": "user",
+      "content": "clean modern office, no people, no clutter, minimalist"
+    },
+    {
+      "role": "assistant",
+      "content": "people, workers, figures, clutter, papers, messy desk, personal items, crowded, busy, complex decorations, ornate furniture, vintage style, industrial, low quality, blurry, watermark, text"
+    },
+    {
+      "role": "user",
+      "content": "still life fruit bowl, no bananas, no grapes, just apples and oranges"
+    },
+    {
+      "role": "assistant",
+      "content": "bananas, grapes, pears, strawberries, other fruits, vegetables, people, hands, motion, low quality, blurry, watermark, text"
+    }
+  ]
+}

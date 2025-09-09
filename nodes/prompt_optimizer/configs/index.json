@@ -1,0 +1,15 @@
+{
+  "models": [
+    "flux_dev",
+    "flux_krea",
+    "flux_kontext",
+    "wan22",
+    "wan21",
+    "mmaudio",
+    "ace_step",
+    "qwen_image_edit",
+    "chroma_hd",
+    "indextts"
+  ],
+  "description": "Each model configuration is stored in configs/{model_id}.json"
+}

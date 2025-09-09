@@ -30,19 +30,57 @@ class PromptOptimizer:
     """
     
     def __init__(self):
-        self.config_file = os.path.join(os.path.dirname(__file__), "model_configs.json")
-        self.model_configs = self._load_model_configs()
+        self.config_dir = os.path.join(os.path.dirname(__file__), "configs")
+        # Fallback to old location if new directory doesn't exist
+        if not os.path.exists(self.config_dir):
+            self.config_file = os.path.join(os.path.dirname(__file__), "model_configs.json")
+            self.model_configs = self._load_model_configs_legacy()
+        else:
+            self.model_configs = self._load_model_configs()
         self.temp_images = []  # Track temporary image files for cleanup
         logger.info(f"🚀 PromptOptimizer initialized with {len(self.model_configs)} models")
     
     def _load_model_configs(self) -> Dict:
-        """Load model configurations from JSON file"""
+        """Load model configurations from separate JSON files"""
+        configs = {}
+        
         try:
-            logger.debug(f"Loading model configs from: {self.config_file}")
+            # Load index to get list of models
+            index_file = os.path.join(self.config_dir, "index.json")
+            if os.path.exists(index_file):
+                with open(index_file, 'r', encoding='utf-8') as f:
+                    index = json.load(f)
+                    model_list = index.get("models", [])
+            else:
+                # No index, scan directory
+                model_list = [f[:-5] for f in os.listdir(self.config_dir) 
+                             if f.endswith('.json') and f != 'index.json']
+            
+            # Load each model config
+            for model_id in model_list:
+                config_file = os.path.join(self.config_dir, f"{model_id}.json")
+                try:
+                    with open(config_file, 'r', encoding='utf-8') as f:
+                        configs[model_id] = json.load(f)
+                        logger.debug(f"Loaded config for {model_id}")
+                except Exception as e:
+                    logger.error(f"❌ Failed to load {model_id}: {e}")
+            
+            logger.info(f"✅ Loaded {len(configs)} model configurations from separate files")
+            return configs
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to load model configs: {e}")
+            return {}
+    
+    def _load_model_configs_legacy(self) -> Dict:
+        """Load model configurations from legacy single JSON file"""
+        try:
+            logger.debug(f"Loading model configs from legacy file: {self.config_file}")
             with open(self.config_file, 'r') as f:
                 data = json.load(f)
                 models = data.get("models", {})
-                logger.info(f"✅ Loaded {len(models)} model configurations")
+                logger.info(f"✅ Loaded {len(models)} model configurations from legacy file")
                 return models
         except Exception as e:
             logger.error(f"❌ Failed to load model configs: {e}")
@@ -51,14 +89,32 @@ class PromptOptimizer:
     @classmethod
     def INPUT_TYPES(cls):
         """Define input types for the node"""
-        # Load model names from config
-        config_file = os.path.join(os.path.dirname(__file__), "model_configs.json")
-        try:
-            with open(config_file, 'r') as f:
-                data = json.load(f)
-                model_names = list(data.get("models", {}).keys())
-        except:
-            model_names = ["flux_dev"]  # Fallback
+        # Try to load model names from new structure first
+        config_dir = os.path.join(os.path.dirname(__file__), "configs")
+        
+        if os.path.exists(config_dir):
+            # Load from separate files
+            try:
+                index_file = os.path.join(config_dir, "index.json")
+                if os.path.exists(index_file):
+                    with open(index_file, 'r') as f:
+                        index = json.load(f)
+                        model_names = index.get("models", [])
+                else:
+                    # Scan directory
+                    model_names = [f[:-5] for f in os.listdir(config_dir) 
+                                 if f.endswith('.json') and f != 'index.json']
+            except:
+                model_names = ["flux_dev"]  # Fallback
+        else:
+            # Fall back to legacy file
+            config_file = os.path.join(os.path.dirname(__file__), "model_configs.json")
+            try:
+                with open(config_file, 'r') as f:
+                    data = json.load(f)
+                    model_names = list(data.get("models", {}).keys())
+            except:
+                model_names = ["flux_dev"]  # Fallback
         
         return {
             "required": {
