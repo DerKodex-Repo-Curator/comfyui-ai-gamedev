@@ -59,13 +59,13 @@
       "inputs": [],
       "outputs": [],
       "properties": {
-        "text": "Prompt Optimizer Workflow\n\n1. Enter your simple prompt\n2. Select target model (flux_dev, wan22, etc.)\n3. Optionally connect an image for context\n4. Configure Ollama settings\n5. Get optimized prompts for your model\n\nRequires:\n- Ollama running locally\n- qwen2.5vl:7b model installed",
+        "text": "Prompt Optimizer Workflow\n\n1. Enter your simple prompt\n2. Select target model (flux_dev, wan22, etc.)\n3. Optionally connect an image for context\n4. Configure Ollama settings\n5. Adjust temperature (0.0-2.0) for creativity\n6. Set seed (-1 for random) for reproducibility\n7. Get optimized prompts for your model\n\nRequires:\n- Ollama running locally\n- qwen2.5vl:7b model installed",
         "ue_properties": {
           "version": "7.0.1"
         }
       },
       "widgets_values": [
-        "Prompt Optimizer Workflow\n\n1. Enter your simple prompt\n2. Select target model (flux_dev, wan22, etc.)\n3. Optionally connect an image for context\n4. Configure Ollama settings\n5. Get optimized prompts for your model\n\nRequires:\n- Ollama running locally\n- qwen2.5vl:7b model installed"
+        "Prompt Optimizer Workflow\n\n1. Enter your simple prompt\n2. Select target model (flux_dev, wan22, etc.)\n3. Optionally connect an image for context\n4. Configure Ollama settings\n5. Adjust temperature (0.0-2.0) for creativity\n6. Set seed (-1 for random) for reproducibility\n7. Get optimized prompts for your model\n\nRequires:\n- Ollama running locally\n- qwen2.5vl:7b model installed"
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -131,13 +131,13 @@
       "inputs": [],
       "outputs": [],
       "properties": {
-        "text": "Supported Models:\n- flux_dev, flux_krea, flux_kontext (no negative)\n- wan21, wan22 (positive + negative)\n- mmaudio, ace_step, qwen_image_edit, indextts",
+        "text": "Supported Models:\n- flux_dev, flux_krea (positive + negative)\n- flux_kontext (positive only)\n- chroma_hd (512 tokens, positive + negative)\n- wan21, wan22 (positive + negative)\n- mmaudio, ace_step, qwen_image_edit, indextts",
         "ue_properties": {
           "version": "7.0.1"
         }
       },
       "widgets_values": [
-        "Supported Models:\n- flux_dev, flux_krea, flux_kontext (no negative)\n- wan21, wan22 (positive + negative)\n- mmaudio, ace_step, qwen_image_edit, indextts"
+        "Supported Models:\n- flux_dev, flux_krea (positive + negative)\n- flux_kontext (positive only)\n- chroma_hd (512 tokens, positive + negative)\n- wan21, wan22 (positive + negative)\n- mmaudio, ace_step, qwen_image_edit, indextts"
       ],
       "color": "#223",
       "bgcolor": "#335"
@@ -189,7 +189,7 @@
       ],
       "size": [
         400,
-        220
+        280
       ],
       "flags": {},
       "order": 3,
@@ -239,7 +239,10 @@
         "flux_dev",
         "a majestic dragon flying through clouds",
         "localhost:11434",
-        "qwen2.5vl:7b"
+        "qwen2.5vl:7b",
+        0.7,
+        -1,
+        0
       ]
     }
   ],

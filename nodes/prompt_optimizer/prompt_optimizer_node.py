@@ -79,6 +79,26 @@ class PromptOptimizer:
                     "default": "qwen2.5vl:7b",
                     "placeholder": "Ollama model to use"
                 }),
+                "temperature": ("FLOAT", {
+                    "default": 0.7,
+                    "min": 0.0,
+                    "max": 2.0,
+                    "step": 0.1,
+                    "display": "slider",
+                    "placeholder": "Temperature (0.0-2.0)"
+                }),
+                "seed": ("INT", {
+                    "default": -1,
+                    "min": -1,
+                    "max": 2147483647,
+                    "placeholder": "Seed (-1 for random)"
+                }),
+                "max_tokens_override": ("INT", {
+                    "default": 0,
+                    "min": 0,
+                    "max": 4096,
+                    "placeholder": "Max tokens (0 for model default)"
+                }),
             }
         }
     
@@ -185,7 +205,10 @@ class PromptOptimizer:
         user_prompt: str,
         image_path: Optional[str],
         ollama_host: str,
-        ollama_model: str
+        ollama_model: str,
+        temperature: float = 0.7,
+        seed: int = -1,
+        max_tokens: Optional[int] = None
     ) -> str:
         """
         Run optimization using Ollama
@@ -196,6 +219,9 @@ class PromptOptimizer:
             image_path: Optional path to image file
             ollama_host: Ollama server host
             ollama_model: Ollama model to use
+            temperature: Temperature for response generation (0.0-2.0)
+            seed: Random seed (-1 for random)
+            max_tokens: Maximum tokens to generate (uses model default if None)
         
         Returns:
             Optimized prompt string
@@ -232,11 +258,38 @@ class PromptOptimizer:
             final_messages.append(user_message)
             logger.debug(f"Total messages to send: {len(final_messages)}")
             
+            # Prepare options
+            options = {
+                "temperature": temperature
+            }
+            
+            # Add seed if not using random (-1)
+            if seed != -1:
+                options["seed"] = seed
+                logger.debug(f"Using fixed seed: {seed}")
+            else:
+                logger.debug("Using random seed")
+            
+            # Add max_tokens if specified
+            if max_tokens is not None:
+                options["num_predict"] = max_tokens
+                logger.debug(f"Using max_tokens: {max_tokens}")
+            
+            logger.info(f"📡 Ollama request parameters:")
+            logger.info(f"   Model: {ollama_model}")
+            logger.info(f"   Temperature: {temperature}")
+            logger.info(f"   Seed: {seed if seed != -1 else 'random'}")
+            logger.info(f"   Max tokens: {max_tokens if max_tokens else 'model default'}")
+            logger.info(f"   Host: {ollama_host}")
+            logger.info(f"   Image included: {bool(image_path and os.path.exists(image_path))}")
+            logger.debug(f"   Full options dict: {options}")
+            
             # Make request to Ollama
             logger.info(f"📡 Sending request to Ollama...")
             response = client.chat(
                 model=ollama_model,
-                messages=final_messages
+                messages=final_messages,
+                options=options
             )
             
             # Extract and clean response
@@ -263,7 +316,10 @@ class PromptOptimizer:
         prompt: str,
         image: Optional[np.ndarray] = None,
         ollama_host: str = "localhost:11434",
-        ollama_model: str = "qwen2.5vl:7b"
+        ollama_model: str = "qwen2.5vl:7b",
+        temperature: float = 0.7,
+        seed: int = -1,
+        max_tokens_override: int = 0
     ) -> Tuple[str, str, str]:
         """
         Optimize prompt for target model
@@ -274,18 +330,26 @@ class PromptOptimizer:
             image: Optional image tensor
             ollama_host: Ollama server host
             ollama_model: Ollama model to use
+            temperature: Temperature for response generation (0.0-2.0)
+            seed: Random seed (-1 for random)
+            max_tokens_override: Override max tokens (0 for model default)
         
         Returns:
             Tuple of (positive_prompt, negative_prompt, original_prompt)
         """
         logger.info(f"=" * 60)
         logger.info(f"🚀 Starting prompt optimization")
-        logger.info(f"   Target model: {target_model}")
-        logger.info(f"   Original prompt: {prompt[:100]}...")
-        logger.info(f"   Image provided: {image is not None}")
+        logger.info(f"📊 Input Parameters (after defaults applied):")
+        logger.info(f"   target_model: {target_model}")
+        logger.info(f"   prompt: {prompt[:100]}{'...' if len(prompt) > 100 else ''}")
+        logger.info(f"   image: {'provided' if image is not None else 'none'}")
         if image is not None:
-            logger.debug(f"   Image info - Type: {type(image)}, Shape: {getattr(image, 'shape', 'N/A')}")
-        logger.info(f"   Ollama config - Host: {ollama_host}, Model: {ollama_model}")
+            logger.debug(f"   image details - Type: {type(image)}, Shape: {getattr(image, 'shape', 'N/A')}")
+        logger.info(f"   ollama_host: {ollama_host}")
+        logger.info(f"   ollama_model: {ollama_model}")
+        logger.info(f"   temperature: {temperature}")
+        logger.info(f"   seed: {seed}")
+        logger.info(f"   max_tokens_override: {max_tokens_override}")
         logger.info(f"=" * 60)
         
         # Clean up any previous temp images
@@ -297,8 +361,14 @@ class PromptOptimizer:
             logger.warning(f"⚠️ Unknown model '{target_model}', returning original prompt")
             return (prompt, "", prompt)
         
-        logger.info(f"📋 Using config for: {model_config.get('name', target_model)}")
+        logger.info(f"📋 Model Configuration:")
+        logger.info(f"   Model name: {model_config.get('name', target_model)}")
         logger.info(f"   Supports negative: {model_config.get('supports_negative', False)}")
+        logger.info(f"   Default max_tokens: {model_config.get('max_tokens', 'not specified')}")
+        
+        # Determine max_tokens to use
+        max_tokens = max_tokens_override if max_tokens_override > 0 else model_config.get('max_tokens', None)
+        logger.info(f"   Effective max_tokens: {max_tokens if max_tokens else 'Ollama default'}{' (user override)' if max_tokens_override > 0 else ''}")
         
         # Save image if provided
         image_path = None
@@ -322,7 +392,10 @@ class PromptOptimizer:
                     prompt,
                     image_path,
                     ollama_host,
-                    ollama_model
+                    ollama_model,
+                    temperature,
+                    seed,
+                    max_tokens
                 )
                 logger.info(f"   Positive result: {len(positive_prompt)} chars")
         else:
@@ -339,7 +412,10 @@ class PromptOptimizer:
                     positive_prompt,  # Use optimized positive as input
                     None,  # Don't include image for negative prompts
                     ollama_host,
-                    ollama_model
+                    ollama_model,
+                    temperature,
+                    seed,
+                    max_tokens
                 )
                 logger.info(f"   Negative result: {len(negative_prompt)} chars")
         else:
