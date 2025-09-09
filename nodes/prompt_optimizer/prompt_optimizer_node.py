@@ -509,6 +509,7 @@ class PromptOptimizer:
                 import time
                 prompt_with_timestamp = f"{prompt}\n[Request ID: {time.time()}]"
                 logger.info(f"   Full prompt for negative generation: {prompt_with_timestamp}")
+                logger.info(f"   Using fixed temperature 0.2 for negative prompt generation")
                 
                 negative_prompt = self._optimize_with_ollama(
                     negative_messages,
@@ -516,7 +517,7 @@ class PromptOptimizer:
                     None,  # Don't include image for negative prompts
                     ollama_host,
                     ollama_model,
-                    temperature,
+                    0.2,  # Lower temperature for more consistent negative prompts
                     seed,
                     max_tokens
                 )
