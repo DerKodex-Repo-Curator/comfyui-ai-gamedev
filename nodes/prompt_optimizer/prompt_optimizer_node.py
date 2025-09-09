@@ -414,7 +414,8 @@ class PromptOptimizer:
             negative_messages = model_config.get("negative_messages", [])
             if negative_messages:
                 logger.info(f"🎯 Optimizing negative prompt for {model_config.get('name', target_model)}...")
-                logger.info(f"   Using model key: {target_model}")
+                logger.info(f"   Target model: {target_model}")
+                logger.info(f"   Temperature: {temperature}")
                 logger.info(f"   Number of negative messages: {len(negative_messages)}")
                 
                 # Debug: Log the system prompt being used for negative generation
@@ -446,15 +447,64 @@ class PromptOptimizer:
                 if "[Request ID:" in negative_prompt:
                     negative_prompt = negative_prompt.split("[Request ID:")[0].strip()
                 
+                # Check for video-related terms in image models and filter them out
+                is_image_model = target_model in ["flux_dev", "flux_krea", "flux_kontext", "chroma_hd", "ace_step", "qwen_image_edit"]
+                if is_image_model:
+                    video_terms = ["frame rate", "fps", "frame count", "temporal", "sound", "dialogue", "music", 
+                                  "ambient sounds", "narrative", "plot", "video", "animation", "keyframe"]
+                    original_negative = negative_prompt
+                    
+                    # Filter out video-related terms
+                    negative_items = [item.strip() for item in negative_prompt.split(",")]
+                    filtered_items = []
+                    removed_items = []
+                    
+                    for item in negative_items:
+                        if not any(term in item.lower() for term in video_terms):
+                            filtered_items.append(item)
+                        else:
+                            removed_items.append(item)
+                    
+                    if removed_items:
+                        logger.warning(f"⚠️ Filtered video-related terms from image model negative prompt: {', '.join(removed_items)}")
+                        negative_prompt = ", ".join(filtered_items)
+                
+                # Check for excessive repetition (more than 3 occurrences of the same phrase)
+                import re
+                from collections import Counter
+                
+                # Split by comma and count occurrences
+                items = [item.strip() for item in negative_prompt.split(",") if item.strip()]
+                item_counts = Counter(items)
+                
+                # Check for any item repeated more than 2 times
+                repetitive_items = {item: count for item, count in item_counts.items() if count > 2}
+                if repetitive_items:
+                    logger.warning(f"⚠️ Detected repetitive items in negative prompt: {repetitive_items}")
+                    # Remove duplicates while preserving order
+                    seen = set()
+                    unique_items = []
+                    for item in items:
+                        if item not in seen:
+                            seen.add(item)
+                            unique_items.append(item)
+                    negative_prompt = ", ".join(unique_items)
+                    logger.info(f"   Deduplicated negative prompt to {len(unique_items)} unique items")
+                
                 logger.info(f"   Negative result: {len(negative_prompt)} chars")
                 logger.info(f"   Full negative prompt: {negative_prompt}")
                 
-                # Check if we got video-related negative prompts for an image model
-                video_keywords = ["motion blur", "frame rate", "temporal", "sound", "dialogue", "music", "ambient sounds", "narrative", "plot"]
-                if any(keyword in negative_prompt.lower() for keyword in video_keywords):
-                    logger.error(f"❌ ERROR: Video-related negative prompt generated for image model {target_model}!")
-                    logger.error(f"   This suggests Ollama may be returning cached or incorrect results.")
-                    logger.error(f"   Target model: {target_model}, Config name: {model_config.get('name', target_model)}")
+                # If the negative prompt seems problematic, use a fallback
+                if len(negative_prompt) < 20 or "high quality" in negative_prompt.lower() or "8k resolution" in negative_prompt.lower():
+                    logger.error(f"❌ ERROR: Invalid negative prompt generated (contains positive terms or too short)")
+                    # Use a simple fallback for the model
+                    fallback_negatives = {
+                        "flux_dev": "low quality, blurry, watermark, text, logo, oversaturated, jpeg artifacts, distorted",
+                        "flux_krea": "low quality, blurry, watermark, mundane, photorealistic, jpeg artifacts",
+                        "chroma_hd": "low quality, blurry, watermark, text, distorted anatomy, compression artifacts",
+                    }
+                    negative_prompt = fallback_negatives.get(target_model, "low quality, blurry, watermark, text")
+                    logger.info(f"   Using fallback negative prompt: {negative_prompt}")
         else:
             if not model_config.get("supports_negative", False):
                 logger.debug(f"Model {target_model} doesn't support negative prompts")
