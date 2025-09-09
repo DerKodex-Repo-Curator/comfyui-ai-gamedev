@@ -341,7 +341,7 @@ class PromptOptimizer:
                 "num_ctx": 2048,  # Set context window
                 "repeat_penalty": 1.2,  # Penalize repetitions
                 "repeat_last_n": 64,  # Look back this many tokens for repetitions
-                "stop": ["\n\n", ".", "!", "?", "\n---", "\nUser:", "\nAssistant:"]  # Stop sequences
+                "stop": ["\n\n\n", "\n---", "\nUser:", "\nAssistant:", "---", "###"]  # Stop sequences - removed punctuation to allow full prompts
             }
             
             # Add seed if not using random (-1)
