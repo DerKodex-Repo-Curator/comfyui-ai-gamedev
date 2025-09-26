@@ -20,6 +20,10 @@ print(f"Current dir: {os.getcwd()}")
 import json
 from pathlib import Path
 
+# Import our progress tracking utilities
+sys.path.insert(0, str(Path(__file__).parent))
+from progress_utils import create_progress_tracker, STAGE_ESTIMATES
+
 # Use offline mode to avoid SSL issues
 os.environ['HF_HUB_OFFLINE'] = '1'
 os.environ['TRANSFORMERS_OFFLINE'] = '1'
@@ -35,6 +39,20 @@ with open(config_path, 'r') as f:
 print(f"Config loaded with keys: {list(config.keys())}")
 print(f"Config contents:")
 print(json.dumps(config, indent=2))
+
+# Initialize progress tracking with raw logging to file
+output_dir = Path(config['output_dir'])
+log_file_path = output_dir / "hunyuan3d_execution.log"
+progress_tracker = create_progress_tracker(str(log_file_path))
+
+# Start progress tracking
+progress_tracker.update_progress(
+    stage="starting", 
+    percent=0, 
+    message="Initializing Hunyuan3D execution", 
+    estimated_total=STAGE_ESTIMATES["total"]
+)
+progress_tracker.log_raw("Script starting with structured logging", "info")
 
 # Setup paths exactly like demo.py
 print("Adding to sys.path...")
@@ -149,12 +167,26 @@ print("="*60)
 print("\n🔨 Step 1: Shape Generation")
 print("-" * 40)
 
+# Progress: Starting shape generation
+progress_tracker.update_progress(
+    stage="shape_generation", 
+    percent=5, 
+    message="Loading 3D shape generation model"
+)
+
 print("Loading pretrained model...")
 shape_pipeline = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained(
     'tencent/Hunyuan3D-2.1', 
     subfolder='hunyuan3d-dit-v2-1'
 )
 print("✓ Model loaded")
+
+# Progress: Model loaded, starting generation
+progress_tracker.update_progress(
+    stage="shape_generation", 
+    percent=10, 
+    message=f"Generating 3D shape with {config['inference_steps']} steps"
+)
 
 print(f"Generating shape with {config['inference_steps']} steps...")
 result = shape_pipeline(
@@ -170,6 +202,13 @@ if result is None or len(result) == 0 or result[0] is None:
 
 mesh = result[0]
 print("✓ Shape generated")
+
+# Progress: Shape generation complete (50% total progress)
+progress_tracker.update_progress(
+    stage="shape_generation", 
+    percent=50, 
+    message="3D shape generation completed successfully"
+)
 
 # Save shape as OBJ first (like test_minimal.py)
 print(f"Saving shape to {shape_path}...")
@@ -188,6 +227,13 @@ print("✓ Memory freed")
 # Step 2: Paint texture (exactly like test_minimal.py)
 print("\n🎨 Step 2: Texture Painting")
 print("-" * 40)
+
+# Progress: Starting texture painting
+progress_tracker.update_progress(
+    stage="texture_painting", 
+    percent=55, 
+    message="Initializing texture painting pipeline"
+)
 
 try:
     print("Importing trimesh...")
@@ -227,9 +273,23 @@ try:
     
     print(f"✅ Texture painting complete: {textured_result}")
     
+    # Progress: Texture painting complete
+    progress_tracker.update_progress(
+        stage="texture_painting", 
+        percent=85, 
+        message="Texture painting completed successfully"
+    )
+    
     # Convert to GLB using trimesh (like test_minimal.py)
     print("\n📦 Step 3: Exporting Formats")
     print("-" * 40)
+    
+    # Progress: Starting export
+    progress_tracker.update_progress(
+        stage="exporting", 
+        percent=90, 
+        message="Exporting 3D models to GLB, OBJ, and STL formats"
+    )
     
     print(f"Loading textured mesh from {textured_result}...")
     mesh_textured = trimesh.load(textured_result)
@@ -263,6 +323,13 @@ try:
 except:
     pass
 
+# Progress: Complete!
+progress_tracker.update_progress(
+    stage="complete", 
+    percent=100, 
+    message="Hunyuan3D generation completed successfully"
+)
+
 print("\n" + "="*60)
 print("✅ GENERATION COMPLETE")
 print(f"   GLB: {textured_glb_path.name if textured_glb_path.exists() else 'Not created'}")
@@ -270,5 +337,6 @@ print(f"   OBJ: {textured_obj_path.name if textured_obj_path.exists() else 'Not 
 print(f"   STL: {textured_stl_path.name if textured_stl_path.exists() else 'Not created'}")
 print("="*60)
 
-# Script may segfault here - that's OK, files are already saved
+# Save final log file
+progress_tracker.save_raw_logs()
 print("Script complete. Blender may crash now - this is expected.")
