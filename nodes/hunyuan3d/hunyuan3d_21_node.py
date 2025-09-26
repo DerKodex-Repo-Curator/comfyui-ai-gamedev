@@ -13,6 +13,13 @@ import subprocess
 from pathlib import Path
 from PIL import Image
 
+# Import progress tracking utilities
+try:
+    from .progress_utils import ProgressParser
+except ImportError:
+    # For testing when module structure is different
+    from progress_utils import ProgressParser
+
 try:
     import folder_paths
 except ImportError:
@@ -163,12 +170,31 @@ class Hunyuan3D21Node:
                 env=clean_env  # Use clean environment
             )
             
-            # Print ALL output from the script
+            # Parse progress from stdout and log JSON progress objects
+            progress_parser = ProgressParser()
+            progress_count = 0
+            
+            # Print ALL output from the script AND parse progress
             if result.stdout:
                 print("=== Script Output ===")
                 # Print every single line, even blank ones
                 for line in result.stdout.split('\n'):
                     print(f"  {line}")
+                    
+                    # Try to parse progress from this line
+                    progress = progress_parser.parse_line(line)
+                    if progress:
+                        progress_count += 1
+                        print(f"📊 PROGRESS UPDATE #{progress_count}:")
+                        print(f"    Stage: {progress.stage}")
+                        print(f"    Percent: {progress.percent}%")
+                        print(f"    Message: {progress.message}")
+                        print(f"    Elapsed: {progress.format_duration(progress.elapsed_seconds)}")
+                        if progress.remaining_seconds is not None:
+                            print(f"    Remaining: {progress.format_duration(progress.remaining_seconds)}")
+                        print(f"    Raw JSON: {progress_parser.last_raw_json}")
+            
+            print(f"📈 Total progress updates received: {progress_count}")
             
             # Print ALL stderr output
             if result.stderr:
