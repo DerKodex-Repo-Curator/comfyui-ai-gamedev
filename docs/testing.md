@@ -95,12 +95,30 @@ class TestMyNode(unittest.TestCase, MockComfyUINode):
 
 ## Test Coverage by Node
 
-### VideoFrameExtractor Tests (10 tests)
+### VideoFrameExtractor Tests (25+ tests)
+**Unit Tests (10 tests)**:
 - **Frame Extraction Logic**: Evenly distributed frame sampling, skip parameters
 - **Tensor Handling**: ComfyUI VIDEO input processing, proper tensor output format
 - **Edge Cases**: Single frame videos, invalid parameters, large datasets
 - **Error Handling**: Invalid tensor shapes, parameter validation
 - **Integration**: Node registration, ComfyUI compatibility
+
+**Integration Tests (10 tests)** - Real video execution:
+- **Actual Frame Extraction**: Loads real video file (`examples/ship.mp4`)
+- **Count Verification**: Ensures correct number of frames extracted (81 total frames)
+- **Resolution Verification**: Confirms 640x640 resolution maintained
+- **Quality Verification**: Validates frame content and variation
+- **Performance Testing**: Measures extraction speed (3000+ fps)
+- **Edge Case Handling**: First/last frames, large requests, invalid parameters
+
+**Visual Verification Tests (5 tests)** - Saves frames to disk:
+- **Frame Distribution**: Saves 5, 10, 20 evenly distributed frames
+- **Skip Comparison**: Saves frames with/without start/end skipping
+- **Sequence Continuity**: Saves 16 frames to verify motion continuity  
+- **Resolution Verification**: Saves frames with resolution info in filename
+- **Edge Cases**: First frame, last frame, middle frames
+
+All extracted frames saved to: `test_output/frame_extraction_visual/`
 
 ### Hunyuan3D Tests (17 tests) 
 - **Subprocess Execution**: Conda environment handling, Blender execution simulation
@@ -118,18 +136,31 @@ class TestMyNode(unittest.TestCase, MockComfyUINode):
 
 ## Test Status
 
-**Current Status: ✅ All 51 tests passing**
+**Current Status: ✅ All 61+ tests passing**
+- **Unit Tests**: 51 tests (ComfyUI simulation)
+- **Integration Tests**: 10+ tests (real video execution)  
+- **Visual Verification**: 5+ tests (saves actual frames)
 
-To verify current test status, run:
+To verify current test status:
 ```bash
+# Run all tests (unit + integration)
 python -m pytest tests/ -v
+
+# Run only unit tests (fast, mocked)
+python -m pytest tests/test_*.py -v
+
+# Run only integration tests (slower, real execution)
+python -m pytest tests/integration_*.py -v
+
+# Run visual verification tests (saves frames to disk)
+python -m pytest tests/visual_*.py -v
 ```
 
-Expected output:
+Expected output for all tests:
 ```
 ============================== test session starts ==============================
 ...
-============================== 51 passed in 4.41s ==============================
+============================== 61+ passed in ~8s ==============================
 ```
 
 ## Key Test Features
