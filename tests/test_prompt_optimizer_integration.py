@@ -91,8 +91,6 @@ class TestPromptOptimizerIntegration(unittest.TestCase, MockComfyUINode):
     
     def test_flux_dev_optimization_real_ollama(self):
         """Test FLUX Dev prompt optimization with real Ollama"""
-        self._check_ollama_requirements()
-        
         test_prompt = "a majestic dragon"
         
         start_time = time.time()
@@ -138,7 +136,6 @@ class TestPromptOptimizerIntegration(unittest.TestCase, MockComfyUINode):
     
     def test_wan22_optimization_with_negative_real_ollama(self):
         """Test WAN22 prompt optimization with negative prompt support"""
-        self._check_ollama_requirements()
         
         test_prompt = "dog running in park"
         
@@ -180,7 +177,6 @@ class TestPromptOptimizerIntegration(unittest.TestCase, MockComfyUINode):
     
     def test_optimization_with_real_image(self):
         """Test optimization with real image input"""
-        self._check_ollama_requirements()
         
         if self.real_image is None:
             self.skipTest("Real test image not available")
@@ -213,7 +209,6 @@ class TestPromptOptimizerIntegration(unittest.TestCase, MockComfyUINode):
     
     def test_different_temperatures_real_ollama(self):
         """Test optimization with different temperature settings"""
-        self._check_ollama_requirements()
         
         test_prompt = "cyberpunk city"
         temperatures = [0.1, 0.7, 1.5]
@@ -252,7 +247,6 @@ class TestPromptOptimizerIntegration(unittest.TestCase, MockComfyUINode):
     
     def test_seed_consistency_real_ollama(self):
         """Test that same seed produces consistent results"""
-        self._check_ollama_requirements()
         
         test_prompt = "medieval castle"
         seed = 999
@@ -298,7 +292,6 @@ class TestPromptOptimizerIntegration(unittest.TestCase, MockComfyUINode):
     
     def test_multiple_models_real_ollama(self):
         """Test optimization with different target models"""
-        self._check_ollama_requirements()
         
         test_prompt = "space station"
         
@@ -341,7 +334,6 @@ class TestPromptOptimizerIntegration(unittest.TestCase, MockComfyUINode):
     
     def test_error_handling_real_ollama(self):
         """Test error handling with real Ollama"""
-        self._check_ollama_requirements()
         
         # Test with invalid model name
         positive, negative, original = self.simulate_comfyui_execution(
@@ -359,7 +351,6 @@ class TestPromptOptimizerIntegration(unittest.TestCase, MockComfyUINode):
     
     def test_long_prompt_optimization_real_ollama(self):
         """Test optimization with longer input prompts"""
-        self._check_ollama_requirements()
         
         long_prompt = ("A detailed fantasy scene with multiple characters including "
                       "a wizard casting spells, knights in armor, dragons flying overhead, "
@@ -386,7 +377,6 @@ class TestPromptOptimizerIntegration(unittest.TestCase, MockComfyUINode):
     
     def test_performance_benchmarking_real_ollama(self):
         """Benchmark performance of real Ollama optimization"""
-        self._check_ollama_requirements()
         
         test_cases = [
             "cat",
