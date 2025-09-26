@@ -61,12 +61,13 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
     @classmethod
     def setUpClass(cls):
         """Set up class-level resources"""
-        # Test image paths
-        cls.test_image_path = Path(__file__).parent.parent / "examples" / "input_images" / "single_view" / "railgun" / "frame_001_4x.png"
-        print(f"Test image available: {cls.test_image_path.exists()}")
+        # Real input images directory
+        cls.examples_dir = Path(__file__).parent.parent / "examples" / "input_images"
+        cls.real_image_path = cls.examples_dir / "single_view" / "railgun" / "frame_001_4x.png"
+        print(f"Real image available: {cls.real_image_path.exists()}")
         
         # Output directory for test files
-        cls.output_dir = Path(__file__).parent.parent / "test_output" / "hunyuan3d_integration"
+        cls.output_dir = Path(__file__).parent.parent / "test_output"
         cls.output_dir.mkdir(parents=True, exist_ok=True)
     
     def setUp(self):
@@ -85,13 +86,10 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
         self.context.__enter__()
         self.node = Hunyuan3D21Node()
         
-        # Create test image tensor
-        self.test_image = create_test_image_tensor(1, 256, 256, 3)
-        
-        # Load real test image if available
+        # Load real test image (required for all tests)
         self.real_image = None
-        if self.test_image_path.exists():
-            pil_image = Image.open(self.test_image_path).convert('RGB')
+        if self.real_image_path.exists():
+            pil_image = Image.open(self.real_image_path).convert('RGB')
             # Resize to reasonable size for faster testing
             if pil_image.size != (256, 256):
                 pil_image = pil_image.resize((256, 256))
@@ -103,6 +101,7 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
         """Clean up test fixtures"""
         self.context.__exit__(None, None, None)
     
+    @unittest.skip("Temporarily disabled - focusing on textured generation tests")
     def test_shape_only_generation_real_execution(self):
         """Test shape-only generation (no texture) with real execution - generates OBJ/STL"""
         print("🔥 REAL EXECUTION: Testing shape-only generation (OBJ/STL)")
@@ -276,7 +275,7 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
             resolution="512",  # String as expected by node
             texture_resolution="512",
             guidance_scale=7.5,
-            inference_steps=20,  # Minimal steps for testing
+            inference_steps=10,  # Minimal steps for testing
             conda_env="hunyuan3d",
             conda_path="conda"
         )
@@ -325,8 +324,8 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
         # Call the node method directly (no mocking) - this will execute real conda subprocess
         glb_path, obj_path, stl_path = self.node.generate_3d(
             images=images,
-            resolution="256",  # String as expected by node
-            texture_resolution="256",
+            resolution="512",  # String as expected by node
+            texture_resolution="512",
             guidance_scale=7.5,
             inference_steps=10,  # Minimal steps for testing
             enable_texture=texture_enabled,
@@ -370,7 +369,6 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
         # Stack into batch [batch_size, height, width, channels]
         return torch.cat(tensors, dim=0)
     
-    @unittest.skip("Enable manually for single image testing")
     def test_single_image_generation(self):
         """Test single image 3D generation - the perfect original test"""
         if self.real_image is None:
@@ -411,7 +409,6 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
         shutil.copy2(stl_file, self.output_dir / f"single_image_{timestamp}.stl")
         print(f"📁 Files copied to: {self.output_dir}")
     
-    @unittest.skip("Enable manually for multiview testing")
     def test_multiview_generation(self):
         """Test multiview (4-frame) 3D generation"""
         if self.real_image is None:

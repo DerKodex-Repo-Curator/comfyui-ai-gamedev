@@ -189,9 +189,9 @@ class Hunyuan3D21Node:
                         print(f"    Stage: {progress.stage}")
                         print(f"    Percent: {progress.percent}%")
                         print(f"    Message: {progress.message}")
-                        print(f"    Elapsed: {progress.format_duration(progress.elapsed_seconds)}")
+                        print(f"    Elapsed: {progress_parser.format_duration(progress.elapsed_seconds)}")
                         if progress.remaining_seconds is not None:
-                            print(f"    Remaining: {progress.format_duration(progress.remaining_seconds)}")
+                            print(f"    Remaining: {progress_parser.format_duration(progress.remaining_seconds)}")
                         print(f"    Raw JSON: {progress_parser.last_raw_json}")
             
             print(f"📈 Total progress updates received: {progress_count}")
