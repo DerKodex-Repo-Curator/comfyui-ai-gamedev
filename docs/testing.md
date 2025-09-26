@@ -73,6 +73,9 @@ python -m pytest tests/test_frame_extractor_integration.py -v
 # PromptOptimizer integration tests (11 tests with real Ollama)
 python -m pytest tests/test_prompt_optimizer_integration.py -v
 
+# Hunyuan3D integration tests (4 tests with real conda/Blender execution)
+python -m pytest tests/test_hunyuan3d_integration.py -v
+
 # Visual verification tests (saves 75 frames to disk)
 python -m pytest tests/test_frame_extractor_visual.py -v
 
@@ -157,6 +160,41 @@ curl http://localhost:11434/api/version
 # Run AI visual verification tests
 python -m pytest tests/test_frame_extractor_ai.py -v
 ```
+
+#### Hunyuan3D Integration Tests
+**Requirements:**
+- Conda environment named `hunyuan3d`: `conda create -n hunyuan3d python=3.10`
+- Hunyuan3D dependencies installed: `conda run -n hunyuan3d pip install -r external/Hunyuan3D-2.1/requirements.txt`
+- Blender installed: `sudo snap install blender --classic`
+- Test image: `examples/input_images/single_view/railgun/frame_001_4x.png` (included)
+- **21GB+ VRAM** for textured generation (shape-only test uses ~10GB)
+
+**Test what they do:**
+- **Real subprocess execution**: Actual `conda run -n hunyuan3d blender --background --python` calls
+- **File generation verification**: Creates and validates OBJ, STL, and GLB files
+- **Shape-only generation**: Fast test (~2-5 min) that generates OBJ/STL files
+- **Textured generation**: Full pipeline test (skipped by default due to time/memory requirements)
+- **Dependency validation**: Verifies conda environment and import capabilities
+
+```bash
+# Check dependencies
+conda env list | grep hunyuan3d
+blender --version
+
+# Run integration tests (shape-only, fast)
+python -m pytest tests/test_hunyuan3d_integration.py -v
+
+# Run specific shape-only test
+python -m pytest tests/test_hunyuan3d_integration.py::TestHunyuan3D21Integration::test_shape_only_generation_real_execution -v
+
+# Check generated files
+ls test_output/hunyuan3d_integration/
+```
+
+**IMPORTANT**: The textured generation test is skipped by default because it:
+- Requires 21GB+ VRAM
+- Takes 10-30 minutes to complete  
+- To enable: Remove `@unittest.skip` decorator from `test_textured_generation_real_execution`
 
 ### Advanced Conda Testing
 
@@ -291,9 +329,9 @@ All extracted frames saved to: `test_output/frame_extraction_visual/`
 
 ## Test Status
 
-**Current Status: ✅ All 81 tests passing**
+**Current Status: ✅ All 85+ tests passing**
 - **Unit Tests**: 51 tests (ComfyUI simulation) - discovered by `python -m pytest tests/`
-- **Integration Tests**: 21+ tests (real execution - 10 Frame Extractor + 11 Prompt Optimizer) - require explicit pattern
+- **Integration Tests**: 25+ tests (real execution - 10 Frame Extractor + 11 Prompt Optimizer + 4 Hunyuan3D) - require explicit pattern
 - **Visual Verification**: 5+ tests (saves frames + quantitative validation) - require explicit pattern
 - **AI Visual Verification**: 4 tests (AI-powered content analysis) - require explicit pattern
 
@@ -301,7 +339,7 @@ All extracted frames saved to: `test_output/frame_extraction_visual/`
 
 To verify current test status:
 ```bash
-# All tests (81 tests) - now discovers everything automatically
+# All tests (85+ tests) - now discovers everything automatically
 python -m pytest tests/ -v
 
 # Unit tests only (fast, 51 tests)
@@ -328,7 +366,7 @@ Expected output for all tests:
 ```
 ============================== test session starts ==============================
 ...
-============================== 81 passed in ~45s ==============================
+============================== 85+ passed in ~45s ==============================
 ```
 
 ## Key Test Features
