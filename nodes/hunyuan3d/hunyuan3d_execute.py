@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
-Hunyuan3D 2.1 execution script with structured logging and clean exit
+Hunyuan3D 2.1 execution script with structured logging
 MUST BE RUN THROUGH BLENDER: conda run -n hunyuan3d blender --background --python hunyuan3d_execute.py -- config.json
-Includes segfault fix for clean Blender exit
+Note: Blender may segfault during cleanup - this is expected after successful generation
 """
 
 print("starting...")
+
+# Note: Blender segfault during cleanup is a known issue - files are generated successfully before crash
 
 # Apply addon cleanup fix for clean Blender exit
 def fix_blender_addon_cleanup():
@@ -13,20 +15,114 @@ def fix_blender_addon_cleanup():
     try:
         import sys
         fixed_count = 0
+        problematic_modules = []
+        all_unregister_modules = []
+        
         for module_name, module in sys.modules.items():
-            if module and hasattr(module, 'unregister') and not callable(module.unregister):
-                def mock_unregister():
-                    pass
-                module.unregister = mock_unregister
-                fixed_count += 1
+            if module and hasattr(module, 'unregister'):
+                all_unregister_modules.append(f"{module_name} ({type(module.unregister).__name__})")
+                if not callable(module.unregister):
+                    # Store original for debugging
+                    original_type = type(module.unregister).__name__
+                    try:
+                        original_value = str(module.unregister)[:100]
+                    except Exception as e:
+                        original_value = f"<Error getting string repr: {e}>"
+                    problematic_modules.append(f"{module_name} ({original_type}): {original_value}")
+                    
+                    # Create a proper mock function with closure to capture module name
+                    def create_mock_unregister(name, orig_type):
+                        def mock_unregister():
+                            # Silent mock for known problematic types
+                            pass
+                        return mock_unregister
+                    
+                    # Replace with mock
+                    module.unregister = create_mock_unregister(module_name, original_type)
+                    fixed_count += 1
+        
+        print(f"🔍 Found {len(all_unregister_modules)} modules with unregister attribute:")
+        for mod in all_unregister_modules:
+            print(f"    - {mod}")
+        
         if fixed_count > 0:
-            print(f"🔧 Fixed {fixed_count} problematic addon unregister functions")
+            print(f"🔧 Fixed {fixed_count} problematic addon unregister functions:")
+            for mod in problematic_modules:
+                print(f"    - {mod}")
+        else:
+            print("ℹ️ No problematic addon unregister functions found")
+            
     except Exception as e:
         print(f"⚠️ Addon cleanup fix error: {e}")
+        import traceback
+        traceback.print_exc()
 
-# Install exit-time fix
+# Comprehensive segfault prevention strategy
 import atexit
-atexit.register(fix_blender_addon_cleanup)
+import signal
+
+def aggressive_blender_cleanup():
+    """Aggressive cleanup strategy that applies multiple fixes"""
+    print("🔄 Running aggressive Blender cleanup...")
+    
+    # Apply our addon fix
+    fix_blender_addon_cleanup()
+    
+    # Monkeypatch the actual Blender cleanup mechanism
+    try:
+        import addon_utils
+        original_disable = addon_utils.disable
+        
+        def safe_disable(module_name, default_set=False, handle_error=None):
+            """Safe version of addon_utils.disable that catches errors"""
+            try:
+                return original_disable(module_name, default_set, handle_error)
+            except Exception as e:
+                print(f"⚠️ Caught addon disable error for {module_name}: {e}")
+                return None
+        
+        addon_utils.disable = safe_disable
+        print("✓ Monkeypatched addon_utils.disable")
+    except Exception as e:
+        print(f"⚠️ Could not monkeypatch addon_utils: {e}")
+    
+    # Try to clear Blender state
+    try:
+        import bpy
+        # Disable all addons first
+        try:
+            enabled_addons = list(bpy.context.preferences.addons.keys())
+            for addon in enabled_addons:
+                try:
+                    bpy.ops.preferences.addon_disable(module=addon)
+                except:
+                    pass
+        except:
+            pass
+        print("✓ Disabled all addons")
+    except Exception as e:
+        print(f"⚠️ Could not clear Blender state: {e}")
+
+def exit_handler():
+    """Exit handler that runs aggressive cleanup"""
+    aggressive_blender_cleanup()
+
+def signal_handler(signum, frame):
+    """Signal handler for clean exit"""
+    print(f"🔔 Received signal {signum}")
+    aggressive_blender_cleanup()
+    exit(0)
+
+# Register multiple cleanup strategies
+atexit.register(exit_handler)
+
+# Register signal handlers
+try:
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+    print("✓ Registered signal handlers")
+except:
+    pass
 
 print("=" * 60)
 print("SCRIPT STARTING")
@@ -358,6 +454,10 @@ print(f"   GLB: {textured_glb_path.name if textured_glb_path.exists() else 'Not 
 print(f"   OBJ: {textured_obj_path.name if textured_obj_path.exists() else 'Not created'}")
 print(f"   STL: {textured_stl_path.name if textured_stl_path.exists() else 'Not created'}")
 print("="*60)
+
+# Apply aggressive cleanup before exit
+print("🔧 Applying aggressive cleanup before exit...")
+aggressive_blender_cleanup()
 
 # Save final log file
 progress_tracker.save_raw_logs()

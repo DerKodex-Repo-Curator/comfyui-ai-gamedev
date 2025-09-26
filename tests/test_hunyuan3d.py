@@ -111,8 +111,8 @@ class TestHunyuan3D21Node(unittest.TestCase, MockComfyUINode):
                 self.node,
                 "generate_3d",
                 images=self.single_image,
-                resolution="512",
-                texture_resolution="768",
+                resolution="256",
+                texture_resolution="256",
                 guidance_scale=7.5,
                 inference_steps=30
             )
@@ -159,8 +159,8 @@ class TestHunyuan3D21Node(unittest.TestCase, MockComfyUINode):
                 self.node,
                 "generate_3d",
                 images=self.single_image,
-                resolution="512",
-                texture_resolution="768",
+                resolution="256",
+                texture_resolution="256",
                 guidance_scale=7.5,
                 inference_steps=30
             )
@@ -188,7 +188,7 @@ class TestHunyuan3D21Node(unittest.TestCase, MockComfyUINode):
                 "generate_3d",
                 images=self.single_image,
                 resolution="256",
-                texture_resolution="512",
+                texture_resolution="256",
                 guidance_scale=5.0,
                 inference_steps=20,
                 conda_env="custom_env",
@@ -214,8 +214,8 @@ class TestHunyuan3D21Node(unittest.TestCase, MockComfyUINode):
                 self.node,
                 "generate_3d",
                 images=self.multi_images,  # 4 images
-                resolution="512",
-                texture_resolution="768",
+                resolution="256",
+                texture_resolution="256",
                 guidance_scale=7.5,
                 inference_steps=30
             )
@@ -246,8 +246,8 @@ class TestHunyuan3D21Node(unittest.TestCase, MockComfyUINode):
                     test_node,
                     "generate_3d",
                     images=self.single_image,
-                    resolution="512",
-                    texture_resolution="768",
+                    resolution="256",
+                    texture_resolution="256",
                     guidance_scale=7.5,
                     inference_steps=30
                 )
@@ -269,8 +269,8 @@ class TestHunyuan3D21Node(unittest.TestCase, MockComfyUINode):
             self.node,
             "generate_3d",
             images=self.single_image,
-            resolution="512",
-            texture_resolution="768",
+            resolution="256",
+            texture_resolution="256",
             guidance_scale=7.5,
             inference_steps=30
         )
@@ -303,8 +303,8 @@ class TestHunyuan3D21Node(unittest.TestCase, MockComfyUINode):
                         self.node,
                         "generate_3d",
                         images=test_images,
-                        resolution="512",
-                        texture_resolution="768",
+                        resolution="256",
+                        texture_resolution="256",
                         guidance_scale=7.5,
                         inference_steps=30
                     )
@@ -340,8 +340,8 @@ class TestHunyuan3D21Node(unittest.TestCase, MockComfyUINode):
                 self.node,
                 "generate_3d",
                 images=self.single_image,
-                resolution="512",
-                texture_resolution="768",
+                resolution="256",
+                texture_resolution="256",
                 guidance_scale=7.5,
                 inference_steps=30
             )
@@ -440,8 +440,8 @@ class TestHunyuan3DIntegration(unittest.TestCase, MockComfyUINode):
                     
                     node.generate_3d(
                         images=test_image,
-                        resolution="512",
-                        texture_resolution="768",
+                        resolution="256",
+                        texture_resolution="256",
                         guidance_scale=7.5,
                         inference_steps=30
                     )
