@@ -2,49 +2,89 @@
 
 Custom ComfyUI nodes for AI-powered game asset generation, focusing on 3D model creation from images and videos.
 
-## Features
+## What Each Node Does
 
-### 🎮 Implemented Nodes
+### 🎮 **Implemented Nodes** - Ready to Use
 
-#### 1. **Hunyuan3D 2.1** - Image to 3D Generation
-- Generate high-quality textured 3D models from single or multiple images
-- **Complete pipeline with intelligent processing**:
-  1. **Background Removal** - Automatic segmentation for clean inputs
-  2. **3D Shape Generation** - Neural FlowMatching diffusion (50-200 steps)
-  3. **Mesh Remeshing** - Optimized topology (77% size reduction)
-  4. **Real-ESRGAN Upscaling** - 4x texture enhancement
-  5. **PBR Texture Painting** - Multi-view consistent textures via Blender
-  6. **Multi-format Export** - GLB (with textures), OBJ, STL outputs
-- **Smart memory management**: 
-  - Shape only: 10GB VRAM (untextured OBJ)
-  - With texture: 21GB VRAM (full pipeline with Blender)
-- Support for 1-10 input images for multi-view reconstruction
-- Outputs textured/remeshed versions for optimal game engine performance
+#### 1. **Hunyuan3D 2.1** - Turn Images into Game-Ready 3D Models
+**What it does**: Converts photos or concept art into textured 3D models perfect for Unity, Unreal, or Godot.
 
-#### 2. **Frame Extractor** - Smart Video Frame Extraction  
-- Extract evenly-distributed frames from videos
-- Skip intro/outro frames automatically
-- Perfect for turntable videos → 3D reconstruction
-- Memory-efficient batch processing
+**Key Features**:
+- **Single or Multi-View Input**: Use 1 photo or up to 10 angles for better quality
+- **Complete 3D Pipeline**: Background removal → 3D generation → texture painting → export
+- **Smart Output Generation**: 
+  - **GLB (textured)**: Full PBR textures with Blender painting - only generated if output connected
+  - **OBJ/STL (untextured)**: Raw geometry for custom texturing or 3D printing
+- **Game Engine Ready**: Optimized GLB files with embedded textures
+- **Smart Processing**: Automatic mesh optimization (77% size reduction)
 
-### 🚀 Planned Nodes
-- **Prompt Optimizer** - Model-specific prompt enhancement
-- **Text-to-Video** - Game animation generation
-- **Image-to-Video**: Animate static game assets
+**Perfect For**:
+- Creating 3D props from reference photos
+- Converting concept art to 3D game assets  
+- Rapid prototyping of game objects
+- Turntable video → 3D model workflows
 
-### 🎯 Frame Selector
-- Extract evenly distributed frames from videos
-- Perfect for multi-view 3D reconstruction
-- Configurable frame distribution strategies
+**Requirements**: 10GB VRAM (shape only) or 21GB VRAM (with textures), Blender
 
-### 💬 Prompt Optimizer
-- Enhance prompts for specific AI models (Flux, WANVideo, etc.)
-- Model-specific vocabulary optimization
-- Automatic prompt extension and refinement
+**Technical Note**: Hunyuan3D runs via subprocess (`conda run -n hunyuan3d`) to escape ComfyUI's virtual environment, as ComfyUI's Python environment often conflicts with Hunyuan3D's specific PyTorch/CUDA requirements.
 
-### 🗣️ Text-to-Speech
-- Generate character voices and narration
-- Multiple voice styles and languages
+#### 2. **Video Frame Extractor** - Smart Video Sampling for 3D
+**What it does**: Intelligently extracts evenly-spaced frames from videos, perfect for feeding into 3D reconstruction.
+
+**Key Features**:
+- **Even Distribution**: Samples frames across the entire video duration
+- **Smart Trimming**: Skip intro/outro frames automatically
+- **Batch Output**: Returns frames as ComfyUI image batch
+- **Memory Efficient**: Processes one frame at a time
+
+**Perfect For**:
+- Turntable videos → multi-view 3D reconstruction
+- Animation reference extraction
+- Video content analysis
+- Creating image sequences from gameplay footage
+
+**Requirements**: OpenCV (`pip install opencv-python`)
+
+#### 3. **Prompt Optimizer** - AI-Powered Prompt Enhancement  
+**What it does**: Uses vision-language models to transform simple prompts into detailed, model-specific prompts that maximize generation quality.
+
+**Key Features**:
+- **9+ Model Support**: FLUX, WAN Video, MMAudio, IndexTTS, and more
+- **Vision Integration**: Analyzes input images to incorporate visual context
+- **Smart Output**: Positive + negative prompts where supported
+- **Model-Specific**: Each AI model gets tailored optimization strategies
+
+**Perfect For**:
+- Improving AI art generation quality
+- Video generation with detailed prompts
+- Audio/SFX generation from simple descriptions
+- Consistent art style across projects
+
+**Requirements**: Ollama server with vision models (qwen2.5vl:7b recommended)
+
+**Environment Variables**: 
+- `OLLAMA_HOST`: Set custom Ollama server (default: localhost:11434)
+- Example: `export OLLAMA_HOST=192.168.1.100:11434` for remote Ollama server
+
+## Game Development Workflows
+
+### **🎯 Image/Video → 3D Game Asset**
+```
+Reference Image/Video → Frame Extractor → Hunyuan3D → Game Engine
+```
+Perfect for creating props, characters, and environment pieces from real-world references.
+
+### **🎨 AI Art → Optimized Content**  
+```
+Simple Prompt → Prompt Optimizer → AI Generator → Game Asset
+```
+Enhance prompts for FLUX, WAN Video, or other AI tools to get consistent, high-quality game art.
+
+### **📹 Turntable Video → 3D Model**
+```
+Turntable Video → Frame Extractor → Hunyuan3D → Textured 3D Model
+```
+Convert product videos or 3D previews into usable game models with textures.
 
 ## Installation
 
@@ -211,6 +251,39 @@ These demonstrate the current Hunyuan3D 2.0 pipeline which our 2.1 nodes enhance
 - Blender (for texture painting in Hunyuan3D)
 - CUDA-capable GPU with 21GB+ VRAM for texture generation (or CPU mode)
 - SSL certificates (installed via conda)
+
+## Testing
+
+### Quick Test
+```bash
+# Install testing dependencies
+pip install -r requirements-test.txt
+
+# Run all tests (61+ tests)
+python -m pytest tests/ -v
+```
+
+### Conda Environment Testing
+For comprehensive testing including Hunyuan3D subprocess simulation:
+
+```bash
+# Activate ComfyUI's conda environment (replace 'comfyui' with your actual environment name)
+conda activate comfyui
+
+# Install testing dependencies in ComfyUI environment
+pip install -r requirements-test.txt
+
+# Set up separate Hunyuan3D environment (for subprocess simulation)
+conda create -n hunyuan3d python=3.10 -y
+conda run -n hunyuan3d pip install -r external/Hunyuan3D-2.1/requirements.txt
+
+# Run tests from ComfyUI environment (tests will simulate subprocess calls to hunyuan3d env)
+python -m pytest tests/ -v
+```
+
+**Test Coverage**: VideoFrameExtractor (25+ tests), Hunyuan3D (17 tests), PromptOptimizer (24 tests)
+
+See `docs/testing.md` for detailed testing documentation.
 
 ## Performance & Optimization
 

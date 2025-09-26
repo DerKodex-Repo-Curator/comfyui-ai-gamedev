@@ -21,29 +21,160 @@ Tests are located in the `/tests` directory:
 
 ## Prerequisites
 
-Install required dependencies:
+Install testing dependencies:
 ```bash
-pip install pytest pytest-mock pytest-asyncio torch numpy pillow
+pip install -r requirements-test.txt
 ```
+
+This installs:
+- **Core Testing**: pytest, pytest-mock, pytest-asyncio
+- **Node Dependencies**: torch, numpy, pillow, opencv-python, ollama
+- **Development Tools**: pytest-cov, pytest-xdist, pytest-html
+
+> **Note**: For basic conda testing setup, see the Testing section in the main README.md. This document covers advanced testing scenarios.
 
 ## Running Tests
 
 ### Run All Tests (Recommended)
 ```bash
-# From project root directory - runs all 51 tests
+# Unit tests only (51 tests) - fast, mocked dependencies
 python -m pytest tests/ -v
+
+# All tests including integration (72+ tests) - requires external services
+python -m pytest tests/ tests/integration_*.py tests/visual_*.py -v
+```
+
+### Run Specific Test Categories
+```bash
+# Unit tests only (fast, mocked)
+python -m pytest tests/test_*.py -v
+
+# Integration tests only (requires Ollama service, real video files)
+python -m pytest tests/integration_*.py -v
+
+# Visual verification tests only (saves frames to disk)
+python -m pytest tests/visual_*.py -v
 ```
 
 ### Run Specific Test Files
 ```bash
-# Test only VideoFrameExtractor (10 tests)
+# Test only VideoFrameExtractor (10 unit tests)
 python -m pytest tests/test_frame_extractor.py -v
 
-# Test only Hunyuan3D (17 tests)
+# Test only Hunyuan3D (17 unit tests)
 python -m pytest tests/test_hunyuan3d.py -v
 
-# Test only PromptOptimizer (24 tests)
+# Test only PromptOptimizer (24 unit tests)
 python -m pytest tests/test_prompt_optimizer.py -v
+
+# VideoFrameExtractor integration tests (10 tests with real video)
+python -m pytest tests/integration_test_frame_extractor.py -v
+
+# PromptOptimizer integration tests (11 tests with real Ollama)
+python -m pytest tests/integration_test_prompt_optimizer.py -v
+
+# Visual verification tests (saves 75 frames to disk)
+python -m pytest tests/visual_verification_frame_extractor.py -v
+```
+
+### Integration Test Requirements
+
+**IMPORTANT**: Integration tests FAIL (not skip) if dependencies are missing. This is intentional.
+
+#### PromptOptimizer Integration Tests
+**Requirements:**
+- Ollama service running: `sudo systemctl start ollama` or `ollama serve`
+- qwen2.5vl:7b model installed: `ollama pull qwen2.5vl:7b`
+- Ollama Python client: `pip install ollama`
+
+**Test what they do:**
+- Real API calls to Ollama service (not mocked)
+- Actual prompt optimization with different models and settings
+- Performance benchmarking (~7-15s response times)
+- Image processing with real tensor data
+
+```bash
+# Check Ollama is ready
+curl http://localhost:11434/api/version
+
+# Run integration tests
+python -m pytest tests/integration_test_prompt_optimizer.py -v
+```
+
+#### VideoFrameExtractor Integration Tests
+**Requirements:**
+- Real video file: `examples/ship.mp4` (included in repo)
+- OpenCV: `pip install opencv-python`
+
+**Test what they do:**
+- Load and process actual video files (not mocked)
+- Extract real frames and verify count/resolution
+- Performance testing (3000+ fps extraction speed)
+
+```bash
+# Run integration tests
+python -m pytest tests/integration_test_frame_extractor.py -v
+```
+
+#### Visual Verification Tests
+**Requirements:**
+- Real video file: `examples/ship.mp4`
+- Write permissions in `test_output/` directory
+
+**Test what they do:**
+- Save 75 actual extracted frames to disk for manual inspection
+- Verify frame distribution, quality, and sequence continuity
+- Output location: `test_output/frame_extraction_visual/`
+
+```bash
+# Run visual tests (creates files on disk)
+python -m pytest tests/visual_verification_frame_extractor.py -v
+
+# View saved frames
+ls test_output/frame_extraction_visual/
+```
+
+### Advanced Conda Testing
+
+#### Testing Conda Integration (Mocked)
+```bash
+# Test conda detection and validation (mocked)
+python -m pytest tests/test_hunyuan3d.py::TestHunyuan3D21Node::test_conda_environment_validation -v
+
+# Test conda command execution (mocked subprocess calls)
+python -m pytest tests/test_hunyuan3d.py::TestHunyuan3D21Node::test_successful_3d_generation -v
+```
+
+#### Conda-Specific Test Features
+
+The Hunyuan3D tests include conda-aware functionality:
+
+**Environment Separation**:
+- **ComfyUI Environment**: Your actual ComfyUI conda environment for running tests and ComfyUI simulation
+- **Subprocess Environment**: `hunyuan3d` for simulating actual Hunyuan3D execution via `conda run`
+- **Why Subprocess**: ComfyUI's virtual environment often conflicts with Hunyuan3D's PyTorch/CUDA requirements, so subprocess execution escapes ComfyUI's environment constraints
+- Tests run from ComfyUI environment but simulate subprocess calls to hunyuan3d environment
+
+**Conda Environment Detection**:
+- Tests validate conda environment configuration
+- Mocks `conda run -n hunyuan3d` command execution
+- Verifies proper conda path and environment name handling
+
+**Blender Integration Testing**:
+- Simulates `conda run -n hunyuan3d blender --background --python script.py`
+- Tests script execution and output file generation
+- Handles expected segfault behavior (normal for Blender texture painting)
+
+**Environment Variable Testing**:
+```bash
+# Test custom conda configuration
+HUNYUAN3D_CONDA_ENV=my_env HUNYUAN3D_CONDA_PATH=/custom/conda python -m pytest tests/test_hunyuan3d.py -v
+
+# Test custom Ollama server configuration
+OLLAMA_HOST=192.168.1.100:11434 python -m pytest tests/test_prompt_optimizer.py -v
+
+# Test both custom configurations
+HUNYUAN3D_CONDA_ENV=my_env OLLAMA_HOST=localhost:11435 python -m pytest tests/ -v
 ```
 
 ### Run Specific Test Classes or Methods
@@ -136,31 +267,40 @@ All extracted frames saved to: `test_output/frame_extraction_visual/`
 
 ## Test Status
 
-**Current Status: ✅ All 61+ tests passing**
-- **Unit Tests**: 51 tests (ComfyUI simulation)
-- **Integration Tests**: 10+ tests (real video execution)  
-- **Visual Verification**: 5+ tests (saves actual frames)
+**Current Status: ✅ All 72+ tests passing**
+- **Unit Tests**: 51 tests (ComfyUI simulation) - discovered by `python -m pytest tests/`
+- **Integration Tests**: 21+ tests (real execution - 10 Frame Extractor + 11 Prompt Optimizer) - require explicit pattern
+- **Visual Verification**: 5+ tests (saves actual frames) - require explicit pattern
+
+**Key Point**: Integration tests use different file naming (`integration_*.py`, `visual_*.py`) and are NOT discovered by `python -m pytest tests/` by default. This is intentional to separate fast unit tests from slower integration tests.
 
 To verify current test status:
 ```bash
-# Run all tests (unit + integration)
+# Unit tests only (fast, 51 tests)
 python -m pytest tests/ -v
 
-# Run only unit tests (fast, mocked)
-python -m pytest tests/test_*.py -v
+# All tests including integration (72+ tests)
+python -m pytest tests/ tests/integration_*.py tests/visual_*.py -v
 
-# Run only integration tests (slower, real execution)
+# Integration tests only (requires external services)
 python -m pytest tests/integration_*.py -v
 
-# Run visual verification tests (saves frames to disk)
+# Visual verification tests only (saves frames to disk)
 python -m pytest tests/visual_*.py -v
+```
+
+Expected output for unit tests only:
+```
+============================== test session starts ==============================
+...
+============================== 51 passed in ~4s ==============================
 ```
 
 Expected output for all tests:
 ```
 ============================== test session starts ==============================
 ...
-============================== 61+ passed in ~8s ==============================
+============================== 72+ passed in ~30s ==============================
 ```
 
 ## Key Test Features
@@ -219,6 +359,74 @@ test_image = create_test_image_tensor(batch_size=1, height=256, width=256)
 test_video = create_test_video_input(num_frames=30, height=480, width=640)
 ```
 
+## Conda Testing Best Practices
+
+### Development Workflow
+```bash
+# 1. Activate ComfyUI's conda environment (replace with your actual ComfyUI environment name)
+conda activate comfyui
+
+# 2. Install testing dependencies in ComfyUI environment
+pip install -r requirements-test.txt
+
+# 3. Set up separate Hunyuan3D environment (for subprocess simulation)
+conda create -n hunyuan3d python=3.10 -y
+conda run -n hunyuan3d pip install -r external/Hunyuan3D-2.1/requirements.txt
+
+# 4. Run comprehensive tests (from ComfyUI environment)
+python -m pytest tests/ -v --tb=short
+
+# 5. Test conda-specific functionality
+python -m pytest tests/test_hunyuan3d.py -v -k "conda"
+
+# 6. Test with remote Ollama server (if available)
+OLLAMA_HOST=your-ollama-server:11434 python -m pytest tests/test_prompt_optimizer.py -v
+```
+
+### CI/CD Integration
+For automated testing pipelines:
+```bash
+# Set up ComfyUI testing environment
+conda create -n comfyui-test python=3.10 -y
+
+# Install testing dependencies
+conda run -n comfyui-test pip install -r requirements-test.txt
+
+# Set up Hunyuan3D subprocess environment
+conda create -n hunyuan3d python=3.10 -y
+conda run -n hunyuan3d pip install -r external/Hunyuan3D-2.1/requirements.txt
+
+# Run tests from ComfyUI environment
+conda run -n comfyui-test python -m pytest tests/ -v
+
+# Clean up
+conda env remove -n comfyui-test -y
+conda env remove -n hunyuan3d -y
+```
+
+### Debugging Conda Issues
+```bash
+# Check conda installation and environments
+conda info
+conda env list
+
+# Test conda command availability
+which conda
+conda --version
+
+# Validate environment variables
+echo $HUNYUAN3D_CONDA_ENV
+echo $HUNYUAN3D_CONDA_PATH
+echo $OLLAMA_HOST
+
+# Test Blender availability in Hunyuan3D subprocess environment
+conda run -n hunyuan3d blender --version
+
+# Verify both environments exist
+conda activate comfyui            # ComfyUI testing environment
+conda activate hunyuan3d          # Subprocess simulation environment
+```
+
 ## Troubleshooting
 
 ### Common Issues
@@ -233,6 +441,66 @@ test_video = create_test_video_input(num_frames=30, height=480, width=640)
 **Mock not working**
 - Verify patch path matches actual import path in node code
 - Check mock is applied before node method execution
+
+### Conda-Specific Issues
+
+**"conda: command not found"**
+```bash
+# Add conda to PATH
+export PATH="$HOME/miniconda3/bin:$PATH"
+# Or use full path in tests
+HUNYUAN3D_CONDA_PATH="/home/user/miniconda3/bin/conda" python -m pytest tests/
+```
+
+**pip install error (missing -r flag)**
+```bash
+# ❌ Wrong (tries to install package named "requirements-test.txt")
+pip install requirements-test.txt
+
+# ✅ Correct (reads requirements from file)
+pip install -r requirements-test.txt
+```
+
+**Ollama connection issues**
+```bash
+# Check if Ollama is running
+curl http://localhost:11434/api/version
+
+# Test with custom host
+OLLAMA_HOST=localhost:11435 curl http://localhost:11435/api/version
+
+# Test remote Ollama server
+OLLAMA_HOST=192.168.1.100:11434 python -m pytest tests/test_prompt_optimizer.py::TestPromptOptimizer::test_basic_optimization -v
+
+# Debug connection issues
+export OLLAMA_HOST=your-server:11434
+python -c "import os; print(f'OLLAMA_HOST: {os.getenv(\"OLLAMA_HOST\", \"localhost:11434\")}')"
+```
+
+**"Environment 'hunyuan3d' not found"**
+```bash
+# Create the subprocess environment
+conda create -n hunyuan3d python=3.10 -y
+conda run -n hunyuan3d pip install -r external/Hunyuan3D-2.1/requirements.txt
+# Or test with custom environment name
+HUNYUAN3D_CONDA_ENV=my-test-env python -m pytest tests/
+```
+
+**"ComfyUI environment not found"**
+```bash
+# If you don't have ComfyUI in conda, create a test environment
+conda create -n comfyui python=3.10 -y
+conda activate comfyui
+pip install -r requirements-test.txt
+
+# Install ComfyUI dependencies (if needed)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+```
+
+**Blender segfault errors**
+- This is expected behavior in Hunyuan3D texture painting
+- Tests verify output files are created before segfault
+- Use mocked tests to avoid actual Blender execution during development
 
 ## Best Practices
 

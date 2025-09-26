@@ -63,6 +63,7 @@ comfyui-ai-gamedev/
 # ONLY CORRECT WAY:
 conda run -n hunyuan3d blender --background --python single_script.py
 ```
+**WHY SUBPROCESS**: ComfyUI's virtual environment conflicts with Hunyuan3D's PyTorch/CUDA requirements. Using `conda run` escapes ComfyUI's environment and ensures Hunyuan3D runs in its isolated conda environment.
 **REQUIREMENTS**:
 1. The node writes input images to disk
 2. The node calls ONE pre-written Python script (not generated on the fly)

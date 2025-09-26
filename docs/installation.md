@@ -34,6 +34,8 @@ Different nodes have different requirements. Install only what you need:
 - CUDA 12.4
 - ~50GB disk space for models
 
+**Why Conda Environment**: Hunyuan3D requires a separate conda environment because ComfyUI's virtual environment often conflicts with Hunyuan3D's specific PyTorch/CUDA requirements. The node executes via subprocess (`conda run -n hunyuan3d`) to escape ComfyUI's environment constraints.
+
 **Quick Install**:
 ```bash
 # From comfyui-ai-gamedev directory

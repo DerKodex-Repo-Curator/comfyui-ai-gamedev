@@ -1,0 +1,27 @@
+# Testing Requirements for ComfyUI AI GameDev Nodes
+# Install with: pip install -r requirements-test.txt
+# Note: Don't forget the -r flag!
+
+# Core testing framework
+pytest>=7.0.0
+pytest-mock>=3.10.0
+pytest-asyncio>=0.21.0
+
+# Core dependencies (usually included with ComfyUI)
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.21.0
+pillow>=9.0.0
+
+# Node-specific dependencies
+opencv-python>=4.8.0  # VideoFrameExtractor
+ollama>=0.1.0         # PromptOptimizer (optional, mocked in tests)
+
+# Development and debugging
+pytest-cov>=4.0.0    # Coverage reporting
+pytest-xdist>=3.0.0  # Parallel test execution
+pytest-html>=3.1.0   # HTML test reports
+
+# Optional: For real integration testing
+# Uncomment if testing with actual conda environments
+# blender-bpy>=3.0.0  # Blender Python API (if available)
