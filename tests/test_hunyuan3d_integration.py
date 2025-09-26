@@ -260,7 +260,6 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
         
         # File generation succeeds even if Blender crashes during cleanup!
     
-    @unittest.skip("Requires 21GB VRAM and is very slow - enable manually for full testing")
     def test_textured_generation_real_execution(self):
         """Test full textured generation with real execution - generates GLB with textures"""
         if self.real_image is None:
@@ -274,8 +273,8 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
         # Call the node method directly (no mocking) - this will execute real conda subprocess
         glb_path, obj_path, stl_path = self.node.generate_3d(
             images=self.real_image,
-            resolution="256",  # String as expected by node
-            texture_resolution="256",
+            resolution="512",  # String as expected by node
+            texture_resolution="512",
             guidance_scale=7.5,
             inference_steps=20,  # Minimal steps for testing
             conda_env="hunyuan3d",
@@ -313,6 +312,119 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
         shutil.copy2(glb_file, self.output_dir / f"test_textured_{timestamp}.glb")
         shutil.copy2(obj_file, self.output_dir / f"test_textured_{timestamp}.obj")
         shutil.copy2(stl_file, self.output_dir / f"test_textured_{timestamp}.stl")
+    
+    def load_multiview_images(self) -> torch.Tensor:
+        """Load 4 multiview images for comparison testing"""
+        multi_view_dir = self.examples_dir / "multi_view"
+        
+        # Selected multiview frames (4 evenly distributed around 360°)
+        multiview_frames = [
+            "frame_001_4x.png",  # Front view (0°)
+            "frame_025_4x.png",  # Side view (~90°) 
+            "frame_044_4x.png",  # Back view (~180°)
+            "frame_069_4x.png"   # Side view (~270°)
+        ]
+        
+        tensors = []
+        for frame_name in multiview_frames:
+            frame_path = multi_view_dir / frame_name
+            if not frame_path.exists():
+                raise FileNotFoundError(f"Multiview frame not found: {frame_path}")
+            
+            # Load and resize image
+            pil_image = Image.open(frame_path).convert('RGB')
+            if pil_image.size != (256, 256):
+                pil_image = pil_image.resize((256, 256))
+            
+            # Convert to tensor format [batch, height, width, channels]
+            image_array = np.array(pil_image, dtype=np.float32) / 255.0
+            tensor = torch.from_numpy(image_array).unsqueeze(0)  # Add batch dimension
+            tensors.append(tensor)
+        
+        # Stack into batch [batch_size, height, width, channels]
+        return torch.cat(tensors, dim=0)
+    
+    @unittest.skip("Enable manually for multiview comparison - requires significant time and VRAM")
+    def test_multiview_vs_single_comparison(self):
+        """Compare single view vs 4-frame multiview generation results"""
+        if self.real_image is None:
+            self.skipTest("No test image available")
+        
+        print("\n" + "="*80)
+        print("🔥 MULTIVIEW COMPARISON TEST")
+        print("="*80)
+        
+        # Test 1: Single view generation
+        print(f"\n1️⃣ SINGLE VIEW TEST")
+        start_time = time.time()
+        
+        single_glb, single_obj, single_stl = self.node.generate_3d(
+            images=self.real_image,
+            resolution="256",
+            texture_resolution="256", 
+            guidance_scale=7.5,
+            inference_steps=10,
+            conda_env="hunyuan3d",
+            conda_path="conda"
+        )
+        
+        single_time = time.time() - start_time
+        print(f"⏱️ Single view execution time: {single_time:.1f}s")
+        
+        # Test 2: Multiview generation (4 frames)
+        print(f"\n2️⃣ MULTIVIEW TEST (4 frames)")
+        try:
+            multiview_images = self.load_multiview_images()
+            print(f"✅ Loaded multiview images: {multiview_images.shape}")
+            
+            start_time = time.time()
+            
+            multi_glb, multi_obj, multi_stl = self.node.generate_3d(
+                images=multiview_images,
+                resolution="256",
+                texture_resolution="256",
+                guidance_scale=7.5, 
+                inference_steps=10,
+                conda_env="hunyuan3d",
+                conda_path="conda"
+            )
+            
+            multi_time = time.time() - start_time
+            print(f"⏱️ Multiview execution time: {multi_time:.1f}s")
+            
+        except FileNotFoundError as e:
+            self.skipTest(f"Multiview images not available: {e}")
+        
+        # Compare results
+        print(f"\n📊 COMPARISON RESULTS:")
+        print("="*60)
+        
+        timestamp = int(time.time())
+        
+        if single_glb and Path(single_glb).exists():
+            single_size = Path(single_glb).stat().st_size
+            print(f"✅ Single view GLB: {Path(single_glb).name} ({single_size:,} bytes)")
+            
+            # Copy for comparison
+            shutil.copy2(single_glb, self.output_dir / f"comparison_single_{timestamp}.glb")
+            print(f"📁 Copied to: comparison_single_{timestamp}.glb")
+        
+        if multi_glb and Path(multi_glb).exists():
+            multi_size = Path(multi_glb).stat().st_size  
+            print(f"✅ Multiview GLB: {Path(multi_glb).name} ({multi_size:,} bytes)")
+            
+            # Copy for comparison
+            shutil.copy2(multi_glb, self.output_dir / f"comparison_multiview_{timestamp}.glb")
+            print(f"📁 Copied to: comparison_multiview_{timestamp}.glb")
+            
+            # Calculate size difference
+            if single_glb and Path(single_glb).exists():
+                diff_percent = ((multi_size - single_size) / single_size) * 100
+                print(f"📈 Size difference: {diff_percent:+.1f}%")
+        
+        print(f"\n🎯 TO COMPARE THE MODELS:")
+        print(f"Check files in: {self.output_dir}")
+        print("Open the GLB files in Blender or online at: https://gltf-viewer.donmccurdy.com/")
     
     def test_conda_environment_validation_real(self):
         """Test that conda environment validation works with real conda"""
