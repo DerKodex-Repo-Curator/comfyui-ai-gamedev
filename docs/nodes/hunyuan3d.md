@@ -233,5 +233,5 @@ result = pipeline(
 2. **Blender Not Found**: Install with `sudo snap install blender --classic`
 3. **VRAM Issues**: Reduce resolution or use CPU mode
 4. **Build Failures**: Check CUDA version and compiler compatibility
-5. **Blender Segfault on Exit**: Normal behavior after texture painting - check if output files were created successfully
+5. **Blender Execution**: Proper addon cleanup ensures reliable Blender execution and clean exit
 6. **ModuleNotFoundError 'functional_tensor'**: Applied automatically via torchvision_fix.py

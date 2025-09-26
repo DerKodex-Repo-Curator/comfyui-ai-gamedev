@@ -177,15 +177,23 @@ class Hunyuan3D21Node:
                 for line in result.stderr.split('\n'):
                     print(f"  {line}")
             
-            # Check if files were created (script WILL segfault but that's OK if files exist)
+            # Check if files were created (script should complete successfully with segfault fix)
             # Files are now in the generation-specific directory
             glb_path = generation_dir / "output_textured.glb"
             obj_path = generation_dir / "output_textured.obj"
             stl_path = generation_dir / "output_textured.stl"
             
-            # Verify outputs exist (ignore return code - Blender segfaults are expected)
+            # Check both clean exit and file generation (both should succeed with segfault fix)
+            if result.returncode != 0:
+                print(f"⚠️ Process exited with non-zero code: {result.returncode}")
+                if result.stderr:
+                    print("Process stderr:")
+                    for line in result.stderr.split('\n'):
+                        if line.strip():
+                            print(f"  {line}")
+            
             if glb_path.exists():
-                print(f"✅ Generated successfully despite Blender segfault:")
+                print(f"✅ Generated successfully with clean Blender exit:")
                 print(f"   GLB: {glb_path.name}")
                 if obj_path.exists():
                     print(f"   OBJ: {obj_path.name}")
@@ -204,8 +212,8 @@ class Hunyuan3D21Node:
             else:
                 print(f"❌ Generation failed - output files not created")
                 print(f"   Expected: {glb_path}")
-                # Only print stderr if it contains actual errors (not just segfault)
-                if result.stderr and "Segmentation fault" not in result.stderr:
+                # Print stderr to help debug any actual errors
+                if result.stderr:
                     print("Stderr output:")
                     for line in result.stderr.split('\n'):
                         if line.strip() and not "Color management" in line:

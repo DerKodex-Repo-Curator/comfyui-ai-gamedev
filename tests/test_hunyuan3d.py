@@ -324,17 +324,17 @@ class TestHunyuan3D21Node(unittest.TestCase, MockComfyUINode):
         self.assertIn("mesh", str(self.node.output_dir))
     
     @patch('subprocess.run')
-    def test_segmentation_fault_handling(self, mock_subprocess):
-        """Test handling of Blender segmentation fault (expected behavior)"""
-        # Mock subprocess that exits with segfault but creates output files
+    def test_clean_exit_handling(self, mock_subprocess):
+        """Test that Blender exits cleanly with segfault fix applied"""
+        # Mock subprocess that exits cleanly (with segfault fix)
         mock_subprocess.return_value = create_mock_subprocess_result(
-            stdout="✅ Shape generation completed\n✅ Texture generation completed",
-            stderr="Segmentation fault (core dumped)",
-            returncode=139  # Segfault return code
+            stdout="✅ Shape generation completed\n✅ Texture generation completed\n✅ Script complete. Blender should exit cleanly",
+            stderr="",
+            returncode=0  # Clean exit with segfault fix
         )
         
         with patch('pathlib.Path.exists') as mock_exists:
-            mock_exists.return_value = True  # Files were created despite segfault
+            mock_exists.return_value = True  # Files were created successfully
             
             result = self.simulate_comfyui_execution(
                 self.node,
@@ -348,8 +348,7 @@ class TestHunyuan3D21Node(unittest.TestCase, MockComfyUINode):
             
             glb_path, obj_path, stl_path = result
             
-            # Should still return file paths if files exist
-            # (segfault is expected after texture generation completes)
+            # Should return file paths when process exits cleanly and files exist
             self.assertNotEqual(glb_path, "")
             self.assertNotEqual(obj_path, "")
             self.assertNotEqual(stl_path, "")

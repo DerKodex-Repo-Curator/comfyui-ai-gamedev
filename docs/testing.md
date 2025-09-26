@@ -174,7 +174,7 @@ python -m pytest tests/test_frame_extractor_ai.py -v
 - **File generation verification**: Creates and validates OBJ, STL, and GLB files
 - **Shape-only generation**: Fast test (~2-5 min) that generates OBJ/STL files
 - **Textured generation**: Full pipeline test (skipped by default due to time/memory requirements)
-- **Segfault handling**: Tests expect Blender to segfault at the end (normal behavior) - success is measured by file generation, not return code
+- **Clean execution**: Tests expect Blender to exit cleanly - success is measured by both clean exit and file generation
 
 ```bash
 # Check dependencies
@@ -225,7 +225,7 @@ The Hunyuan3D tests include conda-aware functionality:
 **Blender Integration Testing**:
 - Simulates `conda run -n hunyuan3d blender --background --python script.py`
 - Tests script execution and output file generation
-- Handles expected segfault behavior (normal for Blender texture painting)
+- Validates clean Blender exit with proper addon cleanup
 
 **Environment Variable Testing**:
 ```bash
@@ -563,9 +563,9 @@ pip install -r requirements-test.txt
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 ```
 
-**Blender segfault errors**
-- This is expected behavior in Hunyuan3D texture painting
-- Tests verify output files are created before segfault
+**Blender execution**
+- Tests verify both clean exit and output file creation
+- Proper addon cleanup ensures reliable execution
 - Use mocked tests to avoid actual Blender execution during development
 
 ## Best Practices

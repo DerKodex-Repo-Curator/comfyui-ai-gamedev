@@ -68,7 +68,7 @@ conda run -n hunyuan3d blender --background --python single_script.py
 1. The node writes input images to disk
 2. The node calls ONE pre-written Python script (not generated on the fly)
 3. That script is executed via: `conda run -n hunyuan3d blender --background --python script.py`
-4. The script will segfault at the end - THIS IS EXPECTED AND OK
+4. The script exits cleanly after completion
 5. Check that output files exist after execution
 6. The script must log completion of each step (shape generation, texture painting, export)
 
@@ -97,7 +97,6 @@ conda run -n hunyuan3d blender --background --python single_script.py
 - Blender 3.0.1+ required for texture painting pipeline
 - **For debugging**: Run Python scripts in Blender's environment with `conda run -n hunyuan3d blender --background --python script.py`
 - **Known issues**: 
-  - Blender crashes/segfaults on exit after texture painting - IGNORE THIS, texture completes before crash
   - `torchvision.transforms.functional_tensor` import error - Apply torchvision fix before importing
 
 #### Texture Troubleshooting

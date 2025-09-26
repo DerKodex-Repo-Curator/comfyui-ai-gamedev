@@ -224,9 +224,9 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
         print(f"\nReturn code: {result.returncode}")
         print("=" * 60)
         
-        # IMPORTANT: Blender segfaults at the end - this is EXPECTED behavior!
-        # Don't check return code, just verify that output files were generated
-        print(f"📊 Subprocess return code: {result.returncode} (segfault expected after texture painting)")
+        # With segfault fix applied, Blender should exit cleanly
+        # Check both return code and that output files were generated
+        print(f"📊 Subprocess return code: {result.returncode} (should be 0 with segfault fix)")
         
         # Look for generated files with exact names the node expects
         obj_path = generation_dir / "output_textured.obj"
@@ -239,7 +239,10 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
         for f in all_files:
             print(f"  {f.name} ({f.stat().st_size} bytes)")
         
-        # Check if specific files were generated (this is what matters, not return code)
+        # With segfault fix, expect both clean exit (return code 0) AND file generation
+        self.assertEqual(result.returncode, 0, f"Expected clean exit with segfault fix, got return code {result.returncode}")
+        
+        # Check if specific files were generated
         self.assertTrue(obj_path.exists(), f"Expected OBJ file not found: {obj_path}")
         self.assertTrue(stl_path.exists(), f"Expected STL file not found: {stl_path}")
         
@@ -247,14 +250,14 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
         self.assertGreater(obj_path.stat().st_size, 1000, f"OBJ file is too small ({obj_path.stat().st_size} bytes) - may be incomplete")
         self.assertGreater(stl_path.stat().st_size, 1000, f"STL file is too small ({stl_path.stat().st_size} bytes) - may be incomplete")
         
-        print(f"✅ SUCCESS: Files generated despite segfault!")
+        print(f"✅ SUCCESS: Files generated with clean Blender exit!")
         print(f"✅ OBJ file: {obj_path} ({obj_path.stat().st_size} bytes)")
         print(f"✅ STL file: {stl_path} ({stl_path.stat().st_size} bytes)")
         if glb_path.exists():
             print(f"✅ GLB file: {glb_path} ({glb_path.stat().st_size} bytes)")
         print(f"📁 Files saved to: {generation_dir}")
         
-        # The segfault is expected - what matters is that files were created!
+        # With segfault fix, both clean exit AND file creation should succeed!
     
     @unittest.skip("Requires 21GB VRAM and is very slow - enable manually for full testing")
     def test_textured_generation_real_execution(self):

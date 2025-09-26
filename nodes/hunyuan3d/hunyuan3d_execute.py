@@ -1,10 +1,32 @@
 #!/usr/bin/env python3
 """
-Hunyuan3D 2.1 execution script - based on working test_minimal.py
+Hunyuan3D 2.1 execution script with structured logging and clean exit
 MUST BE RUN THROUGH BLENDER: conda run -n hunyuan3d blender --background --python hunyuan3d_execute.py -- config.json
+Includes segfault fix for clean Blender exit
 """
 
 print("starting...")
+
+# Apply addon cleanup fix for clean Blender exit
+def fix_blender_addon_cleanup():
+    """Fix Blender addon cleanup: Replace non-callable unregister objects with callable mocks"""
+    try:
+        import sys
+        fixed_count = 0
+        for module_name, module in sys.modules.items():
+            if module and hasattr(module, 'unregister') and not callable(module.unregister):
+                def mock_unregister():
+                    pass
+                module.unregister = mock_unregister
+                fixed_count += 1
+        if fixed_count > 0:
+            print(f"🔧 Fixed {fixed_count} problematic addon unregister functions")
+    except Exception as e:
+        print(f"⚠️ Addon cleanup fix error: {e}")
+
+# Install exit-time fix
+import atexit
+atexit.register(fix_blender_addon_cleanup)
 
 print("=" * 60)
 print("SCRIPT STARTING")
@@ -339,4 +361,4 @@ print("="*60)
 
 # Save final log file
 progress_tracker.save_raw_logs()
-print("Script complete. Blender may crash now - this is expected.")
+print("Script complete. Blender should exit cleanly.")
