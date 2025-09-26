@@ -68,13 +68,16 @@ python -m pytest tests/test_hunyuan3d.py -v
 python -m pytest tests/test_prompt_optimizer.py -v
 
 # VideoFrameExtractor integration tests (10 tests with real video)
-python -m pytest tests/integration_test_frame_extractor.py -v
+python -m pytest tests/test_frame_extractor_integration.py -v
 
 # PromptOptimizer integration tests (11 tests with real Ollama)
-python -m pytest tests/integration_test_prompt_optimizer.py -v
+python -m pytest tests/test_prompt_optimizer_integration.py -v
 
 # Visual verification tests (saves 75 frames to disk)
-python -m pytest tests/visual_verification_frame_extractor.py -v
+python -m pytest tests/test_frame_extractor_visual.py -v
+
+# AI visual verification tests (AI analyzes extracted frames)
+python -m pytest tests/test_frame_extractor_ai.py -v
 ```
 
 ### Integration Test Requirements
@@ -98,7 +101,7 @@ python -m pytest tests/visual_verification_frame_extractor.py -v
 curl http://localhost:11434/api/version
 
 # Run integration tests
-python -m pytest tests/integration_test_prompt_optimizer.py -v
+python -m pytest tests/test_prompt_optimizer_integration.py -v
 ```
 
 #### VideoFrameExtractor Integration Tests
@@ -113,7 +116,7 @@ python -m pytest tests/integration_test_prompt_optimizer.py -v
 
 ```bash
 # Run integration tests
-python -m pytest tests/integration_test_frame_extractor.py -v
+python -m pytest tests/test_frame_extractor_integration.py -v
 ```
 
 #### Visual Verification Tests
@@ -123,15 +126,36 @@ python -m pytest tests/integration_test_frame_extractor.py -v
 
 **Test what they do:**
 - Save 75 actual extracted frames to disk for manual inspection
+- **Automated quantitative validation**: frame count, resolution, tensor format, file validity
 - Verify frame distribution, quality, and sequence continuity
 - Output location: `test_output/frame_extraction_visual/`
 
 ```bash
-# Run visual tests (creates files on disk)
-python -m pytest tests/visual_verification_frame_extractor.py -v
+# Run visual tests (creates files on disk + quantitative validation)
+python -m pytest tests/test_frame_extractor_visual.py -v
 
 # View saved frames
 ls test_output/frame_extraction_visual/
+```
+
+#### AI Visual Verification Tests
+**Requirements:**
+- Ollama service running: `sudo systemctl start ollama` or `ollama serve`
+- qwen2.5vl:7b model installed: `ollama pull qwen2.5vl:7b`
+- Real video file: `examples/ship.mp4`
+
+**Test what they do:**
+- **AI-powered content validation** using qwen2.5vl:7b model (same as PromptOptimizer)
+- Automated analysis of 1, 3, and 5 extracted frames
+- Verify frame quality, clarity, motion progression, and content
+- No manual inspection needed - AI provides detailed descriptions
+
+```bash
+# Check Ollama is ready
+curl http://localhost:11434/api/version
+
+# Run AI visual verification tests
+python -m pytest tests/test_frame_extractor_ai.py -v
 ```
 
 ### Advanced Conda Testing
@@ -267,26 +291,30 @@ All extracted frames saved to: `test_output/frame_extraction_visual/`
 
 ## Test Status
 
-**Current Status: ✅ All 72+ tests passing**
+**Current Status: ✅ All 81 tests passing**
 - **Unit Tests**: 51 tests (ComfyUI simulation) - discovered by `python -m pytest tests/`
 - **Integration Tests**: 21+ tests (real execution - 10 Frame Extractor + 11 Prompt Optimizer) - require explicit pattern
-- **Visual Verification**: 5+ tests (saves actual frames) - require explicit pattern
+- **Visual Verification**: 5+ tests (saves frames + quantitative validation) - require explicit pattern
+- **AI Visual Verification**: 4 tests (AI-powered content analysis) - require explicit pattern
 
-**Key Point**: Integration tests use different file naming (`integration_*.py`, `visual_*.py`) and are NOT discovered by `python -m pytest tests/` by default. This is intentional to separate fast unit tests from slower integration tests.
+**Key Point**: All tests now follow standard pytest naming (`test_*.py`) and are discovered automatically. Integration and visual tests are distinguished by descriptive suffixes.
 
 To verify current test status:
 ```bash
-# Unit tests only (fast, 51 tests)
+# All tests (81 tests) - now discovers everything automatically
 python -m pytest tests/ -v
 
-# All tests including integration (72+ tests)
-python -m pytest tests/ tests/integration_*.py tests/visual_*.py -v
+# Unit tests only (fast, 51 tests)
+python -m pytest tests/test_frame_extractor.py tests/test_hunyuan3d.py tests/test_prompt_optimizer.py -v
 
 # Integration tests only (requires external services)
-python -m pytest tests/integration_*.py -v
+python -m pytest tests/test_*_integration.py -v
 
-# Visual verification tests only (saves frames to disk)
-python -m pytest tests/visual_*.py -v
+# Visual verification tests only (saves frames to disk + quantitative validation)
+python -m pytest tests/test_*_visual.py -v
+
+# AI visual verification tests only (AI-powered analysis)
+python -m pytest tests/test_*_ai.py -v
 ```
 
 Expected output for unit tests only:
@@ -300,7 +328,7 @@ Expected output for all tests:
 ```
 ============================== test session starts ==============================
 ...
-============================== 72+ passed in ~30s ==============================
+============================== 81 passed in ~45s ==============================
 ```
 
 ## Key Test Features

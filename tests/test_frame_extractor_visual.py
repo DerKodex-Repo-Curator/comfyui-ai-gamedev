@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from nodes.frame_extractor.frame_extractor_node import VideoFrameExtractorNode
 from tests.comfyui_mock import ComfyUIMockContext, MockComfyUINode
-from tests.integration_test_frame_extractor import MockVideoInputFromFile
+from tests.test_frame_extractor_integration import MockVideoInputFromFile
 
 
 class TestVideoFrameExtractorVisualVerification(unittest.TestCase, MockComfyUINode):
@@ -93,12 +93,40 @@ class TestVideoFrameExtractorVisualVerification(unittest.TestCase, MockComfyUINo
                     f"of_{total_frames}total"
                 )
                 
+                # QUANTITATIVE VALIDATION
+                # Verify extracted frame count matches requested
+                self.assertEqual(extracted_count, count, f"Should extract exactly {count} frames")
+                self.assertEqual(frames.shape[0], count, f"Tensor should have {count} frames in batch dimension")
+                
+                # Verify tensor format is correct ComfyUI format
+                self.assertEqual(len(frames.shape), 4, "Should be 4D tensor (batch, height, width, channels)")
+                self.assertEqual(frames.shape[1:], (640, 640, 3), "Frames should be 640x640 RGB")
+                self.assertEqual(frames.dtype, torch.float32, "Should be float32 tensor")
+                self.assertTrue(torch.all(frames >= 0.0), "All values should be >= 0.0")
+                self.assertTrue(torch.all(frames <= 1.0), "All values should be <= 1.0")
+                
                 # Verify files were created
                 self.assertEqual(len(saved_files), count)
                 for filepath in saved_files:
                     self.assertTrue(filepath.exists())
                     # Verify file has reasonable size (not empty or corrupted)
                     self.assertGreater(filepath.stat().st_size, 1000)
+                    
+                    # Verify saved image can be loaded and has correct properties
+                    with Image.open(filepath) as img:
+                        self.assertEqual(img.size, (640, 640), f"Saved image should be 640x640: {filepath}")
+                        self.assertEqual(img.mode, 'RGB', f"Saved image should be RGB: {filepath}")
+                
+                # Verify frame variance (frames should be different from each other)
+                if count > 1:
+                    frame_variances = []
+                    for i in range(count - 1):
+                        frame_diff = torch.abs(frames[i] - frames[i + 1])
+                        variance = torch.mean(frame_diff).item()
+                        frame_variances.append(variance)
+                    
+                    avg_variance = sum(frame_variances) / len(frame_variances)
+                    self.assertGreater(avg_variance, 0.001, "Frames should be visually different from each other")
                 
                 print(f"✅ Saved {count} evenly distributed frames to {saved_files[0].parent}")
     
@@ -124,9 +152,25 @@ class TestVideoFrameExtractorVisualVerification(unittest.TestCase, MockComfyUINo
             frames_with_skip, "skip_comparison", "skip_5start_5end"
         )
         
+        # QUANTITATIVE VALIDATION
         # Verify both sets have the same count
-        self.assertEqual(count_no_skip, count_with_skip)
-        self.assertEqual(len(saved_no_skip), len(saved_with_skip))
+        self.assertEqual(count_no_skip, count_with_skip, "Both extractions should yield same frame count")
+        self.assertEqual(count_no_skip, 8, "Should extract exactly 8 frames")
+        self.assertEqual(len(saved_no_skip), len(saved_with_skip), "Should save same number of files")
+        
+        # Verify tensor formats
+        for frames, name in [(frames_no_skip, "no_skip"), (frames_with_skip, "with_skip")]:
+            self.assertEqual(frames.shape, (8, 640, 640, 3), f"{name} should have correct shape")
+            self.assertEqual(frames.dtype, torch.float32, f"{name} should be float32")
+            self.assertTrue(torch.all(frames >= 0.0) and torch.all(frames <= 1.0), 
+                           f"{name} values should be in [0,1] range")
+        
+        # Verify the extracted frames are actually different between skip/no-skip
+        # (they should be, since skipping changes which frames are selected)
+        frames_diff = torch.abs(frames_no_skip - frames_with_skip)
+        avg_difference = torch.mean(frames_diff).item()
+        self.assertGreater(avg_difference, 0.001, 
+                          "Skip vs no-skip should produce different frame selections")
         
         print(f"✅ Saved skip comparison frames:")
         print(f"   No skip: {saved_no_skip[0].parent}")
@@ -157,8 +201,35 @@ class TestVideoFrameExtractorVisualVerification(unittest.TestCase, MockComfyUINo
             pil_image.save(filepath)
             saved_files.append(filepath)
         
+        # QUANTITATIVE VALIDATION
+        # Verify frame count and tensor format
+        self.assertEqual(extracted_count, 16, "Should extract exactly 16 frames")
+        self.assertEqual(frames.shape, (16, 640, 640, 3), "Should have correct tensor shape")
+        self.assertEqual(frames.dtype, torch.float32, "Should be float32 tensor")
+        self.assertTrue(torch.all(frames >= 0.0) and torch.all(frames <= 1.0), 
+                       "Values should be in [0,1] range")
+        
+        # Verify files were saved correctly
+        self.assertEqual(len(saved_files), 16, "Should save 16 image files")
+        for filepath in saved_files:
+            self.assertTrue(filepath.exists(), f"File should exist: {filepath}")
+            self.assertGreater(filepath.stat().st_size, 1000, f"File should not be empty: {filepath}")
+        
+        # Verify sequence has smooth progression (adjacent frames should be similar but not identical)
+        frame_similarities = []
+        for i in range(15):  # Compare each frame with the next
+            frame_diff = torch.abs(frames[i] - frames[i + 1])
+            similarity = 1.0 - torch.mean(frame_diff).item()  # Higher = more similar
+            frame_similarities.append(similarity)
+        
+        avg_similarity = sum(frame_similarities) / len(frame_similarities)
+        # Adjacent frames should be quite similar (smooth motion) but not identical
+        self.assertGreater(avg_similarity, 0.8, "Adjacent frames should be similar (smooth motion)")
+        self.assertLess(avg_similarity, 0.99, "Adjacent frames should not be identical")
+        
         print(f"✅ Saved {len(saved_files)} frames for sequence continuity check")
         print(f"   Location: {saved_files[0].parent}")
+        print(f"   Average frame similarity: {avg_similarity:.3f}")
     
     def test_resolution_verification_visual(self):
         """Verify extracted frames maintain correct resolution"""
@@ -217,7 +288,27 @@ class TestVideoFrameExtractorVisualVerification(unittest.TestCase, MockComfyUINo
                     frames, "edge_cases", case_name
                 )
                 
-                self.assertEqual(len(saved_files), extracted_count)
+                # QUANTITATIVE VALIDATION
+                expected_count = params["frame_count"]
+                self.assertEqual(extracted_count, expected_count, f"{case_name} should extract {expected_count} frames")
+                self.assertEqual(len(saved_files), extracted_count, f"{case_name} should save {extracted_count} files")
+                self.assertEqual(frames.shape[0], extracted_count, f"{case_name} tensor should have {extracted_count} frames")
+                
+                # Verify tensor format
+                self.assertEqual(frames.shape[1:], (640, 640, 3), f"{case_name} should have correct frame dimensions")
+                self.assertEqual(frames.dtype, torch.float32, f"{case_name} should be float32 tensor")
+                self.assertTrue(torch.all(frames >= 0.0) and torch.all(frames <= 1.0), 
+                               f"{case_name} values should be in [0,1] range")
+                
+                # Verify saved files
+                for filepath in saved_files:
+                    self.assertTrue(filepath.exists(), f"{case_name} file should exist: {filepath}")
+                    self.assertGreater(filepath.stat().st_size, 1000, f"{case_name} file should not be empty: {filepath}")
+                    
+                    # Verify saved image properties
+                    with Image.open(filepath) as img:
+                        self.assertEqual(img.size, (640, 640), f"{case_name} saved image should be 640x640: {filepath}")
+                        self.assertEqual(img.mode, 'RGB', f"{case_name} saved image should be RGB: {filepath}")
                 
                 print(f"✅ Edge case '{case_name}': extracted {extracted_count} frames")
     

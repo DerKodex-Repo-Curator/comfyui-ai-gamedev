@@ -56,3 +56,4 @@ build/
 dist/
 *.egg-info/output
 output
+test_output
