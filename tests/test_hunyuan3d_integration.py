@@ -313,7 +313,33 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
         shutil.copy2(obj_file, self.output_dir / f"test_textured_{timestamp}.obj")
         shutil.copy2(stl_file, self.output_dir / f"test_textured_{timestamp}.stl")
     
-    def load_multiview_images(self) -> torch.Tensor:
+    def run_hunyuan3d_generation(self, images, test_name: str, texture_enabled: bool = True):
+        """Shared function to run Hunyuan3D generation with any number of images"""
+        num_images = images.shape[0] if hasattr(images, 'shape') else 1
+        print(f"\n🎮 {test_name} - Generating 3D model from {num_images} image(s)")
+        print(f"   Texture enabled: {texture_enabled}")
+        print(f"   Using conda: conda with environment: hunyuan3d")
+        
+        start_time = time.time()
+        
+        # Call the node method directly (no mocking) - this will execute real conda subprocess
+        glb_path, obj_path, stl_path = self.node.generate_3d(
+            images=images,
+            resolution="256",  # String as expected by node
+            texture_resolution="256",
+            guidance_scale=7.5,
+            inference_steps=10,  # Minimal steps for testing
+            enable_texture=texture_enabled,
+            conda_env="hunyuan3d",
+            conda_path="conda"
+        )
+        
+        execution_time = time.time() - start_time
+        print(f"⏱️ {test_name} execution time: {execution_time:.1f}s")
+        
+        return glb_path, obj_path, stl_path, execution_time
+    
+    def load_multiview_images(self):
         """Load 4 multiview images for comparison testing"""
         multi_view_dir = self.examples_dir / "multi_view"
         
@@ -344,88 +370,94 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
         # Stack into batch [batch_size, height, width, channels]
         return torch.cat(tensors, dim=0)
     
-    @unittest.skip("Enable manually for multiview comparison - requires significant time and VRAM")
-    def test_multiview_vs_single_comparison(self):
-        """Compare single view vs 4-frame multiview generation results"""
+    @unittest.skip("Enable manually for single image testing")
+    def test_single_image_generation(self):
+        """Test single image 3D generation - the perfect original test"""
         if self.real_image is None:
             self.skipTest("No test image available")
         
-        print("\n" + "="*80)
-        print("🔥 MULTIVIEW COMPARISON TEST")
-        print("="*80)
+        print("🔥 REAL EXECUTION: Testing single image generation")
         
-        # Test 1: Single view generation
-        print(f"\n1️⃣ SINGLE VIEW TEST")
-        start_time = time.time()
-        
-        single_glb, single_obj, single_stl = self.node.generate_3d(
-            images=self.real_image,
-            resolution="256",
-            texture_resolution="256", 
-            guidance_scale=7.5,
-            inference_steps=10,
-            conda_env="hunyuan3d",
-            conda_path="conda"
+        glb_path, obj_path, stl_path, execution_time = self.run_hunyuan3d_generation(
+            self.real_image, "Single Image Test", texture_enabled=True
         )
         
-        single_time = time.time() - start_time
-        print(f"⏱️ Single view execution time: {single_time:.1f}s")
+        # Verify files were generated
+        self.assertIsNotNone(glb_path, "GLB path should be returned")
+        self.assertIsNotNone(obj_path, "OBJ path should be returned") 
+        self.assertIsNotNone(stl_path, "STL path should be returned")
         
-        # Test 2: Multiview generation (4 frames)
-        print(f"\n2️⃣ MULTIVIEW TEST (4 frames)")
+        glb_file = Path(glb_path)
+        obj_file = Path(obj_path)
+        stl_file = Path(stl_path)
+        
+        self.assertTrue(glb_file.exists(), f"GLB file should exist at {glb_path}")
+        self.assertTrue(obj_file.exists(), f"OBJ file should exist at {obj_path}")
+        self.assertTrue(stl_file.exists(), f"STL file should exist at {stl_path}")
+        
+        # Check file sizes
+        self.assertGreater(glb_file.stat().st_size, 5000, "GLB file should be substantial")
+        self.assertGreater(obj_file.stat().st_size, 1000, "OBJ file should be substantial")
+        self.assertGreater(stl_file.stat().st_size, 1000, "STL file should be substantial")
+        
+        print(f"✅ GLB file: {glb_path} ({glb_file.stat().st_size:,} bytes)")
+        print(f"✅ OBJ file: {obj_path} ({obj_file.stat().st_size:,} bytes)")
+        print(f"✅ STL file: {stl_path} ({stl_file.stat().st_size:,} bytes)")
+        
+        # Copy to test output for inspection
+        timestamp = int(time.time())
+        shutil.copy2(glb_file, self.output_dir / f"single_image_{timestamp}.glb")
+        shutil.copy2(obj_file, self.output_dir / f"single_image_{timestamp}.obj")
+        shutil.copy2(stl_file, self.output_dir / f"single_image_{timestamp}.stl")
+        print(f"📁 Files copied to: {self.output_dir}")
+    
+    @unittest.skip("Enable manually for multiview testing")
+    def test_multiview_generation(self):
+        """Test multiview (4-frame) 3D generation"""
+        if self.real_image is None:
+            self.skipTest("No test image available")
+        
+        print("🔥 REAL EXECUTION: Testing multiview generation (4 frames)")
+        
         try:
             multiview_images = self.load_multiview_images()
             print(f"✅ Loaded multiview images: {multiview_images.shape}")
-            
-            start_time = time.time()
-            
-            multi_glb, multi_obj, multi_stl = self.node.generate_3d(
-                images=multiview_images,
-                resolution="256",
-                texture_resolution="256",
-                guidance_scale=7.5, 
-                inference_steps=10,
-                conda_env="hunyuan3d",
-                conda_path="conda"
-            )
-            
-            multi_time = time.time() - start_time
-            print(f"⏱️ Multiview execution time: {multi_time:.1f}s")
-            
         except FileNotFoundError as e:
             self.skipTest(f"Multiview images not available: {e}")
         
-        # Compare results
-        print(f"\n📊 COMPARISON RESULTS:")
-        print("="*60)
+        glb_path, obj_path, stl_path, execution_time = self.run_hunyuan3d_generation(
+            multiview_images, "Multiview Test", texture_enabled=True
+        )
         
+        # Verify files were generated
+        self.assertIsNotNone(glb_path, "GLB path should be returned")
+        self.assertIsNotNone(obj_path, "OBJ path should be returned")
+        self.assertIsNotNone(stl_path, "STL path should be returned")
+        
+        glb_file = Path(glb_path)
+        obj_file = Path(obj_path)
+        stl_file = Path(stl_path)
+        
+        self.assertTrue(glb_file.exists(), f"GLB file should exist at {glb_path}")
+        self.assertTrue(obj_file.exists(), f"OBJ file should exist at {obj_path}")
+        self.assertTrue(stl_file.exists(), f"STL file should exist at {stl_path}")
+        
+        # Check file sizes
+        self.assertGreater(glb_file.stat().st_size, 5000, "GLB file should be substantial")
+        self.assertGreater(obj_file.stat().st_size, 1000, "OBJ file should be substantial")
+        self.assertGreater(stl_file.stat().st_size, 1000, "STL file should be substantial")
+        
+        print(f"✅ GLB file: {glb_path} ({glb_file.stat().st_size:,} bytes)")
+        print(f"✅ OBJ file: {obj_path} ({obj_file.stat().st_size:,} bytes)")
+        print(f"✅ STL file: {stl_path} ({stl_file.stat().st_size:,} bytes)")
+        
+        # Copy to test output for inspection
         timestamp = int(time.time())
-        
-        if single_glb and Path(single_glb).exists():
-            single_size = Path(single_glb).stat().st_size
-            print(f"✅ Single view GLB: {Path(single_glb).name} ({single_size:,} bytes)")
-            
-            # Copy for comparison
-            shutil.copy2(single_glb, self.output_dir / f"comparison_single_{timestamp}.glb")
-            print(f"📁 Copied to: comparison_single_{timestamp}.glb")
-        
-        if multi_glb and Path(multi_glb).exists():
-            multi_size = Path(multi_glb).stat().st_size  
-            print(f"✅ Multiview GLB: {Path(multi_glb).name} ({multi_size:,} bytes)")
-            
-            # Copy for comparison
-            shutil.copy2(multi_glb, self.output_dir / f"comparison_multiview_{timestamp}.glb")
-            print(f"📁 Copied to: comparison_multiview_{timestamp}.glb")
-            
-            # Calculate size difference
-            if single_glb and Path(single_glb).exists():
-                diff_percent = ((multi_size - single_size) / single_size) * 100
-                print(f"📈 Size difference: {diff_percent:+.1f}%")
-        
-        print(f"\n🎯 TO COMPARE THE MODELS:")
-        print(f"Check files in: {self.output_dir}")
-        print("Open the GLB files in Blender or online at: https://gltf-viewer.donmccurdy.com/")
-    
+        shutil.copy2(glb_file, self.output_dir / f"multiview_{timestamp}.glb")
+        shutil.copy2(obj_file, self.output_dir / f"multiview_{timestamp}.obj")
+        shutil.copy2(stl_file, self.output_dir / f"multiview_{timestamp}.stl")
+        print(f"📁 Files copied to: {self.output_dir}")
+
     def test_conda_environment_validation_real(self):
         """Test that conda environment validation works with real conda"""
         print("🔥 REAL EXECUTION: Testing conda environment validation")
