@@ -174,7 +174,7 @@ python -m pytest tests/test_frame_extractor_ai.py -v
 - **File generation verification**: Creates and validates OBJ, STL, and GLB files
 - **Shape-only generation**: Fast test (~2-5 min) that generates OBJ/STL files
 - **Textured generation**: Full pipeline test (skipped by default due to time/memory requirements)
-- **Dependency validation**: Verifies conda environment and import capabilities
+- **Segfault handling**: Tests expect Blender to segfault at the end (normal behavior) - success is measured by file generation, not return code
 
 ```bash
 # Check dependencies
