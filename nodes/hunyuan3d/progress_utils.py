@@ -123,6 +123,23 @@ class ProgressTracker:
 class ProgressParser:
     """Parse JSON progress messages from Hunyuan3D output"""
     
+    def __init__(self):
+        self.last_raw_json: Optional[str] = None
+    
+    def format_duration(self, seconds: float) -> str:
+        """Format duration in seconds to human readable string"""
+        if seconds < 60:
+            return f"{seconds:.1f}s"
+        elif seconds < 3600:
+            minutes = int(seconds // 60)
+            secs = seconds % 60
+            return f"{minutes}m {secs:.1f}s"
+        else:
+            hours = int(seconds // 3600)
+            minutes = int((seconds % 3600) // 60)
+            secs = seconds % 60
+            return f"{hours}h {minutes}m {secs:.1f}s"
+    
     def parse_line(self, line: str) -> Optional[ProgressTracker.Progress]:
         """
         Parse a line of output for JSON progress information
@@ -140,6 +157,7 @@ class ProgressParser:
         # Try to parse as JSON
         try:
             data = json.loads(line)
+            self.last_raw_json = line  # Store the raw JSON for debugging
         except (json.JSONDecodeError, ValueError):
             # Not JSON, ignore
             return None
@@ -180,21 +198,33 @@ class ProgressParser:
 class LoggingProgressTracker(ProgressTracker):
     """Progress tracker that logs JSON to stdout and saves raw logs"""
     
-    def __init__(self, log_file_path: Optional[str] = None):
+    def __init__(self, log_file_path: Optional[str] = None, progress_file_path: Optional[str] = None):
         """
         Initialize logging progress tracker
         
         Args:
             log_file_path: Optional path to save raw logs
+            progress_file_path: Optional path for real-time progress updates (for parent process monitoring)
         """
         super().__init__()
         self.log_file_path = log_file_path
+        self.progress_file_path = progress_file_path
         self.raw_logs = []
     
     def log_progress(self):
-        """Log current progress as JSON to stdout"""
+        """Log current progress as JSON to stdout and progress file"""
         json_str = self.to_json()
         print(json_str, flush=True)
+        
+        # Write to real-time progress file for parent process monitoring
+        if self.progress_file_path:
+            try:
+                with open(self.progress_file_path, 'a', encoding='utf-8') as f:
+                    f.write(json_str + '\n')
+                    f.flush()  # Force immediate write to disk
+            except Exception as e:
+                # Don't let progress file errors break execution
+                print(f"Warning: Failed to write to progress file: {e}")
         
         # Also save to raw logs
         self.raw_logs.append({
@@ -262,17 +292,18 @@ STAGE_PERCENTAGES = {
 }
 
 
-def create_progress_tracker(log_file_path: Optional[str] = None) -> LoggingProgressTracker:
+def create_progress_tracker(log_file_path: Optional[str] = None, progress_file_path: Optional[str] = None) -> LoggingProgressTracker:
     """
     Create a progress tracker with logging
     
     Args:
         log_file_path: Optional path to save raw logs
+        progress_file_path: Optional path for real-time progress updates (for parent process monitoring)
         
     Returns:
         LoggingProgressTracker instance
     """
-    return LoggingProgressTracker(log_file_path)
+    return LoggingProgressTracker(log_file_path, progress_file_path)
 
 
 def parse_hunyuan3d_output(output_lines: list) -> list[ProgressTracker.Progress]:

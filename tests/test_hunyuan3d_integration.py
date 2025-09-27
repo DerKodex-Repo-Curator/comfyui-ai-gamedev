@@ -508,6 +508,327 @@ class TestHunyuan3D21Integration(unittest.TestCase, MockComfyUINode):
         except subprocess.TimeoutExpired:
             self.fail("Timeout importing paint pipeline")
 
+    def test_progress_monitoring_real_execution(self):
+        """Test that progress monitoring works correctly during real execution"""
+        if self.real_image is None:
+            self.skipTest("No test image available")
+        
+        print("🔥 REAL EXECUTION: Testing progress monitoring functionality")
+        
+        # Use a custom subprocess execution to capture progress output
+        import uuid
+        import datetime
+        import json
+        import re
+        
+        run_id = uuid.uuid4().hex[:8]
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        base_name = f"hunyuan3d_progress_test_{timestamp}_{run_id}"
+        
+        # Create output directory
+        output_dir = Path(__file__).parent.parent / "test_output" / "hunyuan3d_progress"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        generation_dir = output_dir / base_name
+        generation_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Create test image in temp directory
+        test_image_path = generation_dir / "test_image.png"
+        pil_image = Image.open(self.real_image_path).convert('RGB')
+        if pil_image.size != (256, 256):
+            pil_image = pil_image.resize((256, 256))
+        pil_image.save(test_image_path)
+        
+        # Create config file
+        config = {
+            "image_paths": [str(test_image_path.resolve())],
+            "output_dir": str(generation_dir.resolve()),
+            "base_name": "output",
+            "resolution": 256,  # Small for faster testing
+            "texture_resolution": 256,
+            "guidance_scale": 7.5,
+            "inference_steps": 5,  # Very minimal for testing
+        }
+        
+        config_path = generation_dir / "config.json"
+        with open(config_path, 'w') as f:
+            json.dump(config, f, indent=2)
+        
+        # Execute with progress monitoring
+        script_path = Path(__file__).parent.parent / "nodes" / "hunyuan3d" / "hunyuan3d_execute.py"
+        cmd = [
+            "conda", "run", "-n", "hunyuan3d",
+            "blender", "--background", "--python", str(script_path),
+            "--", str(config_path)
+        ]
+        
+        print(f"🔨 Executing with progress monitoring: {' '.join(cmd)}")
+        print("⏳ This will take 1-3 minutes and test progress tracking...")
+        
+        # Create clean environment
+        clean_env = {
+            'PATH': os.environ.get('PATH', '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'),
+            'HOME': os.environ.get('HOME', os.path.expanduser('~')),
+            'USER': os.environ.get('USER', ''),
+            'SHELL': os.environ.get('SHELL', '/bin/bash'),
+            'TERM': os.environ.get('TERM', 'xterm'),
+            'LANG': os.environ.get('LANG', 'en_US.UTF-8'),
+            'LC_ALL': os.environ.get('LC_ALL', 'C.UTF-8'),
+        }
+        
+        # Add CUDA if available
+        if 'CUDA_VISIBLE_DEVICES' in os.environ:
+            clean_env['CUDA_VISIBLE_DEVICES'] = os.environ['CUDA_VISIBLE_DEVICES']
+        
+        start_time = time.time()
+        
+        # Execute with real-time output monitoring to detect buffering
+        import subprocess
+        from datetime import datetime
+        
+        print("🕐 Starting subprocess with real-time output monitoring...")
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,  # Merge stderr into stdout for unified monitoring
+            text=True,
+            bufsize=0,  # Unbuffered
+            universal_newlines=True,
+            cwd=str(Path(__file__).parent.parent),
+            env=clean_env
+        )
+        
+        # Capture output with timestamps
+        real_time_logs = []
+        output_lines = []
+        
+        print("📋 Real-time subprocess output with receive timestamps:")
+        print("-" * 80)
+        
+        try:
+            while True:
+                line = process.stdout.readline()
+                if not line:
+                    break
+                
+                # Record timestamp when we received this line
+                receive_time = datetime.now()
+                line = line.rstrip('\n\r')
+                
+                # Store for analysis
+                real_time_logs.append({
+                    'receive_time': receive_time,
+                    'elapsed_since_start': (receive_time.timestamp() - start_time),
+                    'content': line
+                })
+                output_lines.append(line)
+                
+                # Print with receive timestamp
+                elapsed = receive_time.timestamp() - start_time
+                print(f"[{receive_time.strftime('%H:%M:%S.%f')[:-3]}] (+{elapsed:6.2f}s) {line}")
+                
+                # Check if this is a JSON progress message
+                try:
+                    import json
+                    data = json.loads(line)
+                    if isinstance(data, dict) and data.get("type") == "progress":
+                        # Extract message timestamp vs receive timestamp
+                        msg_timestamp = data.get('timestamp', '')
+                        if msg_timestamp:
+                            try:
+                                msg_time = datetime.fromisoformat(msg_timestamp.replace('Z', '+00:00'))
+                                delay = (receive_time - msg_time).total_seconds()
+                                print(f"    🚩 PROGRESS JSON - Message time: {msg_timestamp}, Receive delay: {delay:.3f}s")
+                            except Exception as e:
+                                print(f"    🚩 PROGRESS JSON - Could not parse timestamp: {e}")
+                        else:
+                            print(f"    🚩 PROGRESS JSON - No timestamp in message")
+                except json.JSONDecodeError:
+                    pass
+        
+        except KeyboardInterrupt:
+            process.terminate()
+            print("\n⚠️ Process terminated by user")
+        
+        # Wait for process completion
+        process.wait()
+        print("-" * 80)
+        
+        # Create result object for compatibility
+        result = type('ProcessResult', (), {
+            'returncode': process.returncode,
+            'stdout': '\n'.join(output_lines),
+            'stderr': ''  # We merged stderr into stdout
+        })()
+        
+        execution_time = time.time() - start_time
+        print(f"⏱️ Progress monitoring test execution time: {execution_time:.1f}s")
+        
+        # Analyze buffering behavior from real-time logs
+        print("\n📊 BUFFERING ANALYSIS:")
+        print("=" * 60)
+        
+        # Count progress JSON messages and their timing
+        progress_logs = []
+        for log_entry in real_time_logs:
+            try:
+                import json
+                data = json.loads(log_entry['content'])
+                if isinstance(data, dict) and data.get("type") == "progress":
+                    progress_logs.append({
+                        'receive_time': log_entry['receive_time'],
+                        'elapsed_since_start': log_entry['elapsed_since_start'],
+                        'data': data
+                    })
+            except json.JSONDecodeError:
+                pass
+        
+        print(f"Total lines received: {len(real_time_logs)}")
+        print(f"Progress JSON messages: {len(progress_logs)}")
+        
+        if len(progress_logs) > 1:
+            # Calculate gaps between progress messages
+            gaps = []
+            for i in range(1, len(progress_logs)):
+                gap = progress_logs[i]['elapsed_since_start'] - progress_logs[i-1]['elapsed_since_start']
+                gaps.append(gap)
+            
+            if gaps:
+                avg_gap = sum(gaps) / len(gaps)
+                max_gap = max(gaps)
+                min_gap = min(gaps)
+                
+                print(f"Time gaps between progress messages:")
+                print(f"  Average gap: {avg_gap:.2f}s")
+                print(f"  Maximum gap: {max_gap:.2f}s") 
+                print(f"  Minimum gap: {min_gap:.2f}s")
+                
+                # Flag potential buffering if we see large gaps
+                if max_gap > 30:  # More than 30 seconds without progress
+                    print(f"⚠️  POTENTIAL BUFFERING: Large gap of {max_gap:.1f}s detected")
+                else:
+                    print("✅ No significant buffering detected")
+        
+        # Show first/last progress messages with timing
+        if progress_logs:
+            print(f"\nFirst progress: {progress_logs[0]['data']['message']} at +{progress_logs[0]['elapsed_since_start']:.1f}s")
+            print(f"Last progress:  {progress_logs[-1]['data']['message']} at +{progress_logs[-1]['elapsed_since_start']:.1f}s")
+        
+        print("=" * 60)
+        
+        # Parse and validate progress output
+        progress_updates = self.parse_progress_output(result.stdout, result.stderr)
+        
+        print(f"📊 Found {len(progress_updates)} progress updates")
+        
+        # Debug: Show actual subprocess output if no progress found
+        if len(progress_updates) == 0:
+            print("\n🔍 DEBUG: No progress found, showing subprocess output:")
+            print("=" * 60)
+            print("STDOUT:")
+            print(result.stdout)
+            print("\nSTDERR:")
+            print(result.stderr)
+            print(f"\nReturn code: {result.returncode}")
+            print("=" * 60)
+        
+        # Validate progress structure
+        self.assertGreater(len(progress_updates), 0, "Should have at least some progress updates")
+        
+        # Check for expected stages
+        stages_found = set(update.get('stage') for update in progress_updates)
+        expected_stages = {'starting', 'shape_generation', 'texture_painting', 'exporting', 'complete'}
+        
+        # We should see at least starting and some processing stages
+        self.assertIn('starting', stages_found, "Should have starting stage")
+        
+        # Check progress percentage progression
+        percentages = [update.get('percent', 0) for update in progress_updates if 'percent' in update]
+        if percentages:
+            self.assertEqual(percentages[0], 0, "Should start at 0%")
+            self.assertEqual(percentages[-1], 100, "Should end at 100%")
+            
+            # Check that percentages generally increase
+            for i in range(1, len(percentages)):
+                self.assertGreaterEqual(percentages[i], percentages[i-1], 
+                                       f"Progress should not go backwards: {percentages[i-1]}% -> {percentages[i]}%")
+        
+        # Check timing information
+        elapsed_times = [update.get('elapsed_seconds', 0) for update in progress_updates if 'elapsed_seconds' in update]
+        if elapsed_times:
+            # Elapsed time should increase
+            for i in range(1, len(elapsed_times)):
+                self.assertGreater(elapsed_times[i], elapsed_times[i-1], 
+                                 "Elapsed time should increase")
+        
+        # Check for files generation - STRICT REQUIREMENTS
+        obj_path = generation_dir / "output_textured.obj"
+        stl_path = generation_dir / "output_textured.stl"
+        glb_path = generation_dir / "output_textured.glb"
+        log_path = generation_dir / "hunyuan3d_execution.log"
+        
+        # Verify ALL expected files were created
+        self.assertTrue(obj_path.exists(), f"OBJ file should exist: {obj_path}")
+        self.assertTrue(stl_path.exists(), f"STL file should exist: {stl_path}")
+        self.assertTrue(glb_path.exists(), f"GLB file should exist: {glb_path}")
+        self.assertTrue(log_path.exists(), f"Log file should exist: {log_path}")
+        
+        # Verify file sizes are substantial
+        self.assertGreater(obj_path.stat().st_size, 1000, f"OBJ file should be substantial: {obj_path.stat().st_size} bytes")
+        self.assertGreater(stl_path.stat().st_size, 1000, f"STL file should be substantial: {stl_path.stat().st_size} bytes")
+        self.assertGreater(glb_path.stat().st_size, 5000, f"GLB file should be substantial with textures: {glb_path.stat().st_size} bytes")
+        
+        print(f"✅ Progress monitoring test completed successfully!")
+        print(f"✅ Found {len(progress_updates)} progress updates")
+        print(f"✅ Stages detected: {sorted(stages_found)}")
+        print(f"✅ Progress range: {min(percentages) if percentages else 'N/A'}% - {max(percentages) if percentages else 'N/A'}%")
+        print(f"✅ OBJ file: {obj_path} ({obj_path.stat().st_size} bytes)")
+        print(f"✅ STL file: {stl_path} ({stl_path.stat().st_size} bytes)")
+        print(f"✅ GLB file: {glb_path} ({glb_path.stat().st_size} bytes)")
+        print(f"✅ Log file: {log_path} ({log_path.stat().st_size} bytes)")
+        
+        # Display some sample progress messages
+        if progress_updates:
+            print("\n📋 Sample progress updates:")
+            for i, update in enumerate(progress_updates[:5]):  # Show first 5
+                stage = update.get('stage', 'unknown')
+                percent = update.get('percent', 0)
+                message = update.get('message', 'no message')
+                elapsed = update.get('elapsed_seconds', 0)
+                print(f"  {i+1}. [{stage.upper()}] {percent}% - {message} (elapsed: {elapsed:.1f}s)")
+        
+        return progress_updates
+
+    def parse_progress_output(self, stdout: str, stderr: str) -> list:
+        """Parse progress JSON messages from subprocess output"""
+        import json
+        
+        progress_updates = []
+        all_output = stdout + "\n" + stderr
+        
+        # Look for JSON progress messages
+        for line in all_output.split('\n'):
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Try to parse as JSON
+            try:
+                data = json.loads(line)
+                if isinstance(data, dict) and data.get("type") == "progress":
+                    progress_updates.append(data)
+            except (json.JSONDecodeError, ValueError):
+                # Not JSON, look for structured log messages
+                # Look for progress indicators in text output
+                if any(indicator in line.lower() for indicator in [
+                    '% -', 'elapsed:', 'eta:', '[shape_generation]', '[texture_painting]', '[exporting]'
+                ]):
+                    # This is a progress-related message but not JSON
+                    # We can extract basic info if needed
+                    pass
+        
+        return progress_updates
+
 
 if __name__ == '__main__':
     # Print dependency status

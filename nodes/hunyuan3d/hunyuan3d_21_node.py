@@ -81,6 +81,103 @@ class Hunyuan3D21Node:
         
         print(f"Hunyuan3D 2.1 initialized - output dir: {self.output_dir}")
     
+    def _execute_with_progress_monitoring(self, cmd, generation_dir, cwd, env, timeout=600):
+        """Execute subprocess with real-time progress monitoring via progress file"""
+        import subprocess
+        import threading
+        import time
+        from pathlib import Path
+        from .progress_utils import ProgressParser
+        
+        progress_file_path = generation_dir / "progress.jsonl"
+        
+        # Create mock result object to maintain compatibility
+        class MockResult:
+            def __init__(self):
+                self.stdout = ""
+                self.stderr = ""
+                self.returncode = None
+        
+        result = MockResult()
+        
+        # Start subprocess
+        print(f"🕐 Starting subprocess with progress file monitoring...")
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=0,
+            universal_newlines=True,
+            cwd=cwd,
+            env=env
+        )
+        
+        # Progress monitoring thread
+        def monitor_progress():
+            progress_parser = ProgressParser()
+            progress_count = 0
+            last_position = 0
+            
+            print("📋 Real-time progress monitoring started:")
+            print("-" * 60)
+            
+            while process.poll() is None:  # While process is running
+                try:
+                    if progress_file_path.exists():
+                        with open(progress_file_path, 'r', encoding='utf-8') as f:
+                            f.seek(last_position)
+                            new_lines = f.readlines()
+                            last_position = f.tell()
+                            
+                            for line in new_lines:
+                                line = line.strip()
+                                if not line:
+                                    continue
+                                
+                                # Parse progress from JSON line
+                                progress = progress_parser.parse_line(line)
+                                if progress:
+                                    progress_count += 1
+                                    elapsed_str = f"{progress.elapsed_seconds:.1f}s"
+                                    remaining_str = f"{progress.remaining_seconds:.1f}s" if progress.remaining_seconds else "N/A"
+                                    
+                                    print(f"📊 [{progress.stage.upper()}] {progress.percent}% - {progress.message}")
+                                    print(f"    Elapsed: {elapsed_str} | Remaining: {remaining_str}")
+                                    
+                except Exception as e:
+                    # Don't break monitoring on file errors
+                    pass
+                
+                time.sleep(0.5)  # Check every 500ms
+            
+            print("-" * 60)
+            print(f"📈 Total progress updates received: {progress_count}")
+        
+        # Start monitoring thread
+        monitor_thread = threading.Thread(target=monitor_progress, daemon=True)
+        monitor_thread.start()
+        
+        # Collect output
+        try:
+            stdout, stderr = process.communicate(timeout=timeout)
+            result.stdout = stdout or ""
+            result.stderr = stderr or ""
+            result.returncode = process.returncode
+            
+        except subprocess.TimeoutExpired:
+            process.kill()
+            stdout, stderr = process.communicate()
+            result.stdout = stdout or ""
+            result.stderr = stderr or ""
+            result.returncode = -1
+            print(f"❌ Process timed out after {timeout} seconds")
+        
+        # Wait for monitor thread to complete
+        monitor_thread.join(timeout=1.0)
+        
+        return result
+    
     def generate_3d(self, images, resolution, texture_resolution,
                    guidance_scale, inference_steps, 
                    conda_env=None, conda_path=None, **kwargs):
@@ -161,13 +258,13 @@ class Hunyuan3D21Node:
             clean_env['DISPLAY'] = os.environ['DISPLAY']
         
         try:
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=600,
-                cwd=str(Path(__file__).resolve().parent.parent.parent),  # Project root (resolve symlinks)
-                env=clean_env  # Use clean environment
+            # Execute with real-time progress monitoring
+            result = self._execute_with_progress_monitoring(
+                cmd, 
+                generation_dir,
+                cwd=str(Path(__file__).resolve().parent.parent.parent),
+                env=clean_env,
+                timeout=600
             )
             
             # Parse progress from stdout and log JSON progress objects
