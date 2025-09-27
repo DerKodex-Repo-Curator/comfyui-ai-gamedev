@@ -32,6 +32,12 @@ except ImportError:
 class Hunyuan3D21Node:
     """
     Hunyuan3D 2.1 - Generates textured 3D models from images
+    
+    Features:
+    - Real-time progress monitoring via callback integration
+    - File-based progress tracking to bypass subprocess buffering
+    - Crystools progress reporting integration (when available)
+    - Individual diffusion step capture (1/15 → 15/15)
     """
     
     @classmethod
@@ -89,6 +95,15 @@ class Hunyuan3D21Node:
         from pathlib import Path
         from .progress_utils import ProgressParser
         
+        # Try to import Crystools progress reporting
+        crystools_available = False
+        try:
+            from crystools import progress as crystools_progress
+            crystools_available = True
+            print("✅ Crystools progress reporting available")
+        except ImportError:
+            print("ℹ️ Crystools not available - using console progress only")
+        
         progress_file_path = generation_dir / "progress.jsonl"
         
         # Create mock result object to maintain compatibility
@@ -119,6 +134,14 @@ class Hunyuan3D21Node:
             progress_count = 0
             last_position = 0
             
+            # Initialize Crystools progress if available
+            if crystools_available:
+                try:
+                    crystools_progress.start(total=100, desc="Hunyuan3D Generation")
+                    print("📊 Crystools progress session started")
+                except Exception as e:
+                    print(f"⚠️ Crystools progress start failed: {e}")
+            
             print("📋 Real-time progress monitoring started:")
             print("-" * 60)
             
@@ -142,6 +165,16 @@ class Hunyuan3D21Node:
                                     elapsed_str = f"{progress.elapsed_seconds:.1f}s"
                                     remaining_str = f"{progress.remaining_seconds:.1f}s" if progress.remaining_seconds else "N/A"
                                     
+                                    # Update Crystools progress if available
+                                    if crystools_available:
+                                        try:
+                                            crystools_progress.update(
+                                                progress=progress.percent / 100.0,
+                                                desc=f"[{progress.stage.upper()}] {progress.message}"
+                                            )
+                                        except Exception as e:
+                                            print(f"⚠️ Crystools progress update failed: {e}")
+                                    
                                     print(f"📊 [{progress.stage.upper()}] {progress.percent}% - {progress.message}")
                                     print(f"    Elapsed: {elapsed_str} | Remaining: {remaining_str}")
                                     
@@ -153,6 +186,14 @@ class Hunyuan3D21Node:
             
             print("-" * 60)
             print(f"📈 Total progress updates received: {progress_count}")
+            
+            # Finish Crystools progress if available
+            if crystools_available:
+                try:
+                    crystools_progress.finish()
+                    print("✅ Crystools progress session completed")
+                except Exception as e:
+                    print(f"⚠️ Crystools progress finish failed: {e}")
         
         # Start monitoring thread
         monitor_thread = threading.Thread(target=monitor_progress, daemon=True)

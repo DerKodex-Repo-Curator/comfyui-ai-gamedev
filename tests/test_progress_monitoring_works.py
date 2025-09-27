@@ -23,6 +23,35 @@ sys.path.insert(0, str(PROJECT_ROOT))
 class TestProgressMonitoringWorks(unittest.TestCase):
     """Proof that real-time progress monitoring works"""
     
+    def test_crystools_integration(self):
+        """Test that Crystools integration doesn't break the node"""
+        print("\n🔧 Testing Crystools integration...")
+        
+        try:
+            from nodes.hunyuan3d.hunyuan3d_21_node import Hunyuan3D21Node
+            node = Hunyuan3D21Node()
+            print("✅ Node with Crystools integration initialized successfully")
+            
+            # Test the progress monitoring method with a simple command
+            test_dir = Path(tempfile.mkdtemp(prefix="crystools_test_"))
+            try:
+                result = node._execute_with_progress_monitoring(
+                    cmd=["echo", "test"],
+                    generation_dir=test_dir,
+                    cwd=".",
+                    env={},
+                    timeout=5
+                )
+                print("✅ Progress monitoring with Crystools integration works")
+                self.assertEqual(result.returncode, 0)
+            finally:
+                import shutil
+                if test_dir.exists():
+                    shutil.rmtree(test_dir)
+                    
+        except Exception as e:
+            self.fail(f"Crystools integration test failed: {e}")
+    
     def test_progress_monitoring_proof(self):
         """
         PROOF: Run actual Hunyuan3D and validate real-time diffusion progress capture
