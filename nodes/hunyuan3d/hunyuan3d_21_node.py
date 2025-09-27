@@ -87,6 +87,46 @@ class Hunyuan3D21Node:
         
         print(f"Hunyuan3D 2.1 initialized - output dir: {self.output_dir}")
     
+    def _validate_output_files(self, glb_path, obj_path, stl_path):
+        """
+        Validate that expected output files exist and provide detailed error messages
+        
+        Args:
+            glb_path: Path to expected GLB file
+            obj_path: Path to expected OBJ file  
+            stl_path: Path to expected STL file
+            
+        Raises:
+            RuntimeError: If any expected output file is missing with detailed error message
+        """
+        missing_files = []
+        
+        # Check each output file
+        if not glb_path.exists():
+            missing_files.append(f"GLB file: {glb_path}")
+        if not obj_path.exists():
+            missing_files.append(f"OBJ file: {obj_path}")
+        if not stl_path.exists():
+            missing_files.append(f"STL file: {stl_path}")
+            
+        # If any files are missing, provide detailed error
+        if missing_files:
+            error_msg = (
+                f"Hunyuan3D generation failed to create expected output files:\n"
+                f"Missing files:\n" + 
+                "\n".join(f"  • {file}" for file in missing_files) +
+                f"\n\nThis usually indicates:\n"
+                f"  • Texture painting failed during execution\n"
+                f"  • Blender crashed before export completion\n"
+                f"  • Insufficient VRAM (requires 21GB+ for texture generation)\n"
+                f"  • Model download or path issues\n\n"
+                f"Check the console output above for specific error details."
+            )
+            print(f"❌ {error_msg}")
+            raise RuntimeError(error_msg)
+            
+        print(f"✅ All output files validated successfully")
+    
     def _execute_with_progress_monitoring(self, cmd, generation_dir, cwd, env, timeout=600):
         """Execute subprocess with real-time progress monitoring via progress file"""
         import subprocess
@@ -364,6 +404,9 @@ class Hunyuan3D21Node:
                 if stl_path.exists():
                     print(f"   STL: {stl_path.name}")
                 
+                # Validate output files and provide descriptive errors for missing files
+                self._validate_output_files(glb_path, obj_path, stl_path)
+                
                 # Cleanup temp files in generation directory
                 # Keep the generation directory and outputs, but remove config
                 config_path.unlink(missing_ok=True)
@@ -374,23 +417,60 @@ class Hunyuan3D21Node:
                     str(stl_path) if stl_path.exists() else ""
                 )
             else:
-                print(f"❌ Generation failed - output files not created")
-                print(f"   Expected: {glb_path}")
+                # Primary GLB file missing - this is a complete failure
+                error_msg = (
+                    f"Hunyuan3D generation completely failed - no output files created.\n"
+                    f"Expected primary output: {glb_path}\n\n"
+                    f"This indicates a critical failure during:\n"
+                    f"  • Shape generation stage (first 50% of process)\n" 
+                    f"  • Texture painting initialization\n"
+                    f"  • Blender environment setup\n"
+                    f"  • Model loading or VRAM allocation\n\n"
+                    f"Check the console output above for specific error details."
+                )
+                print(f"❌ {error_msg}")
+                
                 # Print stderr to help debug any actual errors
                 if result.stderr:
-                    print("Stderr output:")
+                    print("Process stderr output:")
                     for line in result.stderr.split('\n'):
                         if line.strip() and not "Color management" in line:
                             print(f"  {line}")
+                            
+                raise RuntimeError(error_msg)
                     
         except subprocess.TimeoutExpired:
-            print(f"❌ Generation timed out after 10 minutes")
+            error_msg = (
+                f"Hunyuan3D generation timed out after 10 minutes.\n"
+                f"This usually indicates:\n"
+                f"  • Insufficient system resources (CPU/GPU/VRAM)\n"
+                f"  • Model download in progress (first run takes longer)\n"
+                f"  • Process stuck in diffusion steps\n"
+                f"  • System overload or resource contention\n\n"
+                f"Try reducing resolution or texture_resolution settings."
+            )
+            print(f"❌ {error_msg}")
+            config_path.unlink(missing_ok=True)
+            raise TimeoutError(error_msg)
+            
         except Exception as e:
-            print(f"❌ Execution failed: {e}")
+            error_msg = (
+                f"Hunyuan3D execution failed with unexpected error: {str(e)}\n"
+                f"This indicates a system-level problem:\n"
+                f"  • Missing dependencies (conda, blender, models)\n"
+                f"  • Permission or path issues\n"  
+                f"  • Environment configuration problems\n"
+                f"  • Hardware compatibility issues\n\n"
+                f"Check installation and system requirements."
+            )
+            print(f"❌ {error_msg}")
+            import traceback
+            traceback.print_exc()
+            config_path.unlink(missing_ok=True)
+            raise RuntimeError(error_msg)
         
-        # Cleanup on failure - just remove config
+        # This should never be reached due to error handling above
         config_path.unlink(missing_ok=True)
-        
         return ("", "", "")
     
     @classmethod

@@ -52,6 +52,62 @@ class TestProgressMonitoringWorks(unittest.TestCase):
         except Exception as e:
             self.fail(f"Crystools integration test failed: {e}")
     
+    def test_output_file_validation(self):
+        """Test that output file validation works correctly"""
+        print("\n🔒 Testing output file validation...")
+        
+        try:
+            from nodes.hunyuan3d.hunyuan3d_21_node import Hunyuan3D21Node
+            node = Hunyuan3D21Node()
+            
+            # Test case 1: All files exist (should pass)
+            test_dir = Path(tempfile.mkdtemp(prefix="validation_test_"))
+            try:
+                glb_path = test_dir / "output_textured.glb"
+                obj_path = test_dir / "output_textured.obj" 
+                stl_path = test_dir / "output_textured.stl"
+                
+                # Create mock files
+                glb_path.write_text("mock glb content")
+                obj_path.write_text("mock obj content")
+                stl_path.write_text("mock stl content")
+                
+                # Should not raise an error
+                node._validate_output_files(glb_path, obj_path, stl_path)
+                print("✅ Validation passed when all files exist")
+                
+                # Test case 2: Missing files (should fail)
+                test_dir2 = Path(tempfile.mkdtemp(prefix="validation_test_"))
+                try:
+                    glb_path2 = test_dir2 / "output_textured.glb"  # Don't create this
+                    obj_path2 = test_dir2 / "output_textured.obj"
+                    stl_path2 = test_dir2 / "output_textured.stl"
+                    
+                    # Should raise RuntimeError
+                    with self.assertRaises(RuntimeError) as cm:
+                        node._validate_output_files(glb_path2, obj_path2, stl_path2)
+                    
+                    # Check error message contains expected details
+                    error_msg = str(cm.exception)
+                    self.assertIn("GLB file", error_msg)
+                    self.assertIn("OBJ file", error_msg) 
+                    self.assertIn("STL file", error_msg)
+                    self.assertIn("Texture painting failed", error_msg)
+                    print("✅ Validation correctly failed for missing files")
+                    
+                finally:
+                    import shutil
+                    if test_dir2.exists():
+                        shutil.rmtree(test_dir2)
+                        
+            finally:
+                import shutil
+                if test_dir.exists():
+                    shutil.rmtree(test_dir)
+                    
+        except Exception as e:
+            self.fail(f"Output validation test failed: {e}")
+    
     def test_progress_monitoring_proof(self):
         """
         PROOF: Run actual Hunyuan3D and validate real-time diffusion progress capture
