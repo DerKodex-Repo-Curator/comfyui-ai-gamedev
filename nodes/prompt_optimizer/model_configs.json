@@ -65,11 +65,11 @@
         },
         {
           "role": "user",
-          "content": "mountain landscape"
+          "content": "mountain landscape with no clouds"
         },
         {
           "role": "assistant",
-          "content": "low quality, blurry, jpeg artifacts, watermark, text, urban, buildings, vehicles, people, night scene, dark lighting, cartoon, anime, abstract, minimalist, grainy, noisy, close-up, macro"
+          "content": "low quality, blurry, jpeg artifacts, watermark, text, urban, buildings, vehicles, people, night scene, dark lighting, cartoon, anime, abstract, minimalist, grainy, noisy, close-up, macro, clouds"
         },
         {
           "role": "user",
@@ -86,54 +86,6 @@
         {
           "role": "assistant",
           "content": "people, figures, characters, guards, king, queen, royalty, crowds, low quality, blurry, cartoon, anime, flat lighting, oversaturated, watermark, text"
-        },
-        {
-          "role": "user",
-          "content": "dead steam engine in junkyard"
-        },
-        {
-          "role": "assistant",
-          "content": "steam, smoke, fire, flames, glowing coals, movement, motion blur, operational, working, pristine, new, clean, polished, people, low quality, blurry, cartoon, anime, watermark, text"
-        },
-        {
-          "role": "user",
-          "content": "abandoned house at night without lights"
-        },
-        {
-          "role": "assistant",
-          "content": "lights on, illuminated windows, warm glow, people, inhabitants, smoke from chimney, well-maintained, fresh paint, new, daylight, sunny, low quality, blurry, cartoon, anime, watermark, text"
-        },
-        {
-          "role": "user",
-          "content": "broken robot without power"
-        },
-        {
-          "role": "assistant",
-          "content": "glowing eyes, LED lights, power indicators, movement, functioning, operational, electricity, energy beams, holographic displays, active, low quality, blurry, cartoon, anime, watermark, text"
-        },
-        {
-          "role": "user",
-          "content": "spaceship game asset on black background, no stars, no planets, no exhaust, engines off"
-        },
-        {
-          "role": "assistant",
-          "content": "stars, planets, nebulae, space dust, asteroids, exhaust, engine glow, thrusters firing, energy trails, motion blur, space background, cosmic elements, lens flares, atmospheric effects, low quality, blurry, watermark, text"
-        },
-        {
-          "role": "user",
-          "content": "clean modern office, no people, no clutter, minimalist"
-        },
-        {
-          "role": "assistant",
-          "content": "people, workers, figures, clutter, papers, messy desk, personal items, crowded, busy, complex decorations, ornate furniture, vintage style, industrial, low quality, blurry, watermark, text"
-        },
-        {
-          "role": "user",
-          "content": "still life fruit bowl, no bananas, no grapes, just apples and oranges"
-        },
-        {
-          "role": "assistant",
-          "content": "bananas, grapes, pears, strawberries, other fruits, vegetables, people, hands, motion, low quality, blurry, watermark, text"
         }
       ]
     },

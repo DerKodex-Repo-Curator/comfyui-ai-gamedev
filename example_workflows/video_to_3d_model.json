@@ -111,7 +111,8 @@
         "512",
         "768",
         7.5,
-        50,
+        30,
+        "mesh/painted",
         "hunyuan3d",
         "conda"
       ]

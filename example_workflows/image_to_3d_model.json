@@ -68,9 +68,10 @@
       },
       "widgets_values": [
         "512",
-        "768",
+        "768", 
         7.5,
-        50,
+        30,
+        "mesh/painted",
         "hunyuan3d",
         "conda"
       ]

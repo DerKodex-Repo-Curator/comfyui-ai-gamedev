@@ -38,6 +38,8 @@ class Hunyuan3D21Node:
     - File-based progress tracking to bypass subprocess buffering
     - Crystools progress reporting integration (when available)
     - Individual diffusion step capture (1/15 → 15/15)
+    - Customizable output directory (optional)
+    - Comprehensive error handling with descriptive messages
     """
     
     @classmethod
@@ -65,6 +67,7 @@ class Hunyuan3D21Node:
                 }),
             },
             "optional": {
+                "output_dir": ("STRING", {"default": "mesh/painted", "multiline": False}),
                 "conda_env": ("STRING", {"default": default_conda_env, "multiline": False}),
                 "conda_path": ("STRING", {"default": default_conda_path, "multiline": False}),
             }
@@ -85,7 +88,8 @@ class Hunyuan3D21Node:
         # Path to the single execution script (resolve symlinks)
         self.script_path = Path(__file__).resolve().parent / "hunyuan3d_execute.py"
         
-        print(f"Hunyuan3D 2.1 initialized - output dir: {self.output_dir}")
+        print(f"Hunyuan3D 2.1 initialized - fallback output dir: {self.output_dir}")
+        print(f"   Default output: ComfyUI_output/mesh/painted/")
     
     def _validate_output_files(self, glb_path, obj_path, stl_path):
         """
@@ -260,13 +264,24 @@ class Hunyuan3D21Node:
         return result
     
     def generate_3d(self, images, resolution, texture_resolution,
-                   guidance_scale, inference_steps, 
+                   guidance_scale, inference_steps, output_dir=None,
                    conda_env=None, conda_path=None, **kwargs):
         """Generate 3D model using single script execution through Blender"""
         
         # Use provided conda settings or defaults
         conda_env = conda_env or os.getenv("HUNYUAN3D_CONDA_ENV", "hunyuan3d")
         conda_path = conda_path or os.getenv("HUNYUAN3D_CONDA_PATH", "conda")
+        
+        # Use provided output directory or default to mesh subdirectory
+        if output_dir and output_dir.strip():
+            # If it's a relative path, make it relative to ComfyUI output directory
+            if not Path(output_dir).is_absolute():
+                base_output_dir = Path(folder_paths.get_output_directory()).resolve() / output_dir
+            else:
+                base_output_dir = Path(output_dir).resolve()
+        else:
+            # Fallback: ComfyUI output directory + mesh subfolder (should not happen with new default)
+            base_output_dir = self.output_dir
         
         batch_size = images.shape[0] if len(images.shape) == 4 else 1
         print(f"\n🎮 Hunyuan3D 2.1 - Generating 3D model from {batch_size} image(s)")
@@ -278,9 +293,15 @@ class Hunyuan3D21Node:
         base_name = f"hunyuan3d_{timestamp}_{run_id}"
         
         # Create a unique directory for this generation
-        generation_dir = self.output_dir / base_name
+        generation_dir = base_output_dir / base_name
         generation_dir.mkdir(parents=True, exist_ok=True)
         print(f"📁 Generation directory: {generation_dir}")
+        
+        # Print output directory info
+        if output_dir and output_dir.strip():
+            print(f"   Custom output directory: {base_output_dir}")
+        else:
+            print(f"   Default output directory: {base_output_dir}")
         
         # Save input images to the generation directory
         image_paths = []
